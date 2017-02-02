@@ -19,4 +19,8 @@ object Consts {
   val qfpTriplesPath: String = "triples_path"
   val qfpIntrvlsPath: String = "intervals_path"
   val qfpSparkMaster: String = "spark_master"
+  
+  //universe values
+  val universeLowCorner = Array(39.82,12.21);
+  val universeUpperCorner = Array(45.82,19.6);
 }
