@@ -26,9 +26,11 @@ class SPO(_s: String, _p: String, _o: String) {
   
   def getRegExpString(): Regex = {
     var result: String = ""
-    result += (if (s == "null") "^-?\\d+ " else s + " ")
-    result += (if (p == "null") "^-?\\d+ " else p + " ")
-    result += (if (o == "null") "^-?\\d+" else o)
+    result += (if (s == "null") "^-?\\d+" else s)
+    result += Consts.tripleFieldsSeparator
+    result += (if (p == "null") "-?\\d+" else p)
+    result += Consts.tripleFieldsSeparator
+    result += (if (o == "null") "-?\\d+" else o)
     println(result)
     return result.r
   }

@@ -23,4 +23,13 @@ object Consts {
   //universe values
   val universeLowCorner = Array(39.82,12.21);
   val universeUpperCorner = Array(45.82,19.6);
+  
+  //field separators
+  val tripleFieldsSeparator = " "
+  val dicFieldsSeparator = "\t"
+  val lonLatSeparator = " "
+  
+  //RDF URIs
+  val uriMBR = ":hasMBR_WKT"
+  val uriTime = ":SemanticNodeTimeStart"
 }
