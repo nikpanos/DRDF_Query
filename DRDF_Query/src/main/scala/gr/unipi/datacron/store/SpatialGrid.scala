@@ -8,9 +8,9 @@ import collection.mutable.HashMap
 class SpatialGrid(config: Config, expData: ExpData) {
   val spatialGrid = new EquiGrid(config.getInt(Consts.qfpSpatialBits), Consts.universeLowCorner,  Consts.universeUpperCorner);
   
-  def getSpatialIds(low: (Double, Double), high: (Double, Double)): HashMap[Long, Boolean] = {
-    val lo = (java.lang.Double.valueOf(low._1), java.lang.Double.valueOf(low._2))
-    val hi = (java.lang.Double.valueOf(high._1), java.lang.Double.valueOf(high._2))
+  def getSpatialIds(c: SpatioTemporalConstraints): HashMap[Long, Boolean] = {
+    val lo = (java.lang.Double.valueOf(c.low.latitude), java.lang.Double.valueOf(c.low.longitude))
+    val hi = (java.lang.Double.valueOf(c.high.latitude), java.lang.Double.valueOf(c.high.longitude))
     val it = spatialGrid.getGridCells(lo, hi).entrySet().iterator()
     var result = new HashMap[Long, Boolean]
     while (it.hasNext) {

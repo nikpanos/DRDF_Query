@@ -7,16 +7,31 @@ import org.apache.spark.RangePartitioner
 import gr.unipi.datacron.common.ArrayUtils._
 import gr.unipi.datacron.encoding._
 import org.apache.spark.rdd.RDD
+import gr.unipi.datacron.queries.operators.RdfOperators
+import gr.unipi.datacron.queries.operators.CompositeKeyOperators
 
 class StrQuery(config: Config) extends BaseQuery(config) {
   
-  val qDetails = new QueryInfo(config)
+  val constraints = new SpatioTemporalConstraints(
+      config.getDouble(Consts.qfpLatLower),
+      config.getDouble(Consts.qfpLonLower),
+      config.getDouble(Consts.qfpLatUpper),
+      config.getDouble(Consts.qfpLonUpper),
+      config.getLong(Consts.qfpTimeLower),
+      config.getLong(Consts.qfpTimeUpper))
+  
+  val tripleFilter = new SPO(
+      config.getString(Consts.qfpTripleS),
+      config.getString(Consts.qfpTripleP),
+      config.getString(Consts.qfpTripleO))
+  
+  val encoder = new SimpleEncoder(config)
   
   private def filterByIdInfo(rdd: RDD[String]): RDD[((Int, Long), String)] = {
   
-    val intervalIds = data.temporalGrid.getIntervalIds(qDetails.qTimeLower, qDetails.qTimeUpper)
-    val spatialIds = data.spatialGrid.getSpatialIds((qDetails.qLatLower, qDetails.qLonLower), (qDetails.qLatUpper, qDetails.qLonUpper))
-    val encoder = new SimpleEncoder(config)
+    val intervalIds = data.temporalGrid.getIntervalIds(constraints)
+    val spatialIds = data.spatialGrid.getSpatialIds(constraints)
+    
     
     val result = rdd.map(x => {
       val id = x.substring(0, x.indexOf(Consts.tripleFieldsSeparator)).toLong
@@ -52,7 +67,7 @@ class StrQuery(config: Config) extends BaseQuery(config) {
     return result
   }
   
-  private def refineResult(qDetails: QueryInfo, rdd: RDD[((Int, Long), String)], soForTemporalRefinement: scala.collection.Map[Long, String],
+  private def refineResult(qDetails: SpatioTemporalConstraints, rdd: RDD[((Int, Long), String)], soForTemporalRefinement: scala.collection.Map[Long, String],
       soForSpatialRefinement: scala.collection.Map[Long, String]): RDD[(Boolean, String)] = {
     
     val result = rdd.map(kv => {
@@ -62,7 +77,7 @@ class StrQuery(config: Config) extends BaseQuery(config) {
       if (!tmpResult) {
         //refine temporal
         val decodedObject = soForTemporalRefinement.apply(kv._1._2).toLong
-        if ((decodedObject >= qDetails.qTimeLower) && (decodedObject <= qDetails.qTimeUpper)) {
+        if ((decodedObject >= qDetails.low.time) && (decodedObject <= qDetails.high.time)) {
           tmpResult = true
         }
       }
@@ -76,7 +91,8 @@ class StrQuery(config: Config) extends BaseQuery(config) {
         val lonlat = decodedObject.substring(0, decodedObject.length - 1).split(Consts.lonLatSeparator)
         val lon = lonlat(0).toDouble
         val lat = lonlat(1).toDouble
-        if ((lon >= qDetails.qLonLower) && (lon <= qDetails.qLonUpper) && (lat >= qDetails.qLatLower) && (lat <= qDetails.qLatUpper)) {
+        if ((lon >= qDetails.low.longitude) && (lon <= qDetails.high.longitude) &&
+            (lat >= qDetails.low.latitude) && (lat <= qDetails.high.latitude)) {
           sptResult = true
         }
         
@@ -88,17 +104,13 @@ class StrQuery(config: Config) extends BaseQuery(config) {
   }
 
   override def executeQuery(): Boolean = {
-    val triple = new SPO(
-      config.getString(Consts.qfpTripleS),
-      config.getString(Consts.qfpTripleP),
-      config.getString(Consts.qfpTripleO))
+    //data.triplesData.repartition(4)
+    println(data.triplesData.count + " [" + data.triplesData.partitions.size + "]")
+    val filteredSPO = RdfOperators.simpleFilter(data.triplesData, tripleFilter)
+    println(filteredSPO.count + " [" + filteredSPO.partitions.size + "]")
     
-    val searchStr = triple.getRegExpString
-    val filteredSPO = data.triplesData.filter(searchStr.matches(_))
-    println(filteredSPO.count)
-    
-    val filteredByIdInfo = filterByIdInfo(filteredSPO)
-    println(filteredByIdInfo.count)
+    val filteredByIdInfo = CompositeKeyOperators.filterBySpatiotemporalInfo(filteredSPO, constraints, encoder, data)
+    println(filteredByIdInfo.count + " [" + filteredByIdInfo.partitions.size + "]")
     
     val encodedUriMBR = data.dictionary.getIdByValue(Consts.uriMBR)
     val encodedUriTime = data.dictionary.getIdByValue(Consts.uriTime)
@@ -120,7 +132,7 @@ class StrQuery(config: Config) extends BaseQuery(config) {
     val soForSpatialRefinementDecoded = data.dictionary.getValuesListByIdsList(soForSpatialRefinementEncoded)
     println(soForSpatialRefinementDecoded.size)
     
-    val result = refineResult(qDetails, filteredByIdInfo, soForTemporalRefinementDecoded, soForSpatialRefinementDecoded)
+    val result = refineResult(constraints, filteredByIdInfo, soForTemporalRefinementDecoded, soForSpatialRefinementDecoded)
     println(result.count)
     
     

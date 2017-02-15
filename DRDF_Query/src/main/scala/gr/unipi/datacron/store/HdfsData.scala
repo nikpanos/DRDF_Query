@@ -5,10 +5,10 @@ import gr.unipi.datacron.common._
 import org.apache.spark.sql.SparkSession
 
 class HdfsData(config: Config) {
-  val sparkSession = SparkSession.builder
+  val spark = SparkSession.builder
     .master(config.getString(Consts.qfpSparkMaster))
     .appName(config.getString(Consts.qfpQueryName))
     .getOrCreate()
       
-  val sc = sparkSession.sparkContext
+  val sc = spark.sparkContext
 }

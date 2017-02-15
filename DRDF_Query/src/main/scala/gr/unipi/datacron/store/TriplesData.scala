@@ -5,6 +5,7 @@ import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.RegexUtils._
 
 class TriplesData(config: Config, expData: ExpData) {
+  
   val data = expData.hdfs.sc.textFile(config.getString(Consts.qfpTriplesPath))
   
   def getObjectBySP(sp: String): String = {
