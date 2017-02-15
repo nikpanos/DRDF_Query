@@ -5,7 +5,7 @@ import gr.unipi.datacron.common._
 import scala.io.Source
 import java.util.Arrays
 
-class TemporalGrid(config: Config, expData: ExpData) {
+class TemporalGrid(config: Config) {
   val timeIntervals = Source.fromFile(config.getString(Consts.qfpIntrvlsPath)).getLines().map(_.toLong).toArray
   
   def getIntervalId(x: Long): Int = {

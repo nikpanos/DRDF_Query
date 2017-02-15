@@ -9,6 +9,9 @@ import gr.unipi.datacron.encoding._
 import org.apache.spark.rdd.RDD
 import gr.unipi.datacron.queries.operators.RdfOperators
 import gr.unipi.datacron.queries.operators.CompositeKeyOperators
+import gr.unipi.datacron.store.ExpData
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.DataFrame
 
 class StrQuery(config: Config) extends BaseQuery(config) {
   
@@ -29,8 +32,8 @@ class StrQuery(config: Config) extends BaseQuery(config) {
   
   private def filterByIdInfo(rdd: RDD[String]): RDD[((Int, Long), String)] = {
   
-    val intervalIds = data.temporalGrid.getIntervalIds(constraints)
-    val spatialIds = data.spatialGrid.getSpatialIds(constraints)
+    val intervalIds = ExpData.temporalGrid.getIntervalIds(constraints)
+    val spatialIds = ExpData.spatialGrid.getSpatialIds(constraints)
     
     
     val result = rdd.map(x => {
@@ -67,16 +70,16 @@ class StrQuery(config: Config) extends BaseQuery(config) {
     return result
   }
   
-  private def refineResult(qDetails: SpatioTemporalConstraints, rdd: RDD[((Int, Long), String)], soForTemporalRefinement: scala.collection.Map[Long, String],
+  private def refineResult(qDetails: SpatioTemporalConstraints, data: DataFrame, soForTemporalRefinement: scala.collection.Map[Long, String],
       soForSpatialRefinement: scala.collection.Map[Long, String]): RDD[(Boolean, String)] = {
     
-    val result = rdd.map(kv => {
-      var tmpResult = ((kv._1._1 >> 0) & 1) != 1
-      var sptResult = ((kv._1._1 >> 1) & 1) != 1
+    val result = data.rdd.map(x => {
+      var tmpResult = ((x.getAs[Int]("pruneKey") >> 0) & 1) != 1
+      var sptResult = ((x.getAs[Int]("pruneKey") >> 1) & 1) != 1
       
       if (!tmpResult) {
         //refine temporal
-        val decodedObject = soForTemporalRefinement.apply(kv._1._2).toLong
+        val decodedObject = soForTemporalRefinement.apply(x.getAs[Long]("subject")).toLong
         if ((decodedObject >= qDetails.low.time) && (decodedObject <= qDetails.high.time)) {
           tmpResult = true
         }
@@ -87,7 +90,7 @@ class StrQuery(config: Config) extends BaseQuery(config) {
         //val sp = kv._2.substring(0, kv._2.indexOf(Consts.tripleFieldsSeperator) + 1) + encodedUriMBR
         //val encodedObject = data.triples.getObjectBySP(sp)
         //val decodedObject = data.dictionary.getValueById(encodedObject).substring(6)
-        val decodedObject = soForSpatialRefinement.apply(kv._1._2).substring(6)
+        val decodedObject = soForSpatialRefinement.apply(x.getAs[Long]("subject")).substring(6)
         val lonlat = decodedObject.substring(0, decodedObject.length - 1).split(Consts.lonLatSeparator)
         val lon = lonlat(0).toDouble
         val lat = lonlat(1).toDouble
@@ -98,38 +101,39 @@ class StrQuery(config: Config) extends BaseQuery(config) {
         
       }
       
-      (tmpResult && sptResult, kv._2)
+      (tmpResult && sptResult, x.getAs[String]("spo"))
     }).filter(_._1)
     return result
   }
 
   override def executeQuery(): Boolean = {
-    //data.triplesData.repartition(4)
-    println(data.triplesData.count + " [" + data.triplesData.partitions.size + "]")
-    val filteredSPO = RdfOperators.simpleFilter(data.triplesData, tripleFilter)
-    println(filteredSPO.count + " [" + filteredSPO.partitions.size + "]")
+    import ExpData.spark.implicits._
     
-    val filteredByIdInfo = CompositeKeyOperators.filterBySpatiotemporalInfo(filteredSPO, constraints, encoder, data)
-    println(filteredByIdInfo.count + " [" + filteredByIdInfo.partitions.size + "]")
+    val filteredSPO = RdfOperators.simpleFilter(ExpData.triplesData, tripleFilter)
     
-    val encodedUriMBR = data.dictionary.getIdByValue(Consts.uriMBR)
-    val encodedUriTime = data.dictionary.getIdByValue(Consts.uriTime)
+    val filteredByIdInfo = CompositeKeyOperators.filterBySpatiotemporalInfo(filteredSPO, constraints, encoder)
+    println(filteredByIdInfo.count)
     
-    val idsForTemporalRefinement = filteredByIdInfo.filter(x => {((x._1._1 >> 0) & 1) == 1}).map(_._1._2).collect().toArray
-    val idsForSpatialRefinement = filteredByIdInfo.filter(x => {((x._1._1 >> 1) & 1) == 1}).map(_._1._2).collect().toArray
-    java.util.Arrays.sort(idsForTemporalRefinement)
-    java.util.Arrays.sort(idsForSpatialRefinement)
-    println(idsForTemporalRefinement.length)
-    println(idsForSpatialRefinement.length)
+    val encodedUriMBR = ExpData.dictionary.getKeyByValue(Consts.uriMBR).toLong
+    val encodedUriTime = ExpData.dictionary.getKeyByValue(Consts.uriTime).toLong
     
-    val soForTemporalRefinementEncoded = data.triples.getListOByListSOnConstantP(idsForTemporalRefinement, encodedUriTime)
+    val myNameFilter = ((bit: Int) => {
+      udf {(x: Int) => {
+        ((x >> bit) & 1) == 1
+      }
+    }})
+    
+    val idsForTemporalRefinement = filteredByIdInfo.filter(myNameFilter(0)($"pruneKey")).select($"subject").map(r => (r(0).asInstanceOf[Long], encodedUriTime)).collect()
+    val idsForSpatialRefinement = filteredByIdInfo.filter(myNameFilter(1)($"pruneKey")).select($"subject").map(r => (r(0).asInstanceOf[Long], encodedUriMBR)).collect()
+    
+    val soForTemporalRefinementEncoded = ExpData.triples.getListOByListSP(idsForTemporalRefinement)
     println(soForTemporalRefinementEncoded.size)
-    val soForSpatialRefinementEncoded = data.triples.getListOByListSOnConstantP(idsForSpatialRefinement, encodedUriMBR)
+    val soForSpatialRefinementEncoded = ExpData.triples.getListOByListSP(idsForSpatialRefinement)
     println(soForSpatialRefinementEncoded.size)
     
-    val soForTemporalRefinementDecoded = data.dictionary.getValuesListByIdsList(soForTemporalRefinementEncoded)
+    val soForTemporalRefinementDecoded = ExpData.dictionary.getValuesListByKeysList(soForTemporalRefinementEncoded)
     println(soForTemporalRefinementDecoded.size)
-    val soForSpatialRefinementDecoded = data.dictionary.getValuesListByIdsList(soForSpatialRefinementEncoded)
+    val soForSpatialRefinementDecoded = ExpData.dictionary.getValuesListByKeysList(soForSpatialRefinementEncoded)
     println(soForSpatialRefinementDecoded.size)
     
     val result = refineResult(constraints, filteredByIdInfo, soForTemporalRefinementDecoded, soForSpatialRefinementDecoded)

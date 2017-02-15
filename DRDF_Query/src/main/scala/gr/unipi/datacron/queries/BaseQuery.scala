@@ -9,7 +9,7 @@ abstract class BaseQuery(config: Config) {
   val nTotalBits = config.getInt(Consts.qfpTotalBits)
   val nSpatialBits = config.getInt(Consts.qfpSpatialBits)
   val nIDsBits = config.getInt(Consts.qfpIDsBits)
-  val data = new ExpData(config)
+  ExpData.init(config)
   
   def executeQuery(): Boolean
 }

@@ -4,14 +4,18 @@ import gr.unipi.datacron.store.ExpData
 import org.apache.spark.rdd.RDD
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.encoding._
+import org.apache.spark.sql.DataFrame
 
 object CompositeKeyOperators {
   
-  def filterBySpatiotemporalInfo(rdd: RDD[String], constraints: SpatioTemporalConstraints, encoder: SimpleEncoder, data: ExpData): RDD[((Int, Long), String)] = {
-    val intervalIds = data.temporalGrid.getIntervalIds(constraints)
-    val spatialIds = data.spatialGrid.getSpatialIds(constraints)
+  def filterBySpatiotemporalInfo(data: DataFrame, constraints: SpatioTemporalConstraints, encoder: SimpleEncoder): DataFrame = {
+    import ExpData.spark.implicits._
     
-    val result = rdd.map(x => {
+    val intervalIds = ExpData.temporalGrid.getIntervalIds(constraints)
+    val spatialIds = ExpData.spatialGrid.getSpatialIds(constraints)
+    
+    val tmp = data.rdd.map(r => {
+      val x = r.getAs[String]("spo")
       val id = x.substring(0, x.indexOf(Consts.tripleFieldsSeparator)).toLong
       val components = encoder.decodeComponentsFromKey(id)
       //println(components)
@@ -39,9 +43,9 @@ object CompositeKeyOperators {
           }
         }
       }
-      
-      ((key, id), x)
-    }).filter(_._1._1 != -1)
-    return result
+      (key, id, x)
+    }).toDF("pruneKey", "subject", "spo")
+    val x = tmp.filter($"pruneKey" > -1)
+    return x
   }
 }

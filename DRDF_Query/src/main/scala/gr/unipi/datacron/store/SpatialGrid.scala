@@ -5,7 +5,7 @@ import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.grid.EquiGrid
 import collection.mutable.HashMap
 
-class SpatialGrid(config: Config, expData: ExpData) {
+class SpatialGrid(config: Config) {
   val spatialGrid = new EquiGrid(config.getInt(Consts.qfpSpatialBits), Consts.universeLowCorner,  Consts.universeUpperCorner);
   
   def getSpatialIds(c: SpatioTemporalConstraints): HashMap[Long, Boolean] = {

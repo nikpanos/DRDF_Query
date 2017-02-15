@@ -4,32 +4,39 @@ import com.typesafe.config.Config
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.RegexUtils._
 
-class DictionaryData(config: Config, expData: ExpData) {
-  val data = expData.hdfs.sc.textFile(config.getString(Consts.qfpDicPath))
+class DictionaryData(config: Config) {
+  import ExpData.spark.implicits._
   
-  def getIdByValue(value: String): String = {
-    val searchStr = ("^-?\\d+" + Consts.dicFieldsSeparator +  value).r
+  lazy val data = ExpData.sc.textFile(config.getString(Consts.qfpDicPath)).map(s => {
+    val splitted = s.split(Consts.dicFieldsSeparator)
+    (splitted(0).toLong, splitted(1))
+  }).toDF("key", "value")
+  
+  def getKeyByValue(value: String): Long = {
+    /*val searchStr = ("^-?\\d+" + Consts.dicFieldsSeparator +  value).r
     val result = data.filter(searchStr.matches(_)).collect()
     if (result.size == 0)
       return null
     else
-      return result(0).substring(0, result(0).indexOf(Consts.dicFieldsSeparator))
+      return result(0).substring(0, result(0).indexOf(Consts.dicFieldsSeparator))*/
+    data.filter($"value" === value).first().getAs[Long](0)
   }
   
-  def getValueById(id: String): String = {
-    val searchStr = ("^" + id + Consts.dicFieldsSeparator + ".*").r
+  def getValueByKey(key: Long): String = {
+    /*val searchStr = ("^" + id + Consts.dicFieldsSeparator + ".*").r
     val result = data.filter(searchStr.matches(_)).collect()
     if (result.size == 0)
       return null
     else
-      return result(0).substring(result(0).indexOf(Consts.dicFieldsSeparator) + 1)
+      return result(0).substring(result(0).indexOf(Consts.dicFieldsSeparator) + 1)*/
+    data.filter($"key" === key).first().getAs[String](1)
   }
   
-  def getValuesListByIdsList(ids: Array[(Long, Long)]): scala.collection.Map[Long, String] = {
-    val result = data.flatMap(x => {
-      val id = x.substring(0, x.indexOf(Consts.dicFieldsSeparator)).toLong
+  def getValuesListByKeysList(keys: Array[(Long, Long)]): scala.collection.Map[Long, String] = {
+    val result = data.rdd.flatMap(x => {
+      val key = x.getAs[Long](0)
       val fnc = (() => {
-        val flt = ids.filter(_._2 == id)
+        val flt = keys.filter(_._2 == key)
         if (flt.length == 0) {
           null
         }
@@ -42,7 +49,7 @@ class DictionaryData(config: Config, expData: ExpData) {
         None
       }
       else {
-        val uri = x.substring(x.indexOf(Consts.dicFieldsSeparator) + 1, x.length)
+        val uri = x.getAs[String](1)
         kv.map(x => {
           (x._1, uri)
         })

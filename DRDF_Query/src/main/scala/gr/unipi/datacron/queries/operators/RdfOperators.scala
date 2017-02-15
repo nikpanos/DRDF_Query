@@ -2,13 +2,16 @@ package gr.unipi.datacron.queries.operators
 
 import org.apache.spark.rdd.RDD
 import gr.unipi.datacron.common._
-import gr.unipi.datacron.common.RegexUtils._
 import gr.unipi.datacron.store._
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions._
 
 object RdfOperators {
   
-  def simpleFilter(rdd: RDD[String], spoFilter: SPO): RDD[String] = {
+  import ExpData.spark.implicits._
+  
+  def simpleFilter(data: DataFrame, spoFilter: SPO): DataFrame = {
     val searchStr = spoFilter.getRegExpString
-    return rdd.filter(searchStr.matches(_))
+    return data.filter($"spo" rlike searchStr)
   }
 }
