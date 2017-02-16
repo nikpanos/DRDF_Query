@@ -1,7 +1,6 @@
 package gr.unipi.datacron.queries.operators
 
 import gr.unipi.datacron.store.ExpData
-import org.apache.spark.rdd.RDD
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.encoding._
 import org.apache.spark.sql.DataFrame

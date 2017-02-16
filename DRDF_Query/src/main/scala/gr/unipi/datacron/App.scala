@@ -1,19 +1,32 @@
 package gr.unipi.datacron
 
 import com.typesafe.config.ConfigFactory
-import com.typesafe.config.Config
 import java.io.File
+import gr.unipi.datacron.queries.sptRange._
 import gr.unipi.datacron.queries._
-import gr.unipi.datacron.store._
+import gr.unipi.datacron.common._
+import com.typesafe.config.Config
 
 object App {
   
   def printUsage() {
-    println("Expected arguments: <path_to_queries_directory>.")
+    println("Expected argument: <path_to_queries_directory>.")
   }
   
   def processQueryFile(queryFile: File): Boolean = {
-    new StrQuery(ConfigFactory.parseFile(queryFile)).executeQuery
+    var query: BaseQuery = null
+    val config = ConfigFactory.parseFile(queryFile)
+    
+    config.getString(Consts.qfpQueryType) match {
+      case Consts.spatialFirstSptRangeQuery => query = new SpatialFirst(config)
+      case Consts.rdfFirstSptRangeQuery => query = new RdfFirst(config)
+      case _ => println("Unexpected query type")
+    }
+    
+    if (query != null) {
+      return query.executeQuery
+    }
+    false
   }
   
   def getListOfFiles(dir: String): List[File] = {
