@@ -31,8 +31,6 @@ class RdfFirst(config: Config) extends BaseQuery(config) {
       soForSpatialRefinement: scala.collection.Map[Long, String]): DataFrame = {
     import ExpData.spark.implicits._
     
-    println("Executing rdf-first spatio-temporal range query")
-    
     val bcTemporal = ExpData.sc.broadcast(soForTemporalRefinement)
     val bcSpatial = ExpData.sc.broadcast(soForSpatialRefinement)
     
@@ -71,6 +69,8 @@ class RdfFirst(config: Config) extends BaseQuery(config) {
 
   override def executeQuery(): Boolean = {
     import ExpData.spark.implicits._
+
+    println("Executing rdf-first spatio-temporal range query")
     
     val filteredSPO = RdfOperators.simpleFilter(ExpData.triplesData, tripleFilter)
     
