@@ -37,21 +37,6 @@ class RdfFirst(config: Config) extends BaseQuery(config) {
     
     val result = NaiveRefinement.refineResults(filteredByIdInfo, constraints)
     println("Result count: " + result.count)
-    
-    //val sorted = data.intervals.map(_.split("\\t")).map(x => (x(0).toInt, x(1).toLong)).glom().cache()
-    //for ((k, v) <- sorted.map(a => a.slice(a.binarySearch(timeLower), a.binarySearch(timeUpper) + 1)).collect().flatten) println(s"$k, $v")
-
-    /*val p: RangePartitioner[Int, Int] = sorted.partitioner.get.asInstanceOf[RangePartitioner[Int, Int]];
-    val (lower, upper) = (10, 20)
-    val range = p.getPartition(lower) to p.getPartition(upper)
-    println(range)
-    val rangeFilter = (i: Int, iter: Iterator[(Int, Int)]) => {
-      if (range.contains(i))
-        for ((k, v) <- iter if k >= lower && k <= upper) yield (k, v)
-      else
-        Iterator.empty
-    }
-    for ((k, v) <- sorted.mapPartitionsWithIndex(rangeFilter, preservesPartitioning = true).collect()) println(s"$k, $v")*/
 
     true
   }

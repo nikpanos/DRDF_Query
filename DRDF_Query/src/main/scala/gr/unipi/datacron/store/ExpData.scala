@@ -14,16 +14,17 @@ object ExpData {
   private var _sc: SparkContext = _
 
   def init(config: Config) = {
-    _dictionary = new DictionaryData(config)
-    _triples = new TriplesData(config)
-    _spatialGrid = new SpatialGrid(config)
-    _temporalGrid = new TemporalGrid(config)
     _spark = SparkSession.builder
       .master(config.getString(Consts.qfpSparkMaster))
       .appName(config.getString(Consts.qfpQueryName))
       .getOrCreate()
 
     _sc = _spark.sparkContext
+    
+    _dictionary = new DictionaryData(config)
+    _triples = new TriplesData(config)
+    _spatialGrid = new SpatialGrid(config)
+    _temporalGrid = new TemporalGrid(config)
   }
 
   lazy val dictionary = _dictionary

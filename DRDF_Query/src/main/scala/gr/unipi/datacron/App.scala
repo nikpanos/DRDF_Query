@@ -10,7 +10,7 @@ import com.typesafe.config.Config
 object App {
   
   def printUsage() {
-    println("Expected argument: <path_to_queries_directory>.")
+    println("Expected argument: <path_to_query_file>.")
   }
   
   def processQueryFile(queryFile: File): Boolean = {
@@ -24,19 +24,9 @@ object App {
     }
     
     if (query != null) {
-      return query.executeQuery
+      query.executeQuery
     }
     false
-  }
-  
-  def getListOfFiles(dir: String): List[File] = {
-    val d = new File(dir)
-    if (d.exists && d.isDirectory) {
-      d.listFiles.filter(_.isFile).toList
-    }
-    else {
-      List[File]()
-    }
   }
   
   def main(args : Array[String]) {
@@ -45,8 +35,7 @@ object App {
       System.exit(-1)
     }
     
-    val files = getListOfFiles(args(0))
-    files.forall(processQueryFile(_))
+    processQueryFile(new File(args(0)))
   }
 
 }
