@@ -5,8 +5,7 @@ import org.apache.spark.sql.DataFrame
 import gr.unipi.datacron.store.ExpData
 import org.apache.spark.sql.functions._
 
-object NaiveRefinement {
-  
+object JoinRefinement {
   private def getResults(qDetails: SpatioTemporalConstraints, data: DataFrame, soForTemporalRefinement: scala.collection.Map[Long, String],
       soForSpatialRefinement: scala.collection.Map[Long, String]): DataFrame = {
     import ExpData.spark.implicits._
@@ -54,6 +53,47 @@ object NaiveRefinement {
     val encodedUriMBR = ExpData.dictionary.getKeyByValue(Consts.uriMBR).toLong
     val encodedUriTime = ExpData.dictionary.getKeyByValue(Consts.uriTime).toLong
     
+    val tmp = data.flatMap(x => {
+      val key = x.getAs[Int]("pruneKey")
+      val s = x.getAs[Long]("subject")
+      var result = Array[String]()
+      
+      if (((key >> 0) & 1) == 1) {
+        result :+= (s + Consts.tripleFieldsSeparator + encodedUriTime)
+      }
+      if (((key >> 1) & 1) == 1) {
+        result :+= (s + Consts.tripleFieldsSeparator + encodedUriMBR)
+      }
+      result
+    }).toDF("sp")
+    
+    //tmp.count()
+    val sTransform = udf {(spo: String) =>
+      spo.substring(0, spo.indexOf(Consts.tripleFieldsSeparator))
+    }
+    val tmp1 = ExpData.triplesData
+    val tmp2 = ExpData.triplesData
+    
+    val ttt = tmp1.map(r => {
+      r.getAs[String]("spo")
+    })
+    
+    //val res1 = tmp1.join(tmp2, sTransform(tmp1("spo")) === sTransform(tmp2("spo")))
+    //res1.explain
+    println(tmp1.count)
+    //println(res1.count)
+    
+    val spoTransform = udf {(spo: String) =>
+      spo.substring(0, spo.lastIndexOf(Consts.tripleFieldsSeparator))
+    }
+    
+    val result = ExpData.triplesData.join(tmp, tmp("sp") === spoTransform(ExpData.triplesData("spo")))
+    //result.show()
+    result.explain
+    
+    return result
+    
+    /*
     val flt = ((bit: Int) => {
       udf {(x: Int) => {
         ((x >> bit) & 1) == 1
@@ -73,6 +113,6 @@ object NaiveRefinement {
     val soForSpatialRefinementDecoded = ExpData.dictionary.getValuesListByKeysList(soForSpatialRefinementEncoded)
     //println(soForSpatialRefinementDecoded.size)
     
-    return getResults(constraints, data, soForTemporalRefinementDecoded, soForSpatialRefinementDecoded)
+    return getResults(constraints, data, soForTemporalRefinementDecoded, soForSpatialRefinementDecoded)*/
   }
 }

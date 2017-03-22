@@ -33,8 +33,9 @@ class SpatialFirst(config: Config) extends BaseQuery(config) {
     val filteredByIdInfo = CompositeKeyOperators.filterBySpatiotemporalInfo(ExpData.triplesData, constraints, encoder)
     
     val filteredSPO = RdfOperators.simpleFilter(filteredByIdInfo, tripleFilter)
+    filteredSPO.cache // persist in main memory
     
-    val result = NaiveRefinement.refineResults(filteredSPO, constraints)
+    val result = JoinRefinement.refineResults(filteredSPO, constraints)
     println("Result count: " + result.count)
     
     true

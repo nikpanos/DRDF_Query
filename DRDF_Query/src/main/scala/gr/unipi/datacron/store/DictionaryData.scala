@@ -33,7 +33,7 @@ class DictionaryData(config: Config) {
   }
   
   def getValuesListByKeysList(keys: Array[(Long, Long)]): scala.collection.Map[Long, String] = {
-    val result = data.rdd.flatMap(x => {
+    val result = data.flatMap(x => {
       val key = x.getAs[Long](0)
       val fnc = (() => {
         val flt = keys.filter(_._2 == key)
@@ -56,6 +56,6 @@ class DictionaryData(config: Config) {
         //Array((kv._1, uri))
       }
     })
-    result.collectAsMap()
+    result.rdd.collectAsMap()
   }
 }

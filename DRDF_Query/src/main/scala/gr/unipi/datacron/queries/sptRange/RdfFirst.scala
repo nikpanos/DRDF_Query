@@ -33,6 +33,7 @@ class RdfFirst(config: Config) extends BaseQuery(config) {
     val filteredSPO = RdfOperators.simpleFilter(ExpData.triplesData, tripleFilter)
     
     val filteredByIdInfo = CompositeKeyOperators.filterBySpatiotemporalInfo(filteredSPO, constraints, encoder)
+    filteredByIdInfo.cache // persist in main memory
     //println(filteredByIdInfo.count)
     
     val result = NaiveRefinement.refineResults(filteredByIdInfo, constraints)

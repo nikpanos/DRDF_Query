@@ -13,7 +13,7 @@ object CompositeKeyOperators {
     val intervalIds = ExpData.temporalGrid.getIntervalIds(constraints)
     val spatialIds = ExpData.spatialGrid.getSpatialIds(constraints)
     
-    val tmp = data.rdd.map(r => {
+    val tmp = data.map(r => {
       val x = r.getAs[String]("spo")
       val id = x.substring(0, x.indexOf(Consts.tripleFieldsSeparator)).toLong
       val components = encoder.decodeComponentsFromKey(id)

@@ -9,7 +9,7 @@ class TriplesData(config: Config) {
   
   import ExpData.spark.implicits._
   
-  lazy val data = ExpData.sc.textFile(config.getString(Consts.qfpTriplesPath)).toDF("spo")
+  lazy val data = ExpData.spark.read.text(config.getString(Consts.qfpTriplesPath)).toDF("spo")
   
   def getObjectBySP(sp: String): String = {
     val searchStr = (sp + Consts.tripleFieldsSeparator + "-?\\d+")
@@ -31,7 +31,7 @@ class TriplesData(config: Config) {
       (bc.value.contains(sp))
     }}
     
-    val result = data.filter(myNameFilter($"spo")).rdd.map(x => {
+    val result = data.filter(myNameFilter($"spo")).map(x => {
       val splitted = x.getAs[String]("spo").split(Consts.tripleFieldsSeparator)
       (splitted(0).toLong, splitted(2).toLong)
     }).collect()
