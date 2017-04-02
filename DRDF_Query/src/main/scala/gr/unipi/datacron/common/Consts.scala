@@ -37,4 +37,20 @@ object Consts {
   //Query types
   val spatialFirstSptRangeQuery = "SpatialFirstSptRangeQuery"
   val rdfFirstSptRangeQuery = "RdfFirstSptRangeQuery"
+  
+  //Triples fields
+  val tripleSpoStrField = "spoStr"
+  val triplePruneSubKeyField = "pruneSubKey"
+  val tripleSubLongField = "subLong"
+  val triplePredLongField = "predLong"
+  val tripleObjLongField = "objLong"
+  val tripleTranslateSuffix = "_trans"
+  val tripleMBRField = "mbr_wkt"
+  val tripleTimeStartField = "time_start"
+  
+  //Dictionary fields
+  val dicLineStrField = "lineStr"
+  val dicKeyLongField = "keyLong"
+  val dicValueStrField = "valueStr"
 }
+

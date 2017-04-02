@@ -2,7 +2,7 @@ package gr.unipi.datacron.common
 
 import com.typesafe.config.Config
 
-class SpatioTemporalConstraints(l: SpatioTemporalInfo, h: SpatioTemporalInfo) extends Serializable {
+class SpatioTemporalRange(l: SpatioTemporalInfo, h: SpatioTemporalInfo) extends Serializable {
   val low: SpatioTemporalInfo = l
   val high: SpatioTemporalInfo = h
   

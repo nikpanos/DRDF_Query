@@ -19,5 +19,5 @@ class TemporalGrid(config: Config) {
     return result
   }
   
-  def getIntervalIds(c: SpatioTemporalConstraints): (Int, Int) = (getIntervalId(c.low.time), getIntervalId(c.high.time))
+  def getIntervalIds(c: SpatioTemporalRange): (Int, Int) = (getIntervalId(c.low.time), getIntervalId(c.high.time))
 }
