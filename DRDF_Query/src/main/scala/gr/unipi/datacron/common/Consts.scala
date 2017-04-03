@@ -20,10 +20,26 @@ object Consts {
   val qfpIntrvlsPath = "intervals_path"
   val qfpSparkMaster = "spark_master"
   val qfpQueryType = "query_type"
+  val qfpDictionaryTrait = "dictionary_trait"
+  val qfpTriples_trait = "triples_trait"
+  val qfpJoinTriples_trait = "joinTriples_trait"
+  val qfpParseDictionary = "parse_dictionary"
+  val qfpParseTriples = "parse_triples"
+
+  //Physical plan traits
+  //TDictionary
+  val tLSDictionary = "LSDictionary"
+  val tSDictionary = "SDictionary"
+
+  //TTriples
+  val tSTriples = "STriples"
+
+  //TJoinTriples
+  val tMBJoinSTriples = "MBJoinSTriples"
   
   //universe values
-  val universeLowCorner = Array(39.82,12.21);
-  val universeUpperCorner = Array(45.82,19.6);
+  val universeLowCorner = Array(39.82, 12.21)
+  val universeUpperCorner = Array(45.82, 19.6)
   
   //field separators
   val tripleFieldsSeparator = " "
@@ -52,5 +68,9 @@ object Consts {
   val dicLineStrField = "lineStr"
   val dicKeyLongField = "keyLong"
   val dicValueStrField = "valueStr"
+
+  //parsing
+  val parseString = "S"
+  val parseLongString = "LS"
 }
 

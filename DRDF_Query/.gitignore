@@ -1,7 +1,6 @@
 # use glob syntax.
 syntax: glob
 *.ser
-*.class
 *~
 *.bak
 #*.off
@@ -15,7 +14,6 @@ syntax: glob
 .scala_dependencies
 .cache-main
 .cache-tests
-
 
 # idea
 .idea
@@ -40,9 +38,7 @@ build.log
 #  syntax: regexp
 #  ^\.pc/
 
-#SHITTY output not in target directory
-build.log
-
 # job input-output directories
 input
 output
+spark-warehouse/

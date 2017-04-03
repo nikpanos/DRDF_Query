@@ -36,6 +36,7 @@ class SpatialFirst(config: Config) extends BaseQuery(config) {
     println(filteredSPO.count)
     
     val result = Refinement.refineResults(filteredSPO, constraints)
+    result.show()
     println("Result count: " + result.count)
     
     true

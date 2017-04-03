@@ -45,7 +45,7 @@ case class STriples() extends BaseOperator with TTriples {
     searchStr += pred.getOrElse("-?\\d+") + Consts.tripleFieldsSeparator
     searchStr += obj.getOrElse("-?\\d+")
     
-    return df.filter(df(tripleSpoStrField) rlike searchStr)
+    df.filter(df(tripleSpoStrField) rlike searchStr)
   }
   
   def pointSearchObject(df: DataFrame, sub: Long, pred: Long): Option[Long] = {
@@ -53,7 +53,7 @@ case class STriples() extends BaseOperator with TTriples {
     val searchStr = sp + tripleFieldsSeparator + "-?\\d+"
     try {
       val resStr = df.filter(df(tripleSpoStrField) rlike searchStr).first.getAs[String](tripleSpoStrField)
-      return Some(resStr.substring(resStr.indexOf(tripleFieldsSeparator) + 1).toLong)
+      Some(resStr.substring(resStr.indexOf(tripleFieldsSeparator) + 1).toLong)
     }
     catch {
       case ex: Exception => None  //TODO: fix the exception type here
@@ -95,44 +95,6 @@ case class STriples() extends BaseOperator with TTriples {
     result.withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(triplePruneSubKeyField) > -1)
   }
   
-  def joinSubjectsWithNewObjects(df: DataFrame, dfTriples: DataFrame, predicates: Map[Long, String]): DataFrame = {
-    val fr = if (df.columns.contains(tripleSubLongField)) df else addSubjectInfo(df)
-    val subjects = fr.select(tripleSubLongField).as[Long].collect.toSet
-    val bSubjects = DataStore.sc.broadcast(subjects)
-    val bPredicates = DataStore.sc.broadcast(predicates)
-    
-    val tmp = dfTriples.flatMap(row => {
-      val spo = row.getAs[String](tripleSpoStrField)
-      val s = spo.substring(0, spo.indexOf(tripleFieldsSeparator)).toLong
-      
-      if (bSubjects.value.contains(s)) {
-        val p = spo.substring(spo.indexOf(tripleFieldsSeparator) + 1, spo.lastIndexOf(tripleFieldsSeparator)).toLong
-        
-        if (bPredicates.value.contains(p)) {
-          val o = spo.substring(spo.lastIndexOf(tripleFieldsSeparator) + 1, spo.length).toLong
-          Some((s, p), o)
-        }
-        else {
-          None
-        }
-      }
-      else {
-        None
-      }
-    }).collect.toMap
-    val bTmp = DataStore.sc.broadcast(tmp)
-    
-    val getColumnValue = (pred: Long) => {udf((sub: Long) => {
-      bTmp.value.get((sub, pred))
-    })}
-    
-    var result = fr
-    predicates.foreach(x => {
-      result = result.withColumn(x._2, getColumnValue(x._1)(col(tripleSubLongField)))
-    })
-    result
-  }
-  
   def filterbySpatioTemporalRange(df: DataFrame, range: SpatioTemporalRange): DataFrame = {
     
     df.filter(x => {
@@ -162,6 +124,20 @@ case class STriples() extends BaseOperator with TTriples {
       
       tmpResult && sptResult
     })
+  }
+
+  def prepareForFinalTranslation(df: DataFrame): DataFrame = {
+    var result = df
+    if (!df.hasColumn(tripleSubLongField)) {
+      result = addSubjectInfo(result)
+    }
+    if (!df.hasColumn(triplePredLongField)) {
+      result = addPredicateInfo(result)
+    }
+    if (!df.hasColumn(tripleObjLongField)) {
+      result = addObjectInfo(result)
+    }
+    result
   }
 }
 

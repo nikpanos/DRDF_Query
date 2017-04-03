@@ -37,6 +37,7 @@ class RdfFirst(config: Config) extends BaseQuery(config) {
     //println(filteredByIdInfo.count)
     
     val result = Refinement.refineResults(filteredByIdInfo, constraints)
+    result.show()
     println("Result count: " + result.count)
 
     true

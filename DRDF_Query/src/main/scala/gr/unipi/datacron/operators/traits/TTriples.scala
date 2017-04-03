@@ -8,6 +8,7 @@ trait TTriples {
   def filterBySPO(df: DataFrame, sub: Option[Long], pred: Option[Long], obj: Option[Long]): DataFrame
   def filterBySubSpatioTemporalInfo(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder): DataFrame
   def pointSearchObject(df: DataFrame, sub: Long, pred: Long): Option[Long]
-  def joinSubjectsWithNewObjects(df: DataFrame, dfTriples: DataFrame, predicates: Map[Long, String]): DataFrame
   def filterbySpatioTemporalRange(df: DataFrame, range: SpatioTemporalRange): DataFrame
+
+  def prepareForFinalTranslation(df: DataFrame): DataFrame
 }

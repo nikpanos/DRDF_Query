@@ -9,33 +9,24 @@ import org.apache.spark.sql.DataFrame
 
 object Refinement {
   def refineResults(data: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
-    import DataStore.spark.implicits._
-    
     val dictionary = DataStore.dictionaryData
-    
+
+    println(Executor.dictionary.pointSearchValue(dictionary, -18).get)
+
     val encodedUriMBR = Executor.dictionary.pointSearchKey(dictionary, uriMBR).get
     val encodedUriTime = Executor.dictionary.pointSearchKey(dictionary, uriTime).get
     
     val predicates = Map((encodedUriMBR, tripleMBRField), (encodedUriTime, tripleTimeStartField))
-    val extendedTriples = Executor.triples.joinSubjectsWithNewObjects(data, DataStore.triplesData, predicates)
+    val extendedTriples = Executor.joinTriples.joinSubjectsWithNewObjects(data, DataStore.triplesData, predicates)
     
-    val translatedExtendedTriples = Executor.joinDictionaryTriples.translateColumns(extendedTriples, dictionary, Array(tripleMBRField, tripleTimeStartField))
-    translatedExtendedTriples.show()
-    
-    return Executor.triples.filterbySpatioTemporalRange(translatedExtendedTriples, constraints)
-    /*val idsForTemporalRefinement = data.filter(flt(0)($"pruneKey")).select($"subject").map(r => (r(0).asInstanceOf[Long], encodedUriTime)).collect()
-    val idsForSpatialRefinement = data.filter(flt(1)($"pruneKey")).select($"subject").map(r => (r(0).asInstanceOf[Long], encodedUriMBR)).collect()
-    
-    val soForTemporalRefinementEncoded = DataStore.triples.getListOByListSP(idsForTemporalRefinement)
-    //println(soForTemporalRefinementEncoded.size)
-    val soForSpatialRefinementEncoded = DataStore.triples.getListOByListSP(idsForSpatialRefinement)
-    //println(soForSpatialRefinementEncoded.size)
-    
-    val soForTemporalRefinementDecoded = DataStore.dictionary.getValuesListByKeysList(soForTemporalRefinementEncoded)
-    //println(soForTemporalRefinementDecoded.size)
-    val soForSpatialRefinementDecoded = DataStore.dictionary.getValuesListByKeysList(soForSpatialRefinementEncoded)
-    //println(soForSpatialRefinementDecoded.size)
-    
-    return getResults(constraints, data, soForTemporalRefinementDecoded, soForSpatialRefinementDecoded)*/
+    val translatedExtendedTriples = Executor.dictionary.translateColumns(extendedTriples, dictionary, Array(tripleMBRField, tripleTimeStartField))
+
+    val result = Executor.triples.filterbySpatioTemporalRange(translatedExtendedTriples, constraints)
+
+    //Translate the result before returning
+    val outPrepared = Executor.triples.prepareForFinalTranslation(result)
+    val outTranslated = Executor.dictionary.translateColumns(outPrepared, dictionary, Array(tripleSubLongField, triplePredLongField, tripleObjLongField))
+    val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
+    outTranslated.select(outColumns.head, outColumns.tail: _*)
   }
 }
