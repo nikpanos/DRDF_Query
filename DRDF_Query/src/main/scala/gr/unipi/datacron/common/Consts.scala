@@ -33,9 +33,11 @@ object Consts {
 
   //TTriples
   val tSTriples = "STriples"
+  val tLLLTriples = "LLLTriples"
 
   //TJoinTriples
   val tMBJoinSTriples = "MBJoinSTriples"
+  val tMBJoinLLLTriples = "MBJoinLLLTriples"
   
   //universe values
   val universeLowCorner = Array(39.82, 12.21)
@@ -72,5 +74,6 @@ object Consts {
   //parsing
   val parseString = "S"
   val parseLongString = "LS"
+  val parseTripleLong = "LLL"
 }
 

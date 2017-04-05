@@ -11,8 +11,6 @@ object Refinement {
   def refineResults(data: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
     val dictionary = DataStore.dictionaryData
 
-    println(Executor.dictionary.pointSearchValue(dictionary, -18).get)
-
     val encodedUriMBR = Executor.dictionary.pointSearchKey(dictionary, uriMBR).get
     val encodedUriTime = Executor.dictionary.pointSearchKey(dictionary, uriTime).get
     

@@ -7,7 +7,7 @@ import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
-case class MBJoinSTriples() extends BaseOperator with TJoinTriples {
+case class MBJoinLLLTriples() extends BaseOperator with TJoinTriples {
   import DataStore.spark.implicits._
 
   override def joinSubjectsWithNewObjects(df: DataFrame, dfTriples: DataFrame, predicates: Map[Long, String]): DataFrame = {
@@ -16,14 +16,11 @@ case class MBJoinSTriples() extends BaseOperator with TJoinTriples {
     val bPredicates = DataStore.sc.broadcast(predicates)
 
     val tmp = dfTriples.flatMap(row => {
-      val spo = row.getAs[String](tripleSpoStrField)
-      val s = spo.substring(0, spo.indexOf(tripleFieldsSeparator)).toLong
-
+      val s = row.getAs[Long](tripleSubLongField)
       if (bSubjects.value.contains(s)) {
-        val p = spo.substring(spo.indexOf(tripleFieldsSeparator) + 1, spo.lastIndexOf(tripleFieldsSeparator)).toLong
-
+        val p = row.getAs[Long](triplePredLongField)
         if (bPredicates.value.contains(p)) {
-          val o = spo.substring(spo.lastIndexOf(tripleFieldsSeparator) + 1, spo.length).toLong
+          val o = row.getAs[Long](tripleObjLongField)
           Some((s, p), o)
         }
         else {

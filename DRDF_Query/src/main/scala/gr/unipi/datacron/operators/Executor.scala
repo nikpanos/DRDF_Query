@@ -22,10 +22,12 @@ object Executor {
   }
   lazy val triples: TTriples = config.getString(qfpTriples_trait) match {
     case Consts.tSTriples => STriples()
+    case Consts.tLLLTriples => LLLTriples()
     case _ => throw new Exception("Triples trait not found")
   }
   lazy val joinTriples: TJoinTriples = config.getString(qfpJoinTriples_trait) match {
     case Consts.tMBJoinSTriples => MBJoinSTriples()
+    case Consts.tMBJoinLLLTriples => MBJoinLLLTriples()
     case _ => throw new Exception("JoinTriples trait not found")
   }
 }

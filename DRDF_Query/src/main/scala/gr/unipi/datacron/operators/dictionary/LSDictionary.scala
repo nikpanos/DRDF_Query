@@ -17,8 +17,6 @@ case class LSDictionary() extends BaseOperator with TDictionary {
   def pointSearchKey(df: DataFrame, value: String): Option[Long] =
     Try(df.filter(col(dicValueStrField) === value).first().getAs[Long](dicKeyLongField)).toOption
 
-  import DataStore.spark.implicits._
-
   def translateColumn(dfTriples: DataFrame, dfDictionary: DataFrame, columnName: String): DataFrame = {
     val collected = dfTriples.select(columnName).as[Long].collect.toSet
     val bCollected = DataStore.sc.broadcast(collected)
