@@ -1,9 +1,9 @@
-package gr.unipi.datacron.queries.starSTRange
+package gr.unipi.datacron.plans.logical.starSTRange
 
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.SpatioTemporalRange
-import gr.unipi.datacron.operators.Executor
 import gr.unipi.datacron.common.DataFrameUtils._
+import gr.unipi.datacron.plans.physical.Executor
 import org.apache.spark.sql.DataFrame
 
 object StarRefinement {

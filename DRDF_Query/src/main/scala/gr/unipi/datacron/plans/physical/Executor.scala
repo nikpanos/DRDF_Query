@@ -1,20 +1,20 @@
-package gr.unipi.datacron.operators
+package gr.unipi.datacron.plans.physical
 
 import com.typesafe.config.Config
-import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.Consts
-import gr.unipi.datacron.operators.traits._
-import gr.unipi.datacron.operators.dictionary._
-import gr.unipi.datacron.operators.triples._
-import gr.unipi.datacron.operators.joinTriples._
+import gr.unipi.datacron.common.Consts._
+import gr.unipi.datacron.plans.physical.dictionary._
+import gr.unipi.datacron.plans.physical.joinTriples._
+import gr.unipi.datacron.plans.physical.traits._
+import gr.unipi.datacron.plans.physical.triples._
 
 object Executor {
   private var config: Config = _
-  
+
   def init(_config: Config): Unit = {
     config = _config
   }
-  
+
   lazy val dictionary: TDictionary = config.getString(qfpDictionaryTrait) match {
     case Consts.tLSDictionary => LSDictionary()
     case Consts.tSDictionary => SDictionary()

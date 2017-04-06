@@ -1,14 +1,14 @@
-package gr.unipi.datacron.queries.starSTRange
+package gr.unipi.datacron.plans.logical.starSTRange
 
 import com.typesafe.config.Config
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.encoding.SimpleEncoder
-import gr.unipi.datacron.queries.BaseQuery
+import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 
 import scala.util.Try
 
-abstract class BaseStar(config: Config) extends BaseQuery(config) {
+abstract class BaseStar(config: Config) extends BaseLogicalPlan(config) {
   val constraints = new SpatioTemporalRange(
     config.getDouble(qfpLatLower),
     config.getDouble(qfpLonLower),

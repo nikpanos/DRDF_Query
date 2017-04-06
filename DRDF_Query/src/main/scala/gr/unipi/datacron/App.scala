@@ -3,7 +3,7 @@ package gr.unipi.datacron
 import com.typesafe.config.ConfigFactory
 import java.io.File
 import gr.unipi.datacron.common._
-import gr.unipi.datacron.queries.starSTRange._
+import gr.unipi.datacron.plans.logical.starSTRange._
 
 object App {
   
@@ -22,7 +22,7 @@ object App {
     }
 
     if (query.isDefined) {
-      val result = query.get.executeQuery.cache
+      val result = query.get.executePlan.cache
       result.show
       println(result.count)
       true
