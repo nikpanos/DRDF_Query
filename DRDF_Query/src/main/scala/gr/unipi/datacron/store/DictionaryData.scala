@@ -20,4 +20,6 @@ class DictionaryData(config: Config) {
       }).toDF(dicKeyLongField, dicValueStrField)
     case _ => throw new Exception("Dictionary parsing setting not found")
   }
+
+  println("Dictionary dataset: " + config.getString(qfpDicPath))
 }

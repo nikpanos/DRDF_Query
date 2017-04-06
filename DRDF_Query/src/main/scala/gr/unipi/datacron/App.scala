@@ -2,10 +2,8 @@ package gr.unipi.datacron
 
 import com.typesafe.config.ConfigFactory
 import java.io.File
-import gr.unipi.datacron.queries.sptRange._
-import gr.unipi.datacron.queries._
 import gr.unipi.datacron.common._
-import com.typesafe.config.Config
+import gr.unipi.datacron.queries.starSTRange._
 
 object App {
   
@@ -14,18 +12,21 @@ object App {
   }
   
   def processQueryFile(queryFile: File): Boolean = {
-    var query: BaseQuery = null
     val config = ConfigFactory.parseFile(queryFile)
     
-    config.getString(Consts.qfpQueryType) match {
-      case Consts.spatialFirstSptRangeQuery => query = new SpatialFirst(config)
-      case Consts.rdfFirstSptRangeQuery => query = new RdfFirst(config)
-      case _ => println("Unexpected query type")
+    val query = config.getString(Consts.qfpQueryType) match {
+      case Consts.spatialFirstSptRangeQuery => Some(StarSpatialFirst(config))
+      case Consts.rdfFirstSptRangeQuery => Some(StarRdfFirst(config))
+      case _ => None
     }
-    
-    if (query != null) {
-      query.executeQuery
+
+    if (query.isDefined) {
+      val result = query.get.executeQuery.cache
+      result.show
+      println(result.count)
+      true
     }
+
     false
   }
   

@@ -14,29 +14,14 @@ import org.apache.spark.sql.functions._
 abstract class BaseTriples extends BaseOperator with TTriples {
   import DataStore.spark.implicits._
 
-  private[triples] def addSubjectInfo(df: DataFrame): DataFrame = {
-    val getSubject = udf((spo: String) => {
-      spo.substring(0, spo.indexOf(tripleFieldsSeparator)).toLong
-    })
+  //To be overriden in STriples
+  private[triples] def addSubjectInfo(df: DataFrame): DataFrame = df
 
-    df.withColumn(tripleSubLongField, getSubject(col(tripleSpoStrField)))
-  }
+  //To be overriden in STriples
+  private[triples] def addPredicateInfo(df: DataFrame): DataFrame = df
 
-  private[triples] def addPredicateInfo(df: DataFrame): DataFrame = {
-    val getPredicate = udf((spo: String) => {
-      spo.substring(spo.indexOf(tripleFieldsSeparator) + 1, spo.lastIndexOf(tripleFieldsSeparator)).toLong
-    })
-
-    df.withColumn(triplePredLongField, getPredicate(col(tripleSpoStrField)))
-  }
-
-  private[triples] def addObjectInfo(df: DataFrame): DataFrame = {
-    val getObject = udf((spo: String) => {
-      spo.substring(spo.lastIndexOf(tripleFieldsSeparator) + 1, spo.length).toLong
-    })
-
-    df.withColumn(tripleObjLongField, getObject(col(tripleSpoStrField)))
-  }
+  //To be overriden in STriples
+  private[triples] def addObjectInfo(df: DataFrame): DataFrame = df
 
   def filterBySubSpatioTemporalInfo(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder): DataFrame = {
 

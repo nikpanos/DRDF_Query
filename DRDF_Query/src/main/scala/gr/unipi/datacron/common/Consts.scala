@@ -3,28 +3,43 @@ package gr.unipi.datacron.common
 object Consts {
   //Query file params
   val qfpQueryName = "name"
-  val qfpLatLower = "lat_lower"
-  val qfpLonLower = "lon_lower"
-  val qfpLatUpper = "lat_upper"
-  val qfpLonUpper = "lon_upper"
-  val qfpTimeLower = "time_lower"
-  val qfpTimeUpper = "time_upper"
-  val qfpTripleS = "triple_s"
-  val qfpTripleP = "triple_p"
-  val qfpTripleO = "triple_o"
-  val qfpTotalBits = "nTotalBits"
-  val qfpSpatialBits = "nSpatialBits"
-  val qfpIDsBits = "nIDsBits"
-  val qfpDicPath = "dictionary_path"
-  val qfpTriplesPath = "triples_path"
-  val qfpIntrvlsPath = "intervals_path"
-  val qfpSparkMaster = "spark_master"
   val qfpQueryType = "query_type"
-  val qfpDictionaryTrait = "dictionary_trait"
-  val qfpTriples_trait = "triples_trait"
-  val qfpJoinTriples_trait = "joinTriples_trait"
-  val qfpParseDictionary = "parse_dictionary"
-  val qfpParseTriples = "parse_triples"
+
+  val qfpLatLower = "spatio_temporal_predicate.lat_lower"
+  val qfpLonLower = "spatio_temporal_predicate.lon_lower"
+  val qfpLatUpper = "spatio_temporal_predicate.lat_upper"
+  val qfpLonUpper = "spatio_temporal_predicate.lon_upper"
+  val qfpTimeLower = "spatio_temporal_predicate.time_lower"
+  val qfpTimeUpper = "spatio_temporal_predicate.time_upper"
+
+  val qfpTripleS = "star_predicate.s"
+  val qfpTripleP = "star_predicate.p"
+  val qfpTripleO = "star_predicate.o"
+
+  val qfpTotalBits = "universe.nTotalBits"
+  val qfpSpatialBits = "universe.nSpatialBits"
+  val qfpIDsBits = "universe.nIDsBits"
+  val qfpUniverseLatLower = "universe.lat_lower"
+  val qfpUniverseLonLower = "universe.lon_lower"
+  val qfpUniverseLatUpper = "universe.lat_upper"
+  val qfpUniverseLonUpper = "universe.lon_upper"
+
+  val qfpDicPath = "datasets.dictionary.path"
+  val qfpTriplesPath = "datasets.triples.path"
+  val qfpIntrvlsPath = "datasets.intervals.path"
+
+  val qfpParseDictionary = "datasets.dictionary.parse"
+  val qfpParseTriples = "datasets.triples.parse"
+
+  val qfpSparkMaster = "execution.spark_master"
+
+  val qfpDictionaryTrait = "physical_plans.dictionary"
+  val qfpTriples_trait = "physical_plans.triples"
+  val qfpJoinTriples_trait = "physical_plans.joinTriples"
+
+  //Query types
+  val spatialFirstSptRangeQuery = "SpatialFirstStarSptRangeQuery"
+  val rdfFirstSptRangeQuery = "RdfFirstStarSptRangeQuery"
 
   //Physical plan traits
   //TDictionary
@@ -39,10 +54,6 @@ object Consts {
   val tMBJoinSTriples = "MBJoinSTriples"
   val tMBJoinLLLTriples = "MBJoinLLLTriples"
   
-  //universe values
-  val universeLowCorner = Array(39.82, 12.21)
-  val universeUpperCorner = Array(45.82, 19.6)
-  
   //field separators
   val tripleFieldsSeparator = " "
   val dicFieldsSeparator = "\t"
@@ -51,10 +62,6 @@ object Consts {
   //RDF URIs
   val uriMBR = ":hasMBR_WKT"
   val uriTime = ":SemanticNodeTimeStart"
-  
-  //Query types
-  val spatialFirstSptRangeQuery = "SpatialFirstSptRangeQuery"
-  val rdfFirstSptRangeQuery = "RdfFirstSptRangeQuery"
   
   //Triples fields
   val tripleSpoStrField = "spoStr"

@@ -22,4 +22,6 @@ private[store] class TriplesData(config: Config) {
     }).toDF(tripleSubLongField, triplePredLongField, tripleObjLongField)
     case _ => throw new Exception("Triples parsing setting not found")
   }
+
+  println("Triples dataset: " + config.getString(qfpTriplesPath))
 }

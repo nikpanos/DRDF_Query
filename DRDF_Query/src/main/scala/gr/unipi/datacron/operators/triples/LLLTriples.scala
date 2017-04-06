@@ -1,7 +1,6 @@
 package gr.unipi.datacron.operators.triples
 
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
