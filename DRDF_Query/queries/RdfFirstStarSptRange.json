@@ -1,6 +1,6 @@
 {
   "name": "RdfFirstStarSptRangeQuery",
-  "query_type": "RdfFirstStarSptRangeQuery",
+  "query_type": "StarSptRange",
   "universe": {
     "nTotalBits": 32,
     "nSpatialBits": 8,
@@ -23,10 +23,13 @@
       "path": "input/timeintervalsSimple32_8_4.txt"
     }
   },
-  "physical_plans": {
-    "dictionary": "LSDictionary",
-    "triples": "LLLTriples",
-    "joinTriples": "MBJoinLLLTriples"
+  "plans": {
+    "physical": {
+      "dictionary": "LSDictionary",
+      "triples": "LLLTriples",
+      "joinTriples": "MBJoinLLLTriples"
+    },
+    "logical": ["RdfFirstStarSptRange"]
   },
   "spatio_temporal_predicate": {
     "lat_lower": 43.59634145261275,

@@ -33,16 +33,21 @@ object Consts {
 
   val qfpSparkMaster = "execution.spark_master"
 
-  val qfpDictionaryTrait = "physical_plans.dictionary"
-  val qfpTriples_trait = "physical_plans.triples"
-  val qfpJoinTriples_trait = "physical_plans.joinTriples"
+  val qfpDictionaryTrait = "plans.physical.dictionary"
+  val qfpTriples_trait = "plans.physical.triples"
+  val qfpJoinTriples_trait = "plans.physical.joinTriples"
+
+  val qfpLogicalPlans = "plans.logical"
 
   //Query types
-  val spatialFirstSptRangeQuery = "SpatialFirstStarSptRangeQuery"
-  val spatialFirstJoinStSptRangeQuery = "SpatialFirstJoinStStarSptRangeQuery"
-  val rdfFirstSptRangeQuery = "RdfFirstStarSptRangeQuery"
+  val starSptRangeQuery = "StarSptRange"
 
-  //Physical plan traits
+  //Logical plans
+  val spatialFirstStarSptRangeLPlan = "SpatialFirstStarSptRange"
+  val spatialFirstJoinStarSptRangeLPlan = "SpatialFirstJoinStStarSptRange"
+  val rdfFirstStarSptRangeLPlan = "RdfFirstStarSptRange"
+
+  //Physical plans
   //TDictionary
   val tLSDictionary = "LSDictionary"
   val tSDictionary = "SDictionary"

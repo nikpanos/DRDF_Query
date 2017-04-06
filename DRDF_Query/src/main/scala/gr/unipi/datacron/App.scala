@@ -3,7 +3,7 @@ package gr.unipi.datacron
 import com.typesafe.config.ConfigFactory
 import java.io.File
 import gr.unipi.datacron.common._
-import gr.unipi.datacron.plans.logical.starSTRange._
+import gr.unipi.datacron.queries._
 
 object App {
   
@@ -11,24 +11,17 @@ object App {
     println("Expected argument: <path_to_query_file>.")
   }
   
-  def processQueryFile(queryFile: File): Boolean = {
+  def processQueryFile(queryFile: File): Unit = {
     val config = ConfigFactory.parseFile(queryFile)
     
     val query = config.getString(Consts.qfpQueryType) match {
-      case Consts.spatialFirstSptRangeQuery => Some(StarSpatialFirst(config))
-      case Consts.rdfFirstSptRangeQuery => Some(StarRdfFirst(config))
-      case Consts.spatialFirstJoinStSptRangeQuery => Some(StarSpatialFirstJoinST(config))
+      case Consts.starSptRangeQuery => Some(StarSptRangeQuery(config))
       case _ => None
     }
 
     if (query.isDefined) {
-      val result = query.get.executePlan.cache
-      result.show
-      println(result.count)
-      true
+      query.get.execute()
     }
-
-    false
   }
   
   def main(args : Array[String]) {
