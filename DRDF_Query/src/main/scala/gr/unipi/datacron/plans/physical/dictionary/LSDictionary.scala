@@ -3,13 +3,13 @@ package gr.unipi.datacron.plans.physical.dictionary
 import gr.unipi.datacron.plans.physical.traits.TDictionary
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.physical.BaseOperator
+import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
 import scala.util.Try
 
-case class LSDictionary() extends BaseOperator with TDictionary {
+case class LSDictionary() extends BasePhysicalPlan with TDictionary {
   import DataStore.spark.implicits._
   
   def pointSearchValue(df: DataFrame, key: Long): Option[String] =

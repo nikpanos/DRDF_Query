@@ -1,13 +1,13 @@
 package gr.unipi.datacron.plans.physical.joinTriples
 
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.physical.BaseOperator
+import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits.TJoinTriples
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
-case class MBJoinSTriples() extends BaseOperator with TJoinTriples {
+case class MBJoinSTriples() extends BasePhysicalPlan with TJoinTriples {
   import DataStore.spark.implicits._
 
   override def joinSubjectsWithNewObjects(df: DataFrame, dfTriples: DataFrame, predicates: Map[Long, String]): DataFrame = {

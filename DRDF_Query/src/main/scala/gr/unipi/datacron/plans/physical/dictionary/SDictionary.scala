@@ -3,10 +3,10 @@ package gr.unipi.datacron.plans.physical.dictionary
 import gr.unipi.datacron.plans.physical.traits.TDictionary
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.physical.BaseOperator
+import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import org.apache.spark.sql.DataFrame
 
-case class SDictionary() extends BaseOperator with TDictionary {
+case class SDictionary() extends BasePhysicalPlan with TDictionary {
   import DataStore.spark.implicits._
   
   def pointSearchValue(df: DataFrame, key: Long): Option[String] = {

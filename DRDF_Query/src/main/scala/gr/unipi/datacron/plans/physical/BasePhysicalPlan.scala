@@ -1,5 +1,5 @@
 package gr.unipi.datacron.plans.physical
 
-abstract class BaseOperator {
+abstract private[physical] class BasePhysicalPlan {
   println("Using " + this.getClass.getName)
 }

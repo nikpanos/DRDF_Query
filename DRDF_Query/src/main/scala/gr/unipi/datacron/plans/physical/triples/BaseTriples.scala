@@ -7,11 +7,11 @@ import gr.unipi.datacron.encoding.SimpleEncoder
 import gr.unipi.datacron.plans.physical.traits.TTriples
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.DataFrameUtils._
-import gr.unipi.datacron.plans.physical.BaseOperator
+import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
-abstract class BaseTriples extends BaseOperator with TTriples {
+abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTriples {
   import DataStore.spark.implicits._
 
   //To be overriden in STriples

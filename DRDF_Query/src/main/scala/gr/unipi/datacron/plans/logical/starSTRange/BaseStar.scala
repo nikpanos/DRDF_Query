@@ -8,7 +8,7 @@ import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 
 import scala.util.Try
 
-abstract class BaseStar(config: Config) extends BaseLogicalPlan(config) {
+abstract private[starSTRange] class BaseStar(config: Config) extends BaseLogicalPlan(config) {
   val constraints = new SpatioTemporalRange(
     config.getDouble(qfpLatLower),
     config.getDouble(qfpLonLower),
