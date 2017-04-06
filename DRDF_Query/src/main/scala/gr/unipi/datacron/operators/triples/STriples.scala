@@ -35,10 +35,9 @@ case class STriples() extends BaseTriples {
     df.withColumn(tripleObjLongField, getObject(col(tripleSpoStrField)))
   }
   
-  def filterBySPO(df: DataFrame, sub: Option[Long], pred: Option[Long], obj: Option[Long]): DataFrame = {
-    var searchStr: String = ""
-    
-    searchStr += sub.getOrElse("^-?\\d+") + Consts.tripleFieldsSeparator
+  def filterByPO(df: DataFrame, pred: Option[Long], obj: Option[Long]): DataFrame = {
+    var searchStr = "^-?\\d+" + Consts.tripleFieldsSeparator
+
     searchStr += pred.getOrElse("-?\\d+") + Consts.tripleFieldsSeparator
     searchStr += obj.getOrElse("-?\\d+")
     

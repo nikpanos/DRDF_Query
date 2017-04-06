@@ -39,6 +39,7 @@ object Consts {
 
   //Query types
   val spatialFirstSptRangeQuery = "SpatialFirstStarSptRangeQuery"
+  val spatialFirstJoinStSptRangeQuery = "SpatialFirstJoinStStarSptRangeQuery"
   val rdfFirstSptRangeQuery = "RdfFirstStarSptRangeQuery"
 
   //Physical plan traits

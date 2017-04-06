@@ -3,16 +3,23 @@ package gr.unipi.datacron.queries.starSTRange
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.operators.Executor
-import gr.unipi.datacron.store.DataStore
+import gr.unipi.datacron.common.DataFrameUtils._
 import org.apache.spark.sql.DataFrame
 
 object StarRefinement {
-  def refineResults(dfTriples: DataFrame, dfDictionary: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
+
+  def addSpatialAndTemporalColumns(dfDestination: DataFrame, dfSource: DataFrame, dfDictionary: DataFrame): DataFrame = {
     val encodedUriMBR = Executor.dictionary.pointSearchKey(dfDictionary, uriMBR).get
     val encodedUriTime = Executor.dictionary.pointSearchKey(dfDictionary, uriTime).get
 
     val predicates = Map((encodedUriMBR, tripleMBRField), (encodedUriTime, tripleTimeStartField))
-    val extendedTriples = Executor.joinTriples.joinSubjectsWithNewObjects(dfTriples, DataStore.triplesData, predicates)
+    Executor.joinTriples.joinSubjectsWithNewObjects(dfDestination, dfSource, predicates)
+  }
+
+  def refineResults(dfFilteredTriples: DataFrame, dfAllTriples: DataFrame, dfDictionary: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
+
+    val extendedTriples = if (dfFilteredTriples.hasColumn(tripleMBRField)) dfFilteredTriples else
+      addSpatialAndTemporalColumns(dfFilteredTriples, dfAllTriples, dfDictionary)
 
     val translatedExtendedTriples = Executor.dictionary.translateColumns(extendedTriples, dfDictionary, Array(tripleMBRField, tripleTimeStartField))
 

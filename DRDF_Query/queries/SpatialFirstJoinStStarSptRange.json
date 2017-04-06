@@ -1,0 +1,46 @@
+{
+  "name": "SpatialFirstJoinStStarSptRangeQuery",
+  "query_type": "SpatialFirstJoinStStarSptRangeQuery",
+  "universe": {
+    "nTotalBits": 32,
+    "nSpatialBits": 8,
+    "nIDsBits": 4,
+    "lat_lower": 39.82,
+    "lon_lower": 12.21,
+    "lat_upper": 45.82,
+    "lon_upper": 19.6
+  },
+  "datasets": {
+    "dictionary": {
+      "path": "input/dictionarySimple32_8_4.txt",
+      "parse": "LS"
+    },
+    "triples": {
+      "path": "input/triplesSimple32_8_4.txt",
+      "parse": "LLL"
+    },
+    "intervals": {
+      "path": "input/timeintervalsSimple32_8_4.txt"
+    }
+  },
+  "physical_plans": {
+    "dictionary": "LSDictionary",
+    "triples": "LLLTriples",
+    "joinTriples": "MBJoinLLLTriples"
+  },
+  "spatio_temporal_predicate": {
+    "lat_lower": 43.59634145261275,
+    "lon_lower": 13.414434723606927,
+    "lat_upper": 45.59634145261275,
+    "lon_upper": 16.6,
+    "time_lower": 1451736505000,
+    "time_upper": 1451746665000
+  },
+  "star_predicate": {
+    "p": -8,
+    "o": -9
+  },
+  "execution": {
+    "spark_master": "local[*]"
+  }
+}

@@ -17,6 +17,7 @@ object App {
     val query = config.getString(Consts.qfpQueryType) match {
       case Consts.spatialFirstSptRangeQuery => Some(StarSpatialFirst(config))
       case Consts.rdfFirstSptRangeQuery => Some(StarRdfFirst(config))
+      case Consts.spatialFirstJoinStSptRangeQuery => Some(StarSpatialFirstJoinST(config))
       case _ => None
     }
 

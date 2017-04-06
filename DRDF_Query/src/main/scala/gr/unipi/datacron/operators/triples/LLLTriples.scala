@@ -10,11 +10,8 @@ import scala.util.Try
 case class LLLTriples() extends BaseTriples {
   import DataStore.spark.implicits._
 
-  override def filterBySPO(df: DataFrame, sub: Option[Long], pred: Option[Long], obj: Option[Long]): DataFrame = {
+  override def filterByPO(df: DataFrame, pred: Option[Long], obj: Option[Long]): DataFrame = {
     var result = df
-    if (sub.isDefined) {
-      result = result.filter(col(tripleSubLongField) === sub.get)
-    }
     if (pred.isDefined) {
       result = result.filter(col(triplePredLongField) === pred.get)
     }
