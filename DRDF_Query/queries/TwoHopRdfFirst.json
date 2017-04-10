@@ -1,6 +1,6 @@
 {
-  "name": "SpatialFirstStarSptRangeQuery",
-  "query_type": "StarSptRange",
+  "name": "TwoHopRdfFirst",
+  "query_type": "TwoHopSptRange",
   "universe": {
     "nTotalBits": 32,
     "nSpatialBits": 8,
@@ -29,19 +29,21 @@
       "triples": "LLLTriples",
       "joinTriples": "MBJoinLLLTriples"
     },
-    "logical": ["SpatialFirstStarSptRange"]
+    "logical": ["RdfFirstStarSptRange"]
   },
-  "spatio_temporal_predicate": {
-    "lat_lower": 43.59634145261275,
-    "lon_lower": 13.414434723606927,
-    "lat_upper": 45.59634145261275,
-    "lon_upper": 16.6,
-    "time_lower": 1451736505000,
-    "time_upper": 1451746665000
-  },
-  "star_predicate": {
-    "p": -8,
-    "o": -9
+  "query": {
+    "spatio_temporal_predicate": {
+      "lat_lower": 43.59634145261275,
+      "lon_lower": 13.414434723606927,
+      "lat_upper": 45.59634145261275,
+      "lon_upper": 16.6,
+      "time_lower": 1451736505000,
+      "time_upper": 1451746665000
+    },
+    "two_hop_predicate": {
+      "p": ":SemanticNodeStatus",
+      "o": "GAP END"
+    }
   },
   "execution": {
     "spark_master": "local[*]"

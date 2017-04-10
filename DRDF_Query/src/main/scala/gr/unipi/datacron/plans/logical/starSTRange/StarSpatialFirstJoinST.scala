@@ -10,7 +10,9 @@ case class StarSpatialFirstJoinST(config: Config) extends BaseStar(config) {
 
     val extendedTriples = StarRefinement.addSpatialAndTemporalColumns(filteredByIdInfo, filteredByIdInfo, dfDictionary)
 
-    val filteredSPO = PhysicalPlanner.filterByPO(extendedTriples, qPred, qObj).cache
+    val qPredTrans = translateKey(dfDictionary, qPred)
+    val qObjTrans = translateKey(dfDictionary, qObj)
+    val filteredSPO = PhysicalPlanner.filterByPO(extendedTriples, qPredTrans, qObjTrans).cache
 
     StarRefinement.refineResults(filteredSPO, dfTriples, dfDictionary, constraints)
   }

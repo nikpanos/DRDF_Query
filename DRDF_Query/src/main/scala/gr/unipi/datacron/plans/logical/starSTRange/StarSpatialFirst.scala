@@ -8,7 +8,10 @@ case class StarSpatialFirst(config: Config) extends BaseStar(config) {
   override def doExecutePlan(dfTriples: DataFrame, dfDictionary: DataFrame): DataFrame = {
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(dfTriples, constraints, encoder)
 
-    val filteredSPO = PhysicalPlanner.filterByPO(filteredByIdInfo, qPred, qObj).cache
+    val qPredTrans = translateKey(dfDictionary, qPred)
+    val qObjTrans = translateKey(dfDictionary, qObj)
+
+    val filteredSPO = PhysicalPlanner.filterByPO(filteredByIdInfo, qPredTrans, qObjTrans).cache
     
     StarRefinement.refineResults(filteredSPO, dfTriples, dfDictionary, constraints)
   }

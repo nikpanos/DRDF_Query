@@ -5,16 +5,16 @@ object Consts {
   val qfpQueryName = "name"
   val qfpQueryType = "query_type"
 
-  val qfpLatLower = "spatio_temporal_predicate.lat_lower"
-  val qfpLonLower = "spatio_temporal_predicate.lon_lower"
-  val qfpLatUpper = "spatio_temporal_predicate.lat_upper"
-  val qfpLonUpper = "spatio_temporal_predicate.lon_upper"
-  val qfpTimeLower = "spatio_temporal_predicate.time_lower"
-  val qfpTimeUpper = "spatio_temporal_predicate.time_upper"
+  val qfpLatLower = "query.spatio_temporal_predicate.lat_lower"
+  val qfpLonLower = "query.spatio_temporal_predicate.lon_lower"
+  val qfpLatUpper = "query.spatio_temporal_predicate.lat_upper"
+  val qfpLonUpper = "query.spatio_temporal_predicate.lon_upper"
+  val qfpTimeLower = "query.spatio_temporal_predicate.time_lower"
+  val qfpTimeUpper = "query.spatio_temporal_predicate.time_upper"
 
-  val qfpTripleS = "star_predicate.s"
-  val qfpTripleP = "star_predicate.p"
-  val qfpTripleO = "star_predicate.o"
+  val qfpTripleS = "query.star_predicate.s"
+  val qfpTripleP = "query.star_predicate.p"
+  val qfpTripleO = "query.star_predicate.o"
 
   val qfpTotalBits = "universe.nTotalBits"
   val qfpSpatialBits = "universe.nSpatialBits"
@@ -41,6 +41,7 @@ object Consts {
 
   //Query types
   val starSptRangeQuery = "StarSptRange"
+  val twoHopSptRangeQuery = "TwoHopSptRange"
 
   //Logical plans
   val spatialFirstStarSptRangeLPlan = "SpatialFirstStarSptRange"
