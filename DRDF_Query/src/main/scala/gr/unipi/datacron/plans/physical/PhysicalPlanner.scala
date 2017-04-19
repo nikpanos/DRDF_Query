@@ -39,6 +39,10 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples{
     pickTriplesPlanBasedOnRules.filterByPO(df, pred, obj)
   }
 
+  override def filterByColumn(df: DataFrame, columnName: String, value: Any): DataFrame = {
+    pickTriplesPlanBasedOnRules.filterByColumn(df, columnName, value)
+  }
+
   override def filterBySubSpatioTemporalInfo(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder): DataFrame = {
     pickTriplesPlanBasedOnRules.filterBySubSpatioTemporalInfo(df, constraints, encoder)
   }

@@ -1,12 +1,12 @@
-package gr.unipi.datacron.plans.logical.starSTRange
+package gr.unipi.datacron.plans.logical.sptRefinement
 
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.common.DataFrameUtils._
+import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import org.apache.spark.sql.DataFrame
 
-private[starSTRange] object StarRefinement {
+private[logical] object SptRefinement {
 
   def addSpatialAndTemporalColumns(dfDestination: DataFrame, dfSource: DataFrame, dfDictionary: DataFrame): DataFrame = {
     val encodedUriMBR = PhysicalPlanner.pointSearchKey(dfDictionary, uriMBR).get
@@ -27,7 +27,7 @@ private[starSTRange] object StarRefinement {
 
     //Translate the result before returning
     val outPrepared = PhysicalPlanner.prepareForFinalTranslation(result)
-    val outTranslated = PhysicalPlanner.translateColumns(outPrepared, dfDictionary, Array(tripleSubLongField, triplePredLongField, tripleObjLongField))
+    val outTranslated = PhysicalPlanner.translateColumns(outPrepared, dfDictionary, Array(/*tripleSubLongField, */triplePredLongField, tripleObjLongField))
     val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
     outTranslated.select(outColumns.head, outColumns.tail: _*)
   }

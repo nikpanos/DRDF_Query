@@ -74,7 +74,7 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
 
       if (!sptResult) {
         //refine spatial
-        val decodedObject = x.getAs[String](tripleMBRField + tripleTranslateSuffix).substring(6)
+        val decodedObject = x.getAs[String](tripleMBRField + tripleTranslateSuffix).substring(7)
         val lonlat = decodedObject.substring(0, decodedObject.length - 1).split(Consts.lonLatSeparator)
         val lon = lonlat(0).toDouble
         val lat = lonlat(1).toDouble
@@ -101,5 +101,9 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
       result = addObjectInfo(result)
     }
     result
+  }
+
+  override def filterByColumn(df: DataFrame, columnName: String, value: Any): DataFrame = {
+    df.filter(col(columnName) === value)
   }
 }

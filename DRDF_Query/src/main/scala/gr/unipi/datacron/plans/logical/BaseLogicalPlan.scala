@@ -26,11 +26,7 @@ abstract private[logical] class BaseLogicalPlan(config: Config) {
 
   private[logical] def doExecutePlan(dfTriples: DataFrame, dfDictionary: DataFrame): DataFrame
 
-  private[logical] val constraints = new SpatioTemporalRange(
-    config.getDouble(qfpLatLower),
-    config.getDouble(qfpLonLower),
-    config.getDouble(qfpLatUpper),
-    config.getDouble(qfpLonUpper),
-    config.getLong(qfpTimeLower),
-    config.getLong(qfpTimeUpper))
+  private[logical] val constraints = SpatioTemporalRange(
+    SpatioTemporalInfo(config.getDouble(qfpLatLower), config.getDouble(qfpLonLower), config.getLong(qfpTimeLower)),
+    SpatioTemporalInfo(config.getDouble(qfpLatUpper), config.getDouble(qfpLonUpper), config.getLong(qfpTimeUpper)))
 }

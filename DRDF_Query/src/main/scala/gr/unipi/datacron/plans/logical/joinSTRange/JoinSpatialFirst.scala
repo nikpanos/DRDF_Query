@@ -3,6 +3,7 @@ package gr.unipi.datacron.plans.logical.joinSTRange
 import com.typesafe.config.Config
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
+import gr.unipi.datacron.plans.logical.sptRefinement.SptRefinement
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import org.apache.spark.sql.DataFrame
 
@@ -13,13 +14,18 @@ case class JoinSpatialFirst(config: Config) extends BaseLogicalPlan(config) {
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(dfTriples, constraints, encoder)
 
     val transJoinKey = PhysicalPlanner.pointSearchKey(dfDictionary, config.getString(qfpJoinKey)).get
-    val predicates1 = Map((transJoinKey, tripleJoinKey))
+    val predicates1 = Map((transJoinKey, config.getString(qfpJoinKey)))
     val firstHop = PhysicalPlanner.joinNewObjects(filteredByIdInfo, dfTriples, tripleSubLongField, predicates1)
 
     val transPredicate = PhysicalPlanner.pointSearchKey(dfDictionary, config.getString(qfpJoinTripleP)).get
-    val predicates2 = Map((transPredicate, "join2"))
-    val secondHop = PhysicalPlanner.joinNewObjects(firstHop, dfTriples, tripleJoinKey, predicates2)
+    val predicates2 = Map((transPredicate, config.getString(qfpJoinTripleP)))
+    val secondHop = PhysicalPlanner.joinNewObjects(firstHop, dfTriples, config.getString(qfpJoinKey), predicates2)
 
-    secondHop
+    val encObj = PhysicalPlanner.pointSearchKey(dfDictionary, config.getString(qfpJoinTripleO)).get
+    val filteredBySPO = PhysicalPlanner.filterByColumn(secondHop, config.getString(qfpJoinTripleP), encObj)
+
+    val transFilteredByPO = PhysicalPlanner.translateColumn(filteredBySPO, dfDictionary, config.getString(qfpJoinTripleP))
+
+    SptRefinement.refineResults(transFilteredByPO, dfTriples, dfDictionary, constraints)
   }
 }

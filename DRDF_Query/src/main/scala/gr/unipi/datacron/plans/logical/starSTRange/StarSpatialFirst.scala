@@ -1,6 +1,7 @@
 package gr.unipi.datacron.plans.logical.starSTRange
 
 import com.typesafe.config.Config
+import gr.unipi.datacron.plans.logical.sptRefinement.SptRefinement
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import org.apache.spark.sql.DataFrame
 
@@ -13,6 +14,6 @@ case class StarSpatialFirst(config: Config) extends BaseStar(config) {
 
     val filteredSPO = PhysicalPlanner.filterByPO(filteredByIdInfo, qPredTrans, qObjTrans).cache
     
-    StarRefinement.refineResults(filteredSPO, dfTriples, dfDictionary, constraints)
+    SptRefinement.refineResults(filteredSPO, dfTriples, dfDictionary, constraints)
   }
 }
