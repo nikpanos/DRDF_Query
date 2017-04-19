@@ -11,19 +11,9 @@ import org.apache.spark.sql.DataFrame
 import scala.util.Try
 
 abstract private[starSTRange] class BaseStar(config: Config) extends BaseLogicalPlan(config) {
-  val constraints = new SpatioTemporalRange(
-    config.getDouble(qfpLatLower),
-    config.getDouble(qfpLonLower),
-    config.getDouble(qfpLatUpper),
-    config.getDouble(qfpLonUpper),
-    config.getLong(qfpTimeLower),
-    config.getLong(qfpTimeUpper))
 
-  private[starSTRange] val qSub: Option[String] = Try(config.getString(qfpTripleS)).toOption
   private[starSTRange] val qPred: Option[String] = Try(config.getString(qfpTripleP)).toOption
   private[starSTRange] val qObj: Option[String] = Try(config.getString(qfpTripleO)).toOption
-
-  val encoder = new SimpleEncoder(config)
 
   private def checkAndReturn(x: Option[Long], y: String): Option[Long] = {
     if (x.isEmpty) {

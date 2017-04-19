@@ -13,7 +13,7 @@ private[starSTRange] object StarRefinement {
     val encodedUriTime = PhysicalPlanner.pointSearchKey(dfDictionary, uriTime).get
 
     val predicates = Map((encodedUriMBR, tripleMBRField), (encodedUriTime, tripleTimeStartField))
-    PhysicalPlanner.joinSubjectsWithNewObjects(dfDestination, dfSource, predicates)
+    PhysicalPlanner.joinNewObjects(dfDestination, dfSource, tripleSubLongField, predicates)
   }
 
   def refineResults(dfFilteredTriples: DataFrame, dfAllTriples: DataFrame, dfDictionary: DataFrame, constraints: SpatioTemporalRange): DataFrame = {

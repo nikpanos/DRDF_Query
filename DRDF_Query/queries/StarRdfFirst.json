@@ -1,6 +1,5 @@
 {
   "name": "StarRdfFirst",
-  "query_type": "StarSptRange",
   "universe": {
     "nTotalBits": 32,
     "nSpatialBits": 8,
@@ -23,15 +22,8 @@
       "path": "input/timeintervalsSimple32_8_4.txt"
     }
   },
-  "plans": {
-    "physical": {
-      "dictionary": "LSDictionary",
-      "triples": "LLLTriples",
-      "joinTriples": "MBJoinLLLTriples"
-    },
-    "logical": ["RdfFirstStarSptRange"]
-  },
   "query": {
+    "type": "StarSptRange",
     "spatio_temporal_predicate": {
       "lat_lower": 43.59634145261275,
       "lon_lower": 13.414434723606927,
@@ -40,10 +32,20 @@
       "time_lower": 1451736505000,
       "time_upper": 1451746665000
     },
-    "star_predicate": {
-      "p": ":SemanticNodeStatus",
-      "o": "GAP END"
+    "rdf_predicate": {
+      "condition": {
+        "p": ":SemanticNodeStatus",
+        "o": "GAP END"
+      }
     }
+  },
+  "plans": {
+    "physical": {
+      "dictionary": "LSDictionary",
+      "triples": "LLLTriples",
+      "joinTriples": "MBJoinLLLTriples"
+    },
+    "logical": ["RdfFirstStarSptRange"]
   },
   "execution": {
     "spark_master": "local[*]"

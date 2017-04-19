@@ -3,7 +3,7 @@ package gr.unipi.datacron.common
 object Consts {
   //Query file params
   final val qfpQueryName = "name"
-  final val qfpQueryType = "query_type"
+  final val qfpQueryType = "query.type"
 
   final val qfpLatLower = "query.spatio_temporal_predicate.lat_lower"
   final val qfpLonLower = "query.spatio_temporal_predicate.lon_lower"
@@ -12,9 +12,12 @@ object Consts {
   final val qfpTimeLower = "query.spatio_temporal_predicate.time_lower"
   final val qfpTimeUpper = "query.spatio_temporal_predicate.time_upper"
 
-  final val qfpTripleS = "query.star_predicate.s"
-  final val qfpTripleP = "query.star_predicate.p"
-  final val qfpTripleO = "query.star_predicate.o"
+  final val qfpTripleP = "query.rdf_predicate.condition.p"
+  final val qfpTripleO = "query.rdf_predicate.condition.o"
+
+  final val qfpJoinKey = "query.rdf_predicate.join.key"
+  final val qfpJoinTripleP = "query.rdf_predicate.join.condition.p"
+  final val qfpJoinTripleO = "query.rdf_predicate.join.condition.o"
 
   final val qfpTotalBits = "universe.nTotalBits"
   final val qfpSpatialBits = "universe.nSpatialBits"
@@ -41,12 +44,14 @@ object Consts {
 
   //Query types
   final val starSptRangeQuery = "StarSptRange"
-  final val twoHopSptRangeQuery = "TwoHopSptRange"
+  final val twoHopSptRangeQuery = "JoinSptRange"
 
   //Logical plans
   final val spatialFirstStarSptRangeLPlan = "SpatialFirstStarSptRange"
   final val spatialFirstJoinStarSptRangeLPlan = "SpatialFirstJoinStStarSptRange"
   final val rdfFirstStarSptRangeLPlan = "RdfFirstStarSptRange"
+
+  final val spatialFirstJoinSptRangeLPlan = "SpatialFirstJoinSptRange"
 
   //Physical plans
   //TDictionary
@@ -79,6 +84,7 @@ object Consts {
   final val tripleTranslateSuffix = "_trans"
   final val tripleMBRField = "mbr_wkt"
   final val tripleTimeStartField = "time_start"
+  final val tripleJoinKey = "join_key"
   
   //Dictionary fields
   final val dicLineStrField = "lineStr"

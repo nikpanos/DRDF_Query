@@ -71,7 +71,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples{
     pickDictionaryPlanBasedOnRules.translateColumns(dfTriples, dfDictionary, columnNames)
   }
 
-  override def joinSubjectsWithNewObjects(df: DataFrame, dfTriples: DataFrame, predicates: Map[Long, String]): DataFrame = {
-    pickJoinTriplesPlanBasedOnRules.joinSubjectsWithNewObjects(df, dfTriples, predicates)
+  override def joinNewObjects(df: DataFrame, dfTriples: DataFrame, subjectColumn: String,  predicates: Map[Long, String]): DataFrame = {
+    pickJoinTriplesPlanBasedOnRules.joinNewObjects(df, dfTriples, subjectColumn, predicates)
   }
 }

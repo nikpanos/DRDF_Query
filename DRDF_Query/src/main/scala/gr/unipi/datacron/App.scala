@@ -16,6 +16,7 @@ object App {
     
     val query = config.getString(Consts.qfpQueryType) match {
       case Consts.starSptRangeQuery => Some(StarSptRangeQuery(config))
+      case Consts.twoHopSptRangeQuery => Some(TwoHopSptRangeQuery(config))
       case _ => None
     }
 

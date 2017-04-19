@@ -10,8 +10,8 @@ import org.apache.spark.sql.functions._
 case class MBJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
   import DataStore.spark.implicits._
 
-  override def joinSubjectsWithNewObjects(df: DataFrame, dfTriples: DataFrame, predicates: Map[Long, String]): DataFrame = {
-    val subjects = df.select(tripleSubLongField).as[Long].collect.toSet
+  override def joinNewObjects(df: DataFrame, dfTriples: DataFrame, subjectColumn: String, predicates: Map[Long, String]): DataFrame = {
+    val subjects = df.select(subjectColumn).as[Long].collect.toSet
     val bSubjects = DataStore.sc.broadcast(subjects)
     val bPredicates = DataStore.sc.broadcast(predicates)
 
@@ -37,7 +37,7 @@ case class MBJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
 
     var result = df
     predicates.foreach(x => {
-      result = result.withColumn(x._2, getColumnValue(x._1)(col(tripleSubLongField)))
+      result = result.withColumn(x._2, getColumnValue(x._1)(col(subjectColumn)))
     })
     result
   }
