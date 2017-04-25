@@ -1,0 +1,56 @@
+{
+  "name": "JoinSptRange",
+  "universe": {
+    "nTotalBits": 32,
+    "nSpatialBits": 8,
+    "nIDsBits": 6,
+    "lat_lower": 30,
+    "lon_lower": -12,
+    "lat_upper": 52,
+    "lon_upper": 36.9915533333
+  },
+  "datasets": {
+    "dictionary": {
+      "path": "input/join/dictionary/*",
+      "parse": "LS"
+    },
+    "triples": {
+      "path": "input/join/triples/*",
+      "parse": "LLL"
+    },
+    "intervals": {
+      "path": "input/join/timeintervals/timeintervalsSimple32_8_6.txt"
+    }
+  },
+  "query": {
+    "type": "JoinSptRange",
+    "spatio_temporal_predicate": {
+      "lat_lower": 41,
+      "lon_lower": 5,
+      "lat_upper": 45,
+      "lon_upper": 9,
+      "time_lower": 1451606401001,
+      "time_upper": 1451650000000
+    },
+    "rdf_predicate": {
+      "join": {
+        "key": ":hasNearbyWeatherCondition",
+        "condition": {
+          "p": ":windSpeedMin",
+          "o": "6.929336"
+        }
+      }
+    }
+  },
+  "plans": {
+    "physical": {
+      "dictionary": "LSDictionary",
+      "triples": "LLLTriples",
+      "joinTriples": "MBJoinLLLTriples"
+    },
+    "logical": ["SpatialFirstJoinSptRange"]
+  },
+  "execution": {
+    "spark_master": "local[*]"
+  }
+}
