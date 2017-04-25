@@ -4,7 +4,6 @@ import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits.TJoinTriples
 import gr.unipi.datacron.store.DataStore
-import gr.unipi.datacron.common.DataFrameUtils._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
