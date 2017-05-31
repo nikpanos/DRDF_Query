@@ -7,10 +7,17 @@ import org.apache.spark.sql.DataFrame
 
 private[store] class TriplesData(config: Config) {
   import DataStore.spark.implicits._
+
+  val triplesPath: String = if (config.getString(qfpSparkMaster).equals("yarn")) {
+    config.getString(qfpNamenode) + config.getString(qfpHdfsPrefix) + config.getString(qfpTriplesPath)
+  }
+  else {
+    config.getString(qfpTriplesPath)
+  }
   
   val data: DataFrame = config.getString(qfpParseTriples) match {
-    case Consts.parseString => DataStore.spark.read.text(config.getString(qfpTriplesPath)).toDF(tripleSpoStrField)
-    case Consts.parseTripleLong => DataStore.spark.read.text(config.getString(qfpTriplesPath)).map(s => {
+    case Consts.parseString => DataStore.spark.read.text(triplesPath).toDF(tripleSpoStrField)
+    case Consts.parseTripleLong => DataStore.spark.read.text(triplesPath).map(s => {
       val line = s.getAs[String](0)
       val pos = line.indexOf(tripleFieldsSeparator)
       val pos1 = line.lastIndexOf(tripleFieldsSeparator)

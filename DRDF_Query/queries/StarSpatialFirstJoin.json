@@ -11,15 +11,15 @@
   },
   "datasets": {
     "dictionary": {
-      "path": "input/dictionarySimple32_8_4.txt",
+      "path": "input/star/dictionarySimple32_8_4.txt",
       "parse": "LS"
     },
     "triples": {
-      "path": "input/triplesSimple32_8_4.txt",
+      "path": "input/star/triplesSimple32_8_4.txt",
       "parse": "LLL"
     },
     "intervals": {
-      "path": "input/timeintervalsSimple32_8_4.txt"
+      "path": "input/star/timeintervalsSimple32_8_4.txt"
     }
   },
   "plans": {
@@ -48,6 +48,8 @@
     }
   },
   "execution": {
-    "spark_master": "local[*]"
+    "spark_master": "local[*]",
+    "namenode": "hdfs://dnode1:8020",
+    "hdfs_dir_prefix": "/user/pnikitopoulos/"
   }
 }

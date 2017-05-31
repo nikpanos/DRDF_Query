@@ -35,6 +35,8 @@ object Consts {
   final val qfpParseTriples = "datasets.triples.parse"
 
   final val qfpSparkMaster = "execution.spark_master"
+  final val qfpNamenode = "execution.namenode"
+  final val qfpHdfsPrefix = "execution.hdfs_dir_prefix"
 
   final val qfpDictionaryTrait = "plans.physical.dictionary"
   final val qfpTriples_trait = "plans.physical.triples"
