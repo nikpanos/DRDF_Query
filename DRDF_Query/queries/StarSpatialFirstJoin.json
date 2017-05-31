@@ -48,7 +48,7 @@
     }
   },
   "execution": {
-    "spark_master": "local[*]",
+    "spark_master": "local[1]",
     "namenode": "hdfs://dnode1:8020",
     "hdfs_dir_prefix": "/user/pnikitopoulos/"
   }

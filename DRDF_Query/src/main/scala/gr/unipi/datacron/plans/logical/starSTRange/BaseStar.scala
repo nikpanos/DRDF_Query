@@ -1,19 +1,18 @@
 package gr.unipi.datacron.plans.logical.starSTRange
 
-import com.typesafe.config.Config
+
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.SpatioTemporalRange
-import gr.unipi.datacron.encoding.SimpleEncoder
+import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import org.apache.spark.sql.DataFrame
 
 import scala.util.Try
 
-abstract private[starSTRange] class BaseStar(config: Config) extends BaseLogicalPlan(config) {
+abstract private[starSTRange] class BaseStar() extends BaseLogicalPlan() {
 
-  private[starSTRange] val qPred: Option[String] = Try(config.getString(qfpTripleP)).toOption
-  private[starSTRange] val qObj: Option[String] = Try(config.getString(qfpTripleO)).toOption
+  private[starSTRange] val qPred: Option[String] = Try(AppConfig.getString(qfpTripleP)).toOption
+  private[starSTRange] val qObj: Option[String] = Try(AppConfig.getString(qfpTripleO)).toOption
 
   private def checkAndReturn(x: Option[Long], y: String): Option[Long] = {
     if (x.isEmpty) {

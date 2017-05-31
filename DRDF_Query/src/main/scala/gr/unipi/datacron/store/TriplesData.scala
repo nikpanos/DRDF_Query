@@ -1,21 +1,20 @@
 package gr.unipi.datacron.store
 
-import com.typesafe.config.Config
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.Consts
+import gr.unipi.datacron.common._
 import org.apache.spark.sql.DataFrame
 
-private[store] class TriplesData(config: Config) {
+private[store] class TriplesData() {
   import DataStore.spark.implicits._
 
-  val triplesPath: String = if (config.getString(qfpSparkMaster).equals("yarn")) {
-    config.getString(qfpNamenode) + config.getString(qfpHdfsPrefix) + config.getString(qfpTriplesPath)
+  val triplesPath: String = if (AppConfig.getString(qfpSparkMaster).equals("yarn")) {
+    AppConfig.getString(qfpNamenode) + AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpTriplesPath)
   }
   else {
-    config.getString(qfpTriplesPath)
+    AppConfig.getString(qfpTriplesPath)
   }
   
-  val data: DataFrame = config.getString(qfpParseTriples) match {
+  val data: DataFrame = (AppConfig.getString(qfpParseTriples) match {
     case Consts.parseString => DataStore.spark.read.text(triplesPath).toDF(tripleSpoStrField)
     case Consts.parseTripleLong => DataStore.spark.read.text(triplesPath).map(s => {
       val line = s.getAs[String](0)
@@ -28,7 +27,7 @@ private[store] class TriplesData(config: Config) {
       (sub, pred, obj)
     }).toDF(tripleSubLongField, triplePredLongField, tripleObjLongField)
     case _ => throw new Exception("Triples parsing setting not found")
-  }
+  }).cache
 
-  println("Triples dataset: " + config.getString(qfpTriplesPath))
+  println("Triples dataset: " + AppConfig.getString(qfpTriplesPath))
 }

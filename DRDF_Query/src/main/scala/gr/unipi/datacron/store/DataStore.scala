@@ -1,6 +1,5 @@
 package gr.unipi.datacron.store
 
-import com.typesafe.config.Config
 import gr.unipi.datacron.common._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
@@ -10,22 +9,22 @@ object DataStore {
   Logger.getLogger("org").setLevel(Level.OFF)
   Logger.getLogger("akka").setLevel(Level.OFF)
 
-  private var config: Config = _
-  
-  def init(_config: Config): Unit = {
-    config = _config
+  println("Initializing spark session")
+  val spark: SparkSession = SparkSession.builder
+    .master(AppConfig.getString(Consts.qfpSparkMaster))
+    .appName(AppConfig.getString(Consts.qfpQueryName))
+    .getOrCreate()
+
+  val sc: SparkContext = spark.sparkContext
+
+  def init(): Unit = {
+    //do nothing here
+    //just a method to initialize the other variables
   }
   
-  lazy val spatialGrid: SpatialGrid = new SpatialGrid(config)
-  lazy val temporalGrid: TemporalGrid = new TemporalGrid(config)
+  lazy val spatialGrid: SpatialGrid = new SpatialGrid()
+  lazy val temporalGrid: TemporalGrid = new TemporalGrid()
   
-  lazy val triplesData: DataFrame = new TriplesData(config).data
-  lazy val dictionaryData: DataFrame = new DictionaryData(config).data
-  
-  lazy val spark: SparkSession = SparkSession.builder
-      .master(config.getString(Consts.qfpSparkMaster))
-      .appName(config.getString(Consts.qfpQueryName))
-      .getOrCreate()
-
-  lazy val sc: SparkContext = spark.sparkContext
+  lazy val triplesData: DataFrame = new TriplesData().data
+  lazy val dictionaryData: DataFrame = new DictionaryData().data
 }

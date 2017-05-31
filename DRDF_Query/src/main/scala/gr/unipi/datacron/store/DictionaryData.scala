@@ -1,22 +1,20 @@
 package gr.unipi.datacron.store
 
-import com.typesafe.config.Config
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.Consts
-import gr.unipi.datacron.store.DataStore.config
+import gr.unipi.datacron.common._
 import org.apache.spark.sql.DataFrame
 
-class DictionaryData(config: Config) {
+class DictionaryData() {
   import DataStore.spark.implicits._
 
-  val dicPath: String = if (config.getString(qfpSparkMaster).equals("yarn")) {
-    config.getString(qfpNamenode) + config.getString(qfpHdfsPrefix) + config.getString(qfpDicPath)
+  val dicPath: String = if (AppConfig.getString(qfpSparkMaster).equals("yarn")) {
+    AppConfig.getString(qfpNamenode) + AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpDicPath)
   }
   else {
-    config.getString(qfpDicPath)
+    AppConfig.getString(qfpDicPath)
   }
 
-  val data: DataFrame = config.getString(qfpParseDictionary) match {
+  val data: DataFrame = (AppConfig.getString(qfpParseDictionary) match {
     case Consts.parseString => DataStore.spark.read.text(dicPath).toDF(dicLineStrField)
     case Consts.parseLongString => DataStore.spark.read.text(dicPath).map(s => {
         val line = s.getAs[String](0)
@@ -27,7 +25,7 @@ class DictionaryData(config: Config) {
         (key, value)
       }).toDF(dicKeyLongField, dicValueStrField)
     case _ => throw new Exception("Dictionary parsing setting not found")
-  }
+  }).cache
 
-  println("Dictionary dataset: " + config.getString(qfpDicPath))
+  println("Dictionary dataset: " + AppConfig.getString(qfpDicPath))
 }

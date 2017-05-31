@@ -1,7 +1,9 @@
 package gr.unipi.datacron.queries
 
-import com.typesafe.config.Config
+import gr.unipi.datacron.store.DataStore
 
-abstract class BaseQuery(config: Config) {
+abstract class BaseQuery() {
+  DataStore.init()
+
   def execute()
 }

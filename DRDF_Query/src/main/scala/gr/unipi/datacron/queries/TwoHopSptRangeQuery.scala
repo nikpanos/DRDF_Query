@@ -1,13 +1,12 @@
 package gr.unipi.datacron.queries
 
-import com.typesafe.config.Config
-import gr.unipi.datacron.common.Consts
+import gr.unipi.datacron.common.{AppConfig, Consts}
 import gr.unipi.datacron.plans.logical.joinSTRange.JoinSpatialFirst
 
-case class TwoHopSptRangeQuery(config: Config) extends BaseQuery(config) {
+case class TwoHopSptRangeQuery() extends BaseQuery() {
   override def execute(): Unit = {
-    val plan = config.getStringList(Consts.qfpLogicalPlans).get(0) match {
-      case Consts.spatialFirstJoinSptRangeLPlan => Some(JoinSpatialFirst(config))
+    val plan = AppConfig.getStringList(Consts.qfpLogicalPlans).get(0) match {
+      case Consts.spatialFirstJoinSptRangeLPlan => Some(JoinSpatialFirst())
       case _ => None
     }
 

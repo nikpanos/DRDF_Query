@@ -1,16 +1,15 @@
 package gr.unipi.datacron.store
 
-import com.typesafe.config.Config
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.grid.EquiGrid
 
 import collection.mutable.HashMap
 import scala.collection.mutable
 
-class SpatialGrid(config: Config) {
-  val spatialGrid = new EquiGrid(config.getInt(Consts.qfpSpatialBits),
-    Array(config.getDouble(Consts.qfpUniverseLatLower), config.getDouble(Consts.qfpUniverseLonLower)),
-    Array(config.getDouble(Consts.qfpUniverseLatUpper), config.getDouble(Consts.qfpUniverseLonUpper)))
+class SpatialGrid() {
+  val spatialGrid = new EquiGrid(AppConfig.getInt(Consts.qfpSpatialBits),
+    Array(AppConfig.getDouble(Consts.qfpUniverseLatLower), AppConfig.getDouble(Consts.qfpUniverseLonLower)),
+    Array(AppConfig.getDouble(Consts.qfpUniverseLatUpper), AppConfig.getDouble(Consts.qfpUniverseLonUpper)))
   
   def getSpatialIds(c: SpatioTemporalRange): mutable.HashMap[Long, Boolean] = {
     val lo = (java.lang.Double.valueOf(c.low.latitude), java.lang.Double.valueOf(c.low.longitude))

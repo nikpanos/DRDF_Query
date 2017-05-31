@@ -1,7 +1,6 @@
 package gr.unipi.datacron.plans.physical
 
-import com.typesafe.config.Config
-import gr.unipi.datacron.common.{Consts, SpatioTemporalRange}
+import gr.unipi.datacron.common.{Consts, SpatioTemporalRange, AppConfig}
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.encoding.SimpleEncoder
 import gr.unipi.datacron.plans.physical.dictionary._
@@ -11,25 +10,20 @@ import gr.unipi.datacron.plans.physical.triples._
 import org.apache.spark.sql.DataFrame
 
 object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples{
-  private var config: Config = _
 
-  def init(_config: Config): Unit = {
-    config = _config
-  }
-
-  private def pickTriplesPlanBasedOnRules: TTriples = config.getString(qfpTriples_trait) match {
+  private def pickTriplesPlanBasedOnRules: TTriples = AppConfig.getString(qfpTriples_trait) match {
       case Consts.tSTriples => STriples()
       case Consts.tLLLTriples => LLLTriples()
       case _ => throw new Exception("Triples trait not found")
     }
 
-  private def pickJoinTriplesPlanBasedOnRules: TJoinTriples = config.getString(qfpJoinTriples_trait) match {
+  private def pickJoinTriplesPlanBasedOnRules: TJoinTriples = AppConfig.getString(qfpJoinTriples_trait) match {
       case Consts.tMBJoinSTriples => MBJoinSTriples()
       case Consts.tMBJoinLLLTriples => MBJoinLLLTriples()
       case _ => throw new Exception("JoinTriples trait not found")
     }
 
-  private def pickDictionaryPlanBasedOnRules: TDictionary = config.getString(qfpDictionaryTrait) match {
+  private def pickDictionaryPlanBasedOnRules: TDictionary = AppConfig.getString(qfpDictionaryTrait) match {
       case Consts.tLSDictionary => LSDictionary()
       case Consts.tSDictionary => SDictionary()
       case _ => throw new Exception("Dictionary trait not found")

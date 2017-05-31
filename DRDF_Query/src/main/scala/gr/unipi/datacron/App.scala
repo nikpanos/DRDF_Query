@@ -1,7 +1,5 @@
 package gr.unipi.datacron
 
-import com.typesafe.config.ConfigFactory
-import java.io.File
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.queries._
 
@@ -11,12 +9,12 @@ object App {
     println("Expected argument: <path_to_query_file>.")
   }
   
-  def processQueryFile(queryFile: File): Unit = {
-    val config = ConfigFactory.parseFile(queryFile)
-    
-    val query = config.getString(Consts.qfpQueryType) match {
-      case Consts.starSptRangeQuery => Some(StarSptRangeQuery(config))
-      case Consts.twoHopSptRangeQuery => Some(TwoHopSptRangeQuery(config))
+  def processQueryFile(queryFile: String): Unit = {
+    AppConfig.init(queryFile)
+
+    val query = AppConfig.getString(Consts.qfpQueryType) match {
+      case Consts.starSptRangeQuery => Some(StarSptRangeQuery())
+      case Consts.twoHopSptRangeQuery => Some(TwoHopSptRangeQuery())
       case _ => None
     }
 
@@ -31,7 +29,7 @@ object App {
       System.exit(-1)
     }
     
-    processQueryFile(new File(args(0)))
+    processQueryFile(args(0))
   }
 
 }
