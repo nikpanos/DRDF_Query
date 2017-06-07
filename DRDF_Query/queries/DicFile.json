@@ -1,0 +1,5 @@
+{
+  path = "input/star/dictionarySimple32_8_4.txt"
+  parse = "LS"
+  type = "file"
+}

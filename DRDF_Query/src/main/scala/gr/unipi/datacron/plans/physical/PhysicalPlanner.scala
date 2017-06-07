@@ -26,6 +26,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples{
   private def pickDictionaryPlanBasedOnRules: TDictionary = AppConfig.getString(qfpDictionaryTrait) match {
       case Consts.tLSDictionary => LSDictionary()
       case Consts.tSDictionary => SDictionary()
+      case Consts.tRedisDictionary => RedisDictionary()
       case _ => throw new Exception("Dictionary trait not found")
     }
 
@@ -53,20 +54,20 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples{
     pickTriplesPlanBasedOnRules.prepareForFinalTranslation(df)
   }
 
-  override def pointSearchValue(df: DataFrame, key: Long): Option[String] = {
-    pickDictionaryPlanBasedOnRules.pointSearchValue(df, key)
+  override def pointSearchValue(key: Long): Option[String] = {
+    pickDictionaryPlanBasedOnRules.pointSearchValue(key)
   }
 
-  override def pointSearchKey(df: DataFrame, value: String): Option[Long] = {
-    pickDictionaryPlanBasedOnRules.pointSearchKey(df, value)
+  override def pointSearchKey(value: String): Option[Long] = {
+    pickDictionaryPlanBasedOnRules.pointSearchKey(value)
   }
 
-  override def translateColumn(dfTriples: DataFrame, dfDictionary: DataFrame, columnName: String): DataFrame = {
-    pickDictionaryPlanBasedOnRules.translateColumn(dfTriples, dfDictionary, columnName)
+  override def translateColumn(dfTriples: DataFrame, columnName: String): DataFrame = {
+    pickDictionaryPlanBasedOnRules.translateColumn(dfTriples, columnName)
   }
 
-  override def translateColumns(dfTriples: DataFrame, dfDictionary: DataFrame, columnNames: Array[String]): DataFrame = {
-    pickDictionaryPlanBasedOnRules.translateColumns(dfTriples, dfDictionary, columnNames)
+  override def translateColumns(dfTriples: DataFrame, columnNames: Array[String]): DataFrame = {
+    pickDictionaryPlanBasedOnRules.translateColumns(dfTriples, columnNames)
   }
 
   override def joinNewObjects(df: DataFrame, dfTriples: DataFrame, subjectColumn: String,  predicates: Map[Long, String]): DataFrame = {

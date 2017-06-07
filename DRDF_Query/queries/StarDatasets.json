@@ -1,0 +1,10 @@
+{
+  dictionary { include "DicRedis.json" }
+  triples {
+    path = "input/star/triplesSimple32_8_4.txt"
+    parse = "LLL"
+  }
+  intervals {
+    path = "input/star/timeintervalsSimple32_8_4.txt"
+  }
+}

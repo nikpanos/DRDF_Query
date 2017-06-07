@@ -7,8 +7,8 @@ import org.apache.spark.sql.DataFrame
 class DictionaryData() {
   import DataStore.spark.implicits._
 
-  val dicPath: String = if (AppConfig.getString(qfpSparkMaster).equals("yarn")) {
-    AppConfig.getString(qfpNamenode) + AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpDicPath)
+  val dicPath: String = if (AppConfig.yarnMode) {
+    AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpDicPath)
   }
   else {
     AppConfig.getString(qfpDicPath)
@@ -27,5 +27,5 @@ class DictionaryData() {
     case _ => throw new Exception("Dictionary parsing setting not found")
   }).cache
 
-  println("Dictionary dataset: " + AppConfig.getString(qfpDicPath))
+  println("Dictionary dataset: " + dicPath)
 }

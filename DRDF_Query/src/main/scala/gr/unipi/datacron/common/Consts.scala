@@ -2,18 +2,18 @@ package gr.unipi.datacron.common
 
 object Consts {
   //Query file params
-  final val qfpQueryName = "name"
+  final val qfpQueryName = "query.name"
   final val qfpQueryType = "query.type"
 
-  final val qfpLatLower = "query.spatio_temporal_predicate.lat_lower"
-  final val qfpLonLower = "query.spatio_temporal_predicate.lon_lower"
-  final val qfpLatUpper = "query.spatio_temporal_predicate.lat_upper"
-  final val qfpLonUpper = "query.spatio_temporal_predicate.lon_upper"
-  final val qfpTimeLower = "query.spatio_temporal_predicate.time_lower"
-  final val qfpTimeUpper = "query.spatio_temporal_predicate.time_upper"
+  final val qfpLatLower = "query.predicates.spatio_temporal.lat_lower"
+  final val qfpLonLower = "query.predicates.spatio_temporal.lon_lower"
+  final val qfpLatUpper = "query.predicates.spatio_temporal.lat_upper"
+  final val qfpLonUpper = "query.predicates.spatio_temporal.lon_upper"
+  final val qfpTimeLower = "query.predicates.spatio_temporal.time_lower"
+  final val qfpTimeUpper = "query.predicates.spatio_temporal.time_upper"
 
-  final val qfpTripleP = "query.rdf_predicate.condition.p"
-  final val qfpTripleO = "query.rdf_predicate.condition.o"
+  final val qfpTripleP = "query.predicates.rdf.condition.p"
+  final val qfpTripleO = "query.predicates.rdf.condition.o"
 
   final val qfpJoinKey = "query.rdf_predicate.join.key"
   final val qfpJoinTripleP = "query.rdf_predicate.join.condition.p"
@@ -31,6 +31,16 @@ object Consts {
   final val qfpTriplesPath = "datasets.triples.path"
   final val qfpIntrvlsPath = "datasets.intervals.path"
 
+  final val qfpDicType = "datasets.dictionary.type"
+  final val qfpDicTypeFile = "file"
+  final val qfpDicTypeRedis = "redis"
+
+  final val qfpDicRedisIdToUriHosts = "datasets.dictionary.idToUri.hosts"
+  final val qfpDicRedisUriToIdHosts = "datasets.dictionary.uriToId.hosts"
+
+  final val qfpDicRedisAddress = "address"
+  final val qfpDicRedisPort = "port"
+
   final val qfpParseDictionary = "datasets.dictionary.parse"
   final val qfpParseTriples = "datasets.triples.parse"
 
@@ -38,11 +48,11 @@ object Consts {
   final val qfpNamenode = "execution.namenode"
   final val qfpHdfsPrefix = "execution.hdfs_dir_prefix"
 
-  final val qfpDictionaryTrait = "plans.physical.dictionary"
-  final val qfpTriples_trait = "plans.physical.triples"
-  final val qfpJoinTriples_trait = "plans.physical.joinTriples"
+  final val qfpDictionaryTrait = "query.plans.physical.dictionary"
+  final val qfpTriples_trait = "query.plans.physical.triples"
+  final val qfpJoinTriples_trait = "query.plans.physical.joinTriples"
 
-  final val qfpLogicalPlans = "plans.logical"
+  final val qfpLogicalPlans = "query.plans.logical"
 
   //Query types
   final val starSptRangeQuery = "StarSptRange"
@@ -59,6 +69,7 @@ object Consts {
   //TDictionary
   final val tLSDictionary = "LSDictionary"
   final val tSDictionary = "SDictionary"
+  final val tRedisDictionary = "RedisDictionary"
 
   //TTriples
   final val tSTriples = "STriples"

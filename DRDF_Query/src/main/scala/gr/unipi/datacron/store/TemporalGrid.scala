@@ -10,20 +10,18 @@ import scala.io.Source
 class TemporalGrid() {
   import DataStore.spark.implicits._
 
-  private val timeIntervalsStr: Array[String] = if (AppConfig.getString(qfpSparkMaster).equals("yarn")) {
-    //val hdfs = FileSystem.get(new URI(config.getString(qfpNamenode)), new Configuration())
-    //val path = new Path(config.getString(Consts.qfpHdfsPrefix) + config.getString(Consts.qfpIntrvlsPath))
-    //val stream = new BufferedReader(new InputStreamReader(hdfs.open(path)))
-    //val input = Stream.continually(stream.readLine)
-    //Stream.continually(stream.readLine).toIterator
-
-    DataStore.spark.read.text(AppConfig.getString(Consts.qfpHdfsPrefix) + AppConfig.getString(Consts.qfpIntrvlsPath)).map(_.getAs[String](0)).collect()
+  private val intervalsPath: String = if (AppConfig.yarnMode) {
+    AppConfig.getString(Consts.qfpHdfsPrefix) + AppConfig.getString(Consts.qfpIntrvlsPath)
   }
   else {
-    Source.fromFile(AppConfig.getString(Consts.qfpIntrvlsPath)).getLines().toArray
+    AppConfig.getString(Consts.qfpIntrvlsPath)
   }
 
+  private val timeIntervalsStr: Array[String] = DataStore.spark.read.text(intervalsPath).map(_.getAs[String](0)).collect()
+
   val timeIntervals: Array[Long] = timeIntervalsStr.map(_.toLong)
+
+  println("Time intervals dataset: " + intervalsPath)
   
   def getIntervalId(x: Long): Int = {
     val result = util.Arrays.binarySearch(timeIntervals, x)

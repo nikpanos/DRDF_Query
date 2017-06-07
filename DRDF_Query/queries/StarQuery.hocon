@@ -1,0 +1,16 @@
+universe { include "StarUniverse.json" }
+datasets { include "StarDatasets.json" }
+query {
+  name = "StarSpatialFirstJoin"
+  type = "StarSptRange"
+  predicates: { include "StarPredicates.json"}
+  plans {
+    physical {
+      dictionary = "RedisDictionary"
+      triples = "LLLTriples"
+      joinTriples = "MBJoinLLLTriples"
+    }
+    logical = ["SpatialFirstJoinStStarSptRange"]
+  }
+}
+execution { include "Execution.json" }

@@ -9,7 +9,8 @@ import org.apache.spark.sql.DataFrame
 case class SDictionary() extends BasePhysicalPlan with TDictionary {
   import DataStore.spark.implicits._
   
-  def pointSearchValue(df: DataFrame, key: Long): Option[String] = {
+  def pointSearchValue(key: Long): Option[String] = {
+    val df: DataFrame = DataStore.dictionaryData
     val searchStr = "^" + key + dicFieldsSeparator + ".*"
     try {
       val resultLine = df.filter(df(dicLineStrField).rlike(searchStr)).first().getAs[String](dicLineStrField)
@@ -20,7 +21,8 @@ case class SDictionary() extends BasePhysicalPlan with TDictionary {
     }
   }
   
-  def pointSearchKey(df: DataFrame, value: String): Option[Long] = {
+  def pointSearchKey(value: String): Option[Long] = {
+    val df: DataFrame = DataStore.dictionaryData
     val searchStr = "^-?\\d+" + dicFieldsSeparator + value
     try {
       val resultLine = df.filter(df(dicLineStrField).rlike(searchStr)).first().getAs[String](dicLineStrField)
@@ -31,12 +33,12 @@ case class SDictionary() extends BasePhysicalPlan with TDictionary {
     }
   }
 
-  override def translateColumn(dfTriples: DataFrame, dfDictionary: DataFrame, columnName: String): DataFrame = {
+  override def translateColumn(dfTriples: DataFrame, columnName: String): DataFrame = {
     throw new NotImplementedError()
     //TODO: add implementation
   }
 
-  override def translateColumns(dfTriples: DataFrame, dfDictionary: DataFrame, columnNames: Array[String]): DataFrame = {
+  override def translateColumns(dfTriples: DataFrame, columnNames: Array[String]): DataFrame = {
     throw new NotImplementedError()
     //TODO: add implementation
   }

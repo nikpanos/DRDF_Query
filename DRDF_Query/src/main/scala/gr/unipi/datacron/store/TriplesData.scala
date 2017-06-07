@@ -7,8 +7,8 @@ import org.apache.spark.sql.DataFrame
 private[store] class TriplesData() {
   import DataStore.spark.implicits._
 
-  val triplesPath: String = if (AppConfig.getString(qfpSparkMaster).equals("yarn")) {
-    AppConfig.getString(qfpNamenode) + AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpTriplesPath)
+  val triplesPath: String = if (AppConfig.yarnMode) {
+    AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpTriplesPath)
   }
   else {
     AppConfig.getString(qfpTriplesPath)
@@ -29,5 +29,5 @@ private[store] class TriplesData() {
     case _ => throw new Exception("Triples parsing setting not found")
   }).cache
 
-  println("Triples dataset: " + AppConfig.getString(qfpTriplesPath))
+  println("Triples dataset: " + triplesPath)
 }

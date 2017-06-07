@@ -21,10 +21,19 @@ object DataStore {
     //do nothing here
     //just a method to initialize the other variables
   }
-  
+
   lazy val spatialGrid: SpatialGrid = new SpatialGrid()
   lazy val temporalGrid: TemporalGrid = new TemporalGrid()
-  
+
   lazy val triplesData: DataFrame = new TriplesData().data
-  lazy val dictionaryData: DataFrame = new DictionaryData().data
+
+  lazy val dictionaryData: DataFrame = if (AppConfig.getString(Consts.qfpDicType).equals(Consts.qfpDicTypeFile)) {
+     new DictionaryData().data
+  }
+  else null
+
+  lazy val dictionaryRedis: DictionaryRedis =  if (AppConfig.getString(Consts.qfpDicType).equals(Consts.qfpDicTypeRedis)) {
+    new DictionaryRedis()
+  }
+  else null
 }

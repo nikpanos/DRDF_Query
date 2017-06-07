@@ -1,8 +1,10 @@
 package gr.unipi.datacron.common
 
 import java.io.File
+import java.util
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ConfigFactory, ConfigObject}
+import gr.unipi.datacron.common.Consts.qfpSparkMaster
 
 object AppConfig {
   private var queryFile: File = _
@@ -21,4 +23,8 @@ object AppConfig {
   def getLong(s: String): Long = config.getLong(s)
 
   def getStringList(s: String): java.util.List[String] = config.getStringList(s)
+
+  def getObjectList(s: String): util.List[_ <: ConfigObject] = config.getObjectList(s)
+
+  def yarnMode: Boolean = getString(qfpSparkMaster).equals("yarn")
 }

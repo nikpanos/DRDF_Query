@@ -3,11 +3,11 @@
   "universe": {
     "nTotalBits": 32,
     "nSpatialBits": 8,
-    "nIDsBits": 6,
-    "lat_lower": 30,
-    "lon_lower": -12,
-    "lat_upper": 52,
-    "lon_upper": 36.9915533333
+    "nIDsBits": 4,
+    "lat_lower": 39.82,
+    "lon_lower": 12.21,
+    "lat_upper": 45.82,
+    "lon_upper": 19.6
   },
   "datasets": {
     "dictionary": {

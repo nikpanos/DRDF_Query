@@ -1,0 +1,13 @@
+{
+  type = "redis"
+  idToUri {
+    hosts = [
+      { address = "localhost", port = 6379 }
+    ]
+  }
+  uriToId {
+    hosts = [
+      { address = "localhost", port = 6380 }
+    ]
+  }
+}

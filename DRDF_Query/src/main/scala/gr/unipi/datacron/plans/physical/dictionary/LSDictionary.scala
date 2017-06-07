@@ -12,19 +12,19 @@ import scala.util.Try
 case class LSDictionary() extends BasePhysicalPlan with TDictionary {
   import DataStore.spark.implicits._
   
-  def pointSearchValue(df: DataFrame, key: Long): Option[String] =
-    Try(df.filter(col(dicKeyLongField) === key).first().getAs[String](dicValueStrField)).toOption
+  def pointSearchValue(key: Long): Option[String] =
+    Try(DataStore.dictionaryData.filter(col(dicKeyLongField) === key).first().getAs[String](dicValueStrField)).toOption
   
-  def pointSearchKey(df: DataFrame, value: String): Option[Long] =
-    Try(df.filter(col(dicValueStrField) === value).first().getAs[Long](dicKeyLongField)).toOption
+  def pointSearchKey(value: String): Option[Long] =
+    Try(DataStore.dictionaryData.filter(col(dicValueStrField) === value).first().getAs[Long](dicKeyLongField)).toOption
 
-  def translateColumn(dfTriples: DataFrame, dfDictionary: DataFrame, columnName: String): DataFrame = {
+  def translateColumn(dfTriples: DataFrame, columnName: String): DataFrame = {
     val collected = dfTriples.select(columnName).as[Long].collect.toSet
     val bCollected = DataStore.sc.broadcast(collected)
 
     val contains = udf((key: Long) => bCollected.value.contains(key))
 
-    val dicMap = dfDictionary.filter(contains(col(dicKeyLongField))).as[(Long, String)].collect.toMap
+    val dicMap = DataStore.dictionaryData.filter(contains(col(dicKeyLongField))).as[(Long, String)].collect.toMap
     val bDicMap = DataStore.sc.broadcast(dicMap)
 
     val translate = udf((field: Long) => bDicMap.value(field))
@@ -32,7 +32,7 @@ case class LSDictionary() extends BasePhysicalPlan with TDictionary {
     dfTriples.withColumn(columnName + tripleTranslateSuffix, translate(col(columnName)))
   }
 
-  def translateColumns(dfTriples: DataFrame, dfDictionary: DataFrame, columnNames: Array[String]): DataFrame = {
+  def translateColumns(dfTriples: DataFrame, columnNames: Array[String]): DataFrame = {
     val bColumns = DataStore.sc.broadcast(columnNames)
 
     val collected = dfTriples.rdd.flatMap(row => {
@@ -42,7 +42,7 @@ case class LSDictionary() extends BasePhysicalPlan with TDictionary {
 
     val contains = udf((key: Long) => bCollected.value.contains(key))
 
-    val dicMap = dfDictionary.filter(contains(col(dicKeyLongField))).as[(Long, String)].collect.toMap
+    val dicMap = DataStore.dictionaryData.filter(contains(col(dicKeyLongField))).as[(Long, String)].collect.toMap
     val bDicMap = DataStore.sc.broadcast(dicMap)
 
     val translate = udf((field: Long) => bDicMap.value(field))

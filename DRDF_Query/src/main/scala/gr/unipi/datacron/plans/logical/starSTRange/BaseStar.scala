@@ -23,7 +23,7 @@ abstract private[starSTRange] class BaseStar() extends BaseLogicalPlan() {
 
   private[starSTRange] def translateKey(dfDictionary: DataFrame, pred: Option[String]): Option[Long] = {
     if (pred.isDefined) {
-      checkAndReturn(PhysicalPlanner.pointSearchKey(dfDictionary, pred.get), pred.get)
+      checkAndReturn(PhysicalPlanner.pointSearchKey(pred.get), pred.get)
     }
     else {
       None
