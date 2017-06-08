@@ -11,7 +11,7 @@ class TemporalGrid() {
   import DataStore.spark.implicits._
 
   private val intervalsPath: String = if (AppConfig.yarnMode) {
-    AppConfig.getString(Consts.qfpHdfsPrefix) + AppConfig.getString(Consts.qfpIntrvlsPath)
+    AppConfig.getString(qfpNamenode) + AppConfig.getString(Consts.qfpHdfsPrefix) + AppConfig.getString(Consts.qfpIntrvlsPath)
   }
   else {
     AppConfig.getString(Consts.qfpIntrvlsPath)

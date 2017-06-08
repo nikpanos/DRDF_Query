@@ -8,7 +8,7 @@ class DictionaryData() {
   import DataStore.spark.implicits._
 
   val dicPath: String = if (AppConfig.yarnMode) {
-    AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpDicPath)
+    AppConfig.getString(qfpNamenode) + AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpDicPath)
   }
   else {
     AppConfig.getString(qfpDicPath)

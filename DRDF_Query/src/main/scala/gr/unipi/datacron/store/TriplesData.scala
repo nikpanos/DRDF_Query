@@ -8,7 +8,7 @@ private[store] class TriplesData() {
   import DataStore.spark.implicits._
 
   val triplesPath: String = if (AppConfig.yarnMode) {
-    AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpTriplesPath)
+    AppConfig.getString(qfpNamenode) + AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpTriplesPath)
   }
   else {
     AppConfig.getString(qfpTriplesPath)

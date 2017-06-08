@@ -47,6 +47,7 @@ object Consts {
   final val qfpSparkMaster = "execution.spark_master"
   final val qfpNamenode = "execution.namenode"
   final val qfpHdfsPrefix = "execution.hdfs_dir_prefix"
+  final val qfpVerboseLogging = "execution.verbose_logging"
 
   final val qfpDictionaryTrait = "query.plans.physical.dictionary"
   final val qfpTriples_trait = "query.plans.physical.triples"

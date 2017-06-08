@@ -1,18 +1,19 @@
 package gr.unipi.datacron.store
 
-import gr.unipi.datacron.common.{AppConfig, Consts}
+import com.typesafe.config.ConfigObject
+import gr.unipi.datacron.common.Consts._
 import redis.clients.jedis.Jedis
 
-class DictionaryRedis {
-  private val idToUriHosts = AppConfig.getObjectList(Consts.qfpDicRedisIdToUriHosts)
-  private val uriToIdHosts = AppConfig.getObjectList(Consts.qfpDicRedisUriToIdHosts)
+class DictionaryRedis() {
+  //private[store] val  = AppConfig.getObjectList(Consts.qfpDicRedisIdToUriHosts)
+  //private[store] val  = AppConfig.getObjectList(Consts.qfpDicRedisUriToIdHosts)
 
-  private var port = idToUriHosts.get(0).get(Consts.qfpDicRedisPort).unwrapped().asInstanceOf[Int]
-  private var addr = idToUriHosts.get(0).get(Consts.qfpDicRedisAddress).unwrapped().asInstanceOf[String]
+  private var port = 6379  //idToUriHosts.get(0).get(qfpDicRedisPort).unwrapped().asInstanceOf[Int]
+  private var addr = "localhost"  //uriToIdHosts.get(0).get(qfpDicRedisAddress).unwrapped().asInstanceOf[String]
   private val idToUri: Jedis = new Jedis(addr, port)
 
-  port = uriToIdHosts.get(0).get(Consts.qfpDicRedisPort).unwrapped().asInstanceOf[Int]
-  addr = uriToIdHosts.get(0).get(Consts.qfpDicRedisAddress).unwrapped().asInstanceOf[String]
+  port = 6380 //uriToIdHosts.get(0).get(qfpDicRedisPort).unwrapped().asInstanceOf[Int]
+  addr = "localhost" //uriToIdHosts.get(0).get(qfpDicRedisAddress).unwrapped().asInstanceOf[String]
   private val uriToId: Jedis = new Jedis(addr, port)
 
   def getDecodedValue(key: Long): Option[String] = Option(idToUri.get(key.toString))

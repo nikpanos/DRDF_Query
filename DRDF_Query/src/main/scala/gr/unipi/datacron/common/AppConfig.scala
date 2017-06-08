@@ -3,7 +3,7 @@ package gr.unipi.datacron.common
 import java.io.File
 import java.util
 
-import com.typesafe.config.{ConfigFactory, ConfigObject}
+import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigRenderOptions}
 import gr.unipi.datacron.common.Consts.qfpSparkMaster
 
 object AppConfig {
@@ -25,6 +25,8 @@ object AppConfig {
   def getStringList(s: String): java.util.List[String] = config.getStringList(s)
 
   def getObjectList(s: String): util.List[_ <: ConfigObject] = config.getObjectList(s)
+
+  def getBoolean(s: String): Boolean = config.getBoolean(s)
 
   def yarnMode: Boolean = getString(qfpSparkMaster).equals("yarn")
 }

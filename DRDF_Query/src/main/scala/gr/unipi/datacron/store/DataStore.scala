@@ -1,39 +1,56 @@
 package gr.unipi.datacron.store
 
-import gr.unipi.datacron.common._
+import com.typesafe.config.ConfigObject
+import gr.unipi.datacron.common.AppConfig
+import gr.unipi.datacron.common.Consts._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
+import org.apache.spark.broadcast.Broadcast
 
 object DataStore {
-  Logger.getLogger("org").setLevel(Level.OFF)
-  Logger.getLogger("akka").setLevel(Level.OFF)
+  //IMPORTANT: all DataStore fields should be lazy evaluated because DataStore is being initialized on each node
+  //Initialization in each node is important for Redis dictionary to work
 
-  println("Initializing spark session")
-  val spark: SparkSession = SparkSession.builder
-    .master(AppConfig.getString(Consts.qfpSparkMaster))
-    .appName(AppConfig.getString(Consts.qfpQueryName))
+  lazy val spark: SparkSession = SparkSession.builder
+    .master(AppConfig.getString(qfpSparkMaster))
+    .appName(AppConfig.getString(qfpQueryName))
     .getOrCreate()
 
-  val sc: SparkContext = spark.sparkContext
-
-  def init(): Unit = {
-    //do nothing here
-    //just a method to initialize the other variables
-  }
+  lazy val sc: SparkContext = spark.sparkContext
 
   lazy val spatialGrid: SpatialGrid = new SpatialGrid()
   lazy val temporalGrid: TemporalGrid = new TemporalGrid()
 
   lazy val triplesData: DataFrame = new TriplesData().data
 
-  lazy val dictionaryData: DataFrame = if (AppConfig.getString(Consts.qfpDicType).equals(Consts.qfpDicTypeFile)) {
-     new DictionaryData().data
+  lazy val dictionaryData: DataFrame = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeFile)) {
+    new DictionaryData().data
   }
   else null
 
-  lazy val dictionaryRedis: DictionaryRedis =  if (AppConfig.getString(Consts.qfpDicType).equals(Consts.qfpDicTypeRedis)) {
+  lazy val dictionaryRedis: DictionaryRedis =  //if (redisOn.value) {
     new DictionaryRedis()
+  //}
+  //else null
+
+  //var idToUriHosts: Broadcast[java.util.List[_ <: ConfigObject]] = _
+  //var uriToIdHosts: Broadcast[java.util.List[_ <: ConfigObject]] = _
+  //var redisOn: Broadcast[Boolean] = _
+
+  def init(): Unit = {
+    //Force initialization of spark context here in order to omit the initialization overhead
+    if (!AppConfig.getBoolean(qfpVerboseLogging)) {
+      Logger.getLogger("org").setLevel(Level.OFF)
+      Logger.getLogger("akka").setLevel(Level.OFF)
+    }
+    println("Initializing spark session")
+
+    //redisOn = sc.broadcast(AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis))
+    //if (redisOn.value) {
+    //  idToUriHosts = sc.broadcast(AppConfig.getObjectList(qfpDicRedisIdToUriHosts))
+    //  uriToIdHosts = sc.broadcast(AppConfig.getObjectList(qfpDicRedisUriToIdHosts))
+    //}
+    sc.broadcast(1)
   }
-  else null
 }
