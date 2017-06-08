@@ -3,10 +3,10 @@ package gr.unipi.datacron.common
 import java.io.File
 import java.util
 
-import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigRenderOptions}
+import com.typesafe.config.{ConfigFactory, ConfigObject, Config}
 import gr.unipi.datacron.common.Consts.qfpSparkMaster
 
-object AppConfig {
+object AppConfig extends Serializable {
   private var queryFile: File = _
   private lazy val config = ConfigFactory.parseFile(queryFile)
 
@@ -29,4 +29,6 @@ object AppConfig {
   def getBoolean(s: String): Boolean = config.getBoolean(s)
 
   def yarnMode: Boolean = getString(qfpSparkMaster).equals("yarn")
+
+  def getConfig: Config = config
 }

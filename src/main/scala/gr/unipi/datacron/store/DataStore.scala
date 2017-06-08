@@ -1,12 +1,13 @@
 package gr.unipi.datacron.store
 
-import com.typesafe.config.ConfigObject
+import com.typesafe.config.{Config, ConfigObject}
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.sql.expressions.UserDefinedFunction
 
 object DataStore {
   //IMPORTANT: all DataStore fields should be lazy evaluated because DataStore is being initialized on each node
@@ -29,14 +30,16 @@ object DataStore {
   }
   else null
 
-  lazy val dictionaryRedis: DictionaryRedis =  //if (redisOn.value) {
+  var dictionaryRedis: DictionaryRedis = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
     new DictionaryRedis()
-  //}
-  //else null
+  }
+  else null
 
-  //var idToUriHosts: Broadcast[java.util.List[_ <: ConfigObject]] = _
-  //var uriToIdHosts: Broadcast[java.util.List[_ <: ConfigObject]] = _
-  //var redisOn: Broadcast[Boolean] = _
+  private var bConfig: Broadcast[Config] = _
+
+  def doWithConfig(x: (UserDefinedFunction) => DataFrame, y: UserDefinedFunction): DataFrame = {
+    x(y)
+  }
 
   def init(): Unit = {
     //Force initialization of spark context here in order to omit the initialization overhead
@@ -45,12 +48,7 @@ object DataStore {
       Logger.getLogger("akka").setLevel(Level.OFF)
     }
     println("Initializing spark session")
+    bConfig = sc.broadcast(AppConfig.getConfig)
 
-    //redisOn = sc.broadcast(AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis))
-    //if (redisOn.value) {
-    //  idToUriHosts = sc.broadcast(AppConfig.getObjectList(qfpDicRedisIdToUriHosts))
-    //  uriToIdHosts = sc.broadcast(AppConfig.getObjectList(qfpDicRedisUriToIdHosts))
-    //}
-    sc.broadcast(1)
   }
 }

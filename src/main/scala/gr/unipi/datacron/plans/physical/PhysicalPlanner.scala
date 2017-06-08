@@ -26,7 +26,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples{
   private def pickDictionaryPlanBasedOnRules: TDictionary = AppConfig.getString(qfpDictionaryTrait) match {
       case Consts.tLSDictionary => LSDictionary()
       case Consts.tSDictionary => SDictionary()
-      case Consts.tRedisDictionary => RedisDictionary()
+      case Consts.tRedisDictionary => RdsDictionary()
       case _ => throw new Exception("Dictionary trait not found")
     }
 
