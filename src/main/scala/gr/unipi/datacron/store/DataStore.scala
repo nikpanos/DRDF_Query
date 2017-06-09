@@ -7,7 +7,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.expressions.UserDefinedFunction
 
 object DataStore {
   //IMPORTANT: all DataStore fields should be lazy evaluated because DataStore is being initialized on each node
@@ -30,16 +29,12 @@ object DataStore {
   }
   else null
 
+  var bConfig: Broadcast[String] = _
+
   var dictionaryRedis: DictionaryRedis = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
     new DictionaryRedis()
   }
   else null
-
-  private var bConfig: Broadcast[Config] = _
-
-  def doWithConfig(x: (UserDefinedFunction) => DataFrame, y: UserDefinedFunction): DataFrame = {
-    x(y)
-  }
 
   def init(): Unit = {
     //Force initialization of spark context here in order to omit the initialization overhead
@@ -49,6 +44,5 @@ object DataStore {
     }
     println("Initializing spark session")
     bConfig = sc.broadcast(AppConfig.getConfig)
-
   }
 }
