@@ -29,12 +29,12 @@ object DataStore {
   }
   else null
 
-  var bConfig: Broadcast[String] = _
-
-  var dictionaryRedis: DictionaryRedis = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
+  lazy val dictionaryRedis: DictionaryRedis = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
     new DictionaryRedis()
   }
   else null
+
+  var bConfig: Broadcast[String] = _
 
   def init(): Unit = {
     //Force initialization of spark context here in order to omit the initialization overhead
