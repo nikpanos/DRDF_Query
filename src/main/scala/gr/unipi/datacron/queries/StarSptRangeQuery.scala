@@ -4,7 +4,7 @@ import gr.unipi.datacron.common._
 import gr.unipi.datacron.plans.logical.starSTRange._
 
 case class StarSptRangeQuery() extends BaseQuery() {
-  override def execute(): Unit = {
+  private[queries] override def doExecute(): Unit = {
     val plan = AppConfig.getStringList(Consts.qfpLogicalPlans).get(0) match {
       case Consts.spatialFirstStarSptRangeLPlan => Some(StarSpatialFirst())
       case Consts.rdfFirstStarSptRangeLPlan => Some(StarRdfFirst())

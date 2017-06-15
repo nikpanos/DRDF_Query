@@ -5,6 +5,7 @@ import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
+import gr.unipi.datacron.plans.physical.traits.pointSearchKeyParams
 import org.apache.spark.sql.DataFrame
 
 import scala.util.Try
@@ -21,9 +22,9 @@ abstract private[starSTRange] class BaseStar() extends BaseLogicalPlan() {
     x
   }
 
-  private[starSTRange] def translateKey(dfDictionary: DataFrame, pred: Option[String]): Option[Long] = {
+  private[starSTRange] def encodePredicate(dfDictionary: DataFrame, pred: Option[String]): Option[Long] = {
     if (pred.isDefined) {
-      checkAndReturn(PhysicalPlanner.pointSearchKey(pred.get), pred.get)
+      checkAndReturn(PhysicalPlanner.pointSearchKey(pointSearchKeyParams(pred.get, Some("Find encoded predicate: " + pred.get))), pred.get)
     }
     else {
       None

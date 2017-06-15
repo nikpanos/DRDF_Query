@@ -14,10 +14,10 @@ private[store] class TriplesData() {
     AppConfig.getString(qfpTriplesPath)
   }
   
-  val data: DataFrame = (AppConfig.getString(qfpParseTriples) match {
+  val data: DataFrame = Benchmarks.doBenchmark[DataFrame](() => {(AppConfig.getString(qfpParseTriples) match {
     case Consts.parseString => DataStore.spark.read.text(triplesPath).toDF(tripleSpoStrField)
     case Consts.parseTripleLong => DataStore.spark.read.text(triplesPath).map(s => {
-      val line = s.getAs[String](0)
+      val line = s.getString(0)
       val pos = line.indexOf(tripleFieldsSeparator)
       val pos1 = line.lastIndexOf(tripleFieldsSeparator)
       val sub = line.substring(0, pos).toLong
@@ -27,7 +27,9 @@ private[store] class TriplesData() {
       (sub, pred, obj)
     }).toDF(tripleSubLongField, triplePredLongField, tripleObjLongField)
     case _ => throw new Exception("Triples parsing setting not found")
-  }).cache
+  }).cache}, new BaseOperatorParams() {
+    override def operationName: Option[String] = Some("Load triples dataset")
+  })
 
   println("Triples dataset: " + triplesPath)
 }

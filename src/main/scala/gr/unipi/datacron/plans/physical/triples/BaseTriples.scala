@@ -1,10 +1,8 @@
 package gr.unipi.datacron.plans.physical.triples
 
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.Consts
 import gr.unipi.datacron.common.SpatioTemporalRange
-import gr.unipi.datacron.encoding.SimpleEncoder
-import gr.unipi.datacron.plans.physical.traits.TTriples
+import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
@@ -23,17 +21,17 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
   //To be overriden in STriples
   private[triples] def addObjectInfo(df: DataFrame): DataFrame = df
 
-  def filterBySubSpatioTemporalInfo(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder): DataFrame = {
+  def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
 
-    val intervalIds = DataStore.temporalGrid.getIntervalIds(constraints)
-    val spatialIds = DataStore.spatialGrid.getSpatialIds(constraints)
+    val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
+    val spatialIds = DataStore.spatialGrid.getSpatialIds(params.constraints)
 
-    val result = if (df.hasColumn(tripleSubLongField)) df else addSubjectInfo(df)
+    val result = if (params.df.hasColumn(tripleSubLongField)) params.df else addSubjectInfo(params.df)
 
     val getPruneKey = udf((sub: Long) => {
       var key = -1
       if (sub >= 0) {
-        val components = encoder.decodeComponentsFromKey(sub)
+        val components = params.encoder.decodeComponentsFromKey(sub)
 
         if ((components._1 >= intervalIds._1) && (components._1 <= intervalIds._2)) {
           //not pruned by temporal
@@ -58,16 +56,16 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
     result.withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(triplePruneSubKeyField) > -1)
   }
 
-  def filterbySpatioTemporalRange(df: DataFrame, range: SpatioTemporalRange): DataFrame = {
+  def filterbySpatioTemporalRange(params: filterbySpatioTemporalRangeParams): DataFrame = {
 
-    df.filter(x => {
+    params.df.filter(x => {
       var tmpResult = ((x.getAs[Int](triplePruneSubKeyField) >> 0) & 1) != 1
       var sptResult = ((x.getAs[Int](triplePruneSubKeyField) >> 1) & 1) != 1
 
       if (!tmpResult) {
         //refine temporal
         val decodedObject = x.getAs[String](tripleTimeStartField + tripleTranslateSuffix).toLong
-        if ((decodedObject >= range.low.time) && (decodedObject <= range.high.time)) {
+        if ((decodedObject >= params.range.low.time) && (decodedObject <= params.range.high.time)) {
           tmpResult = true
         }
       }
@@ -75,11 +73,11 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
       if (!sptResult) {
         //refine spatial
         val decodedObject = x.getAs[String](tripleMBRField + tripleTranslateSuffix).substring(7)
-        val lonlat = decodedObject.substring(0, decodedObject.length - 1).split(Consts.lonLatSeparator)
+        val lonlat = decodedObject.substring(0, decodedObject.length - 1).split(lonLatSeparator)
         val lon = lonlat(0).toDouble
         val lat = lonlat(1).toDouble
-        if ((lon >= range.low.longitude) && (lon <= range.high.longitude) &&
-          (lat >= range.low.latitude) && (lat <= range.high.latitude)) {
+        if ((lon >= params.range.low.longitude) && (lon <= params.range.high.longitude) &&
+          (lat >= params.range.low.latitude) && (lat <= params.range.high.latitude)) {
           sptResult = true
         }
 
@@ -89,21 +87,21 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
     })
   }
 
-  def prepareForFinalTranslation(df: DataFrame): DataFrame = {
-    var result = df
-    if (!df.hasColumn(tripleSubLongField)) {
+  def prepareForFinalTranslation(params: prepareForFinalTranslationParams): DataFrame = {
+    var result = params.df
+    if (!params.df.hasColumn(tripleSubLongField)) {
       result = addSubjectInfo(result)
     }
-    if (!df.hasColumn(triplePredLongField)) {
+    if (!params.df.hasColumn(triplePredLongField)) {
       result = addPredicateInfo(result)
     }
-    if (!df.hasColumn(tripleObjLongField)) {
+    if (!params.df.hasColumn(tripleObjLongField)) {
       result = addObjectInfo(result)
     }
     result
   }
 
-  override def filterByColumn(df: DataFrame, columnName: String, value: Any): DataFrame = {
-    df.filter(col(columnName) === value)
+  override def filterByColumn(params: filterByColumnParams): DataFrame = {
+    params.df.filter(col(params.columnName) === params.value)
   }
 }

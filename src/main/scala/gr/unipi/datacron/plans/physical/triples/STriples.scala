@@ -4,6 +4,7 @@ import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.DataFrameUtils._
+import gr.unipi.datacron.plans.physical.traits.{filterByPOParams, pointSearchObjectParams}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.functions.udf
@@ -35,20 +36,20 @@ case class STriples() extends BaseTriples {
     df.withColumn(tripleObjLongField, getObject(col(tripleSpoStrField)))
   }
   
-  def filterByPO(df: DataFrame, pred: Option[Long], obj: Option[Long]): DataFrame = {
+  def filterByPO(params: filterByPOParams): DataFrame = {
     var searchStr = "^-?\\d+" + Consts.tripleFieldsSeparator
 
-    searchStr += pred.getOrElse("-?\\d+") + Consts.tripleFieldsSeparator
-    searchStr += obj.getOrElse("-?\\d+")
-    
-    df.filter(df(tripleSpoStrField) rlike searchStr)
+    searchStr += params.pred.getOrElse("-?\\d+") + Consts.tripleFieldsSeparator
+    searchStr += params.obj.getOrElse("-?\\d+")
+
+    params.df.filter(params.df(tripleSpoStrField) rlike searchStr)
   }
   
-  def pointSearchObject(df: DataFrame, sub: Long, pred: Long): Option[Long] = {
-    val sp = sub + tripleFieldsSeparator + pred
+  def pointSearchObject(params: pointSearchObjectParams): Option[Long] = {
+    val sp = params.sub + tripleFieldsSeparator + params.pred
     val searchStr = sp + tripleFieldsSeparator + "-?\\d+"
     try {
-      val resStr = df.filter(df(tripleSpoStrField) rlike searchStr).first.getAs[String](tripleSpoStrField)
+      val resStr = params.df.filter(params.df(tripleSpoStrField) rlike searchStr).first.getAs[String](tripleSpoStrField)
       Some(resStr.substring(resStr.indexOf(tripleFieldsSeparator) + 1).toLong)
     }
     catch {

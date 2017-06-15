@@ -4,6 +4,7 @@ import java.util
 
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.Consts._
+import org.apache.spark.sql.DataFrame
 
 import scala.io.Source
 
@@ -17,7 +18,11 @@ class TemporalGrid() {
     AppConfig.getString(Consts.qfpIntrvlsPath)
   }
 
-  private val timeIntervalsStr: Array[String] = DataStore.spark.read.text(intervalsPath).map(_.getAs[String](0)).collect()
+  private val timeIntervalsStr: Array[String] = Benchmarks.doBenchmark[Array[String]](() => {
+    DataStore.spark.read.text(intervalsPath).map(_.getAs[String](0)).collect()
+  }, new BaseOperatorParams() {
+    override def operationName: Option[String] = Some("Load time intervals dataset")
+  })
 
   val timeIntervals: Array[Long] = timeIntervalsStr.map(_.toLong)
 

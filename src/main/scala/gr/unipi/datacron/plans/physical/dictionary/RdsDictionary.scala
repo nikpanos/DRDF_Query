@@ -2,7 +2,7 @@ package gr.unipi.datacron.plans.physical.dictionary
 
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
-import gr.unipi.datacron.plans.physical.traits.TDictionary
+import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.Consts._
 import org.apache.spark.sql.expressions.UserDefinedFunction
@@ -10,9 +10,9 @@ import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.DataFrame
 
 case class RdsDictionary() extends BasePhysicalPlan with TDictionary {
-  override def pointSearchValue(key: Long): Option[String] = DataStore.dictionaryRedis.getDecodedValue(key)
+  override def pointSearchValue(params: pointSearchValueParams): Option[String] = DataStore.dictionaryRedis.getDecodedValue(params.key)
 
-  override def pointSearchKey(value: String): Option[Long] = DataStore.dictionaryRedis.getEncodedValue(value)
+  override def pointSearchKey(params: pointSearchKeyParams): Option[Long] = DataStore.dictionaryRedis.getEncodedValue(params.value)
 
     private def decodeColumn(df: DataFrame, columnName: String, newColumnName: String): DataFrame = {
       val bCnf = DataStore.bConfig
@@ -26,12 +26,12 @@ case class RdsDictionary() extends BasePhysicalPlan with TDictionary {
       df.withColumn(newColumnName, translate(col(columnName)))
     }
 
-  override def translateColumn(dfTriples: DataFrame, columnName: String): DataFrame =
-    decodeColumn(dfTriples, columnName, columnName + tripleTranslateSuffix)
+  override def translateColumn(params: translateColumnParams): DataFrame =
+    decodeColumn(params.dfTriples, params.columnName, params.columnName + tripleTranslateSuffix)
 
-  override def translateColumns(dfTriples: DataFrame, columnNames: Array[String]): DataFrame = {
-    var result = dfTriples
-    columnNames.foreach(c => {
+  override def translateColumns(params: translateColumnsParams): DataFrame = {
+    var result = params.dfTriples
+    params.columnNames.foreach(c => {
       result = decodeColumn(result, c, c + tripleTranslateSuffix)
     })
 

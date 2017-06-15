@@ -1,6 +1,6 @@
 package gr.unipi.datacron.plans.physical.dictionary
 
-import gr.unipi.datacron.plans.physical.traits.TDictionary
+import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
@@ -12,14 +12,14 @@ import scala.util.Try
 case class LSDictionary() extends BasePhysicalPlan with TDictionary {
   import DataStore.spark.implicits._
   
-  def pointSearchValue(key: Long): Option[String] =
-    Try(DataStore.dictionaryData.filter(col(dicKeyLongField) === key).first().getAs[String](dicValueStrField)).toOption
+  def pointSearchValue(params: pointSearchValueParams): Option[String] =
+    Try(DataStore.dictionaryData.filter(col(dicKeyLongField) === params.key).first().getAs[String](dicValueStrField)).toOption
   
-  def pointSearchKey(value: String): Option[Long] =
-    Try(DataStore.dictionaryData.filter(col(dicValueStrField) === value).first().getAs[Long](dicKeyLongField)).toOption
+  def pointSearchKey(params: pointSearchKeyParams): Option[Long] =
+    Try(DataStore.dictionaryData.filter(col(dicValueStrField) === params.value).first().getAs[Long](dicKeyLongField)).toOption
 
-  def translateColumn(dfTriples: DataFrame, columnName: String): DataFrame = {
-    val collected = dfTriples.select(columnName).as[Long].collect.toSet
+  def translateColumn(params: translateColumnParams): DataFrame = {
+    val collected = params.dfTriples.select(params.columnName).as[Long].collect.toSet
     val bCollected = DataStore.sc.broadcast(collected)
 
     val contains = udf((key: Long) => bCollected.value.contains(key))
@@ -29,13 +29,13 @@ case class LSDictionary() extends BasePhysicalPlan with TDictionary {
 
     val translate = udf((field: Long) => bDicMap.value(field))
 
-    dfTriples.withColumn(columnName + tripleTranslateSuffix, translate(col(columnName)))
+    params.dfTriples.withColumn(params.columnName + tripleTranslateSuffix, translate(col(params.columnName)))
   }
 
-  def translateColumns(dfTriples: DataFrame, columnNames: Array[String]): DataFrame = {
-    val bColumns = DataStore.sc.broadcast(columnNames)
+  def translateColumns(params: translateColumnsParams): DataFrame = {
+    val bColumns = DataStore.sc.broadcast(params.columnNames)
 
-    val collected = dfTriples.rdd.flatMap(row => {
+    val collected = params.dfTriples.rdd.flatMap(row => {
       bColumns.value.map(x => row.getAs[Long](x))
     }).collect.toSet
     val bCollected = DataStore.sc.broadcast(collected)
@@ -47,8 +47,8 @@ case class LSDictionary() extends BasePhysicalPlan with TDictionary {
 
     val translate = udf((field: Long) => bDicMap.value(field))
 
-    var result = dfTriples
-    columnNames.foreach(c => {
+    var result = params.dfTriples
+    params.columnNames.foreach(c => {
       result = result.withColumn(c + tripleTranslateSuffix, translate(col(c)))
     })
     result

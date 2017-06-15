@@ -1,6 +1,6 @@
 package gr.unipi.datacron.plans.physical.dictionary
 
-import gr.unipi.datacron.plans.physical.traits.TDictionary
+import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
@@ -9,9 +9,9 @@ import org.apache.spark.sql.DataFrame
 case class SDictionary() extends BasePhysicalPlan with TDictionary {
   import DataStore.spark.implicits._
   
-  def pointSearchValue(key: Long): Option[String] = {
+  def pointSearchValue(params: pointSearchValueParams): Option[String] = {
     val df: DataFrame = DataStore.dictionaryData
-    val searchStr = "^" + key + dicFieldsSeparator + ".*"
+    val searchStr = "^" + params.key + dicFieldsSeparator + ".*"
     try {
       val resultLine = df.filter(df(dicLineStrField).rlike(searchStr)).first().getAs[String](dicLineStrField)
       Some(resultLine.substring(resultLine.indexOf(dicFieldsSeparator) + 1, resultLine.length))
@@ -21,9 +21,9 @@ case class SDictionary() extends BasePhysicalPlan with TDictionary {
     }
   }
   
-  def pointSearchKey(value: String): Option[Long] = {
+  def pointSearchKey(params: pointSearchKeyParams): Option[Long] = {
     val df: DataFrame = DataStore.dictionaryData
-    val searchStr = "^-?\\d+" + dicFieldsSeparator + value
+    val searchStr = "^-?\\d+" + dicFieldsSeparator + params.value
     try {
       val resultLine = df.filter(df(dicLineStrField).rlike(searchStr)).first().getAs[String](dicLineStrField)
       Some(resultLine.substring(0, resultLine.indexOf(dicFieldsSeparator)).toLong)
@@ -33,12 +33,12 @@ case class SDictionary() extends BasePhysicalPlan with TDictionary {
     }
   }
 
-  override def translateColumn(dfTriples: DataFrame, columnName: String): DataFrame = {
+  override def translateColumn(params: translateColumnParams): DataFrame = {
     throw new NotImplementedError()
     //TODO: add implementation
   }
 
-  override def translateColumns(dfTriples: DataFrame, columnNames: Array[String]): DataFrame = {
+  override def translateColumns(params: translateColumnsParams): DataFrame = {
     throw new NotImplementedError()
     //TODO: add implementation
   }
