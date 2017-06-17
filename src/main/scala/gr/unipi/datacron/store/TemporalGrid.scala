@@ -4,7 +4,7 @@ import java.util
 
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.Consts._
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Dataset}
 
 import scala.io.Source
 

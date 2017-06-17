@@ -22,7 +22,7 @@ abstract private[starSTRange] class BaseStar() extends BaseLogicalPlan() {
     x
   }
 
-  private[starSTRange] def encodePredicate(dfDictionary: DataFrame, pred: Option[String]): Option[Long] = {
+  private[starSTRange] def encodePredicate(pred: Option[String]): Option[Long] = {
     if (pred.isDefined) {
       checkAndReturn(PhysicalPlanner.pointSearchKey(pointSearchKeyParams(pred.get, Some("Find encoded predicate: " + pred.get))), pred.get)
     }

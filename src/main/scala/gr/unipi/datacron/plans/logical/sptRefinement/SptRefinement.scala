@@ -7,20 +7,20 @@ import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
 import org.apache.spark.sql.DataFrame
 
-private[logical] object SptRefinement {
+private[logical] case class SptRefinement() {
 
-  def addSpatialAndTemporalColumns(dfDestination: DataFrame, dfSource: DataFrame, dfDictionary: DataFrame): DataFrame = {
-    val encodedUriMBR = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriMBR, Some("Find encoded " + uriMBR))).get
-    val encodedUriTime = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriTime, Some("Find encoded " + uriTime))).get
+  val encodedUriMBR = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriMBR, Some("Find encoded " + uriMBR))).get
+  val encodedUriTime = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriTime, Some("Find encoded " + uriTime))).get
 
+  def addSpatialAndTemporalColumns(dfDestination: DataFrame, dfSource: DataFrame): DataFrame = {
     val predicates = Map((encodedUriMBR, tripleMBRField), (encodedUriTime, tripleTimeStartField))
-    PhysicalPlanner.joinNewObjects(joinNewObjectsParams(dfDestination, dfSource, tripleSubLongField, predicates, Some("Add encoded spatial and temporal columns")))
+    PhysicalPlanner.joinNewObjects(joinNewObjectsParams(dfDestination, dfSource, tripleSubLongField, predicates, Some("(Self join)Add encoded spatial and temporal columns")))
   }
 
-  def refineResults(dfFilteredTriples: DataFrame, dfAllTriples: DataFrame, dfDictionary: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
+  def refineResults(dfFilteredTriples: DataFrame, dfAllTriples: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
 
     val extendedTriples = if (dfFilteredTriples.hasColumn(tripleMBRField)) dfFilteredTriples else
-      addSpatialAndTemporalColumns(dfFilteredTriples, dfAllTriples, dfDictionary)
+      addSpatialAndTemporalColumns(dfFilteredTriples, dfAllTriples)
 
     val translatedExtendedTriples = PhysicalPlanner.translateColumns(translateColumnsParams(extendedTriples, Array(tripleMBRField, tripleTimeStartField), Some("Add decoded spatial and temporal columns")))
 

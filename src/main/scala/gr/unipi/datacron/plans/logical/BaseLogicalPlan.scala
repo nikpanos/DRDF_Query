@@ -17,10 +17,10 @@ abstract private[logical] class BaseLogicalPlan() {
   def executePlan: DataFrame = {
     println("Query name: " + AppConfig.getString(Consts.qfpQueryName))
     println("Query type: " + AppConfig.getString(Consts.qfpQueryType))
-    doExecutePlan(DataStore.triplesData, DataStore.dictionaryData)
+    doExecutePlan()
   }
 
-  private[logical] def doExecutePlan(dfTriples: DataFrame, dfDictionary: DataFrame): DataFrame
+  private[logical] def doExecutePlan(): DataFrame
 
   private[logical] val constraints = SpatioTemporalRange(
     SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), AppConfig.getLong(qfpTimeLower)),

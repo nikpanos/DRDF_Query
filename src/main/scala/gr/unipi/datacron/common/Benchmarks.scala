@@ -1,7 +1,7 @@
 package gr.unipi.datacron.common
 
 import gr.unipi.datacron.common.Consts.qfpBenchmarkEnabled
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
 import scala.collection.mutable.ListBuffer
 
@@ -19,9 +19,11 @@ object Benchmarks {
       var result = foo()
 
       val resultCount = result match {
-        case result: DataFrame =>
+        case result: Dataset[Row] =>
           result.cache
           result.count
+        case result: Array[String] =>
+          result.length
         case _ => 1L
       }
       val endTime = System.currentTimeMillis
