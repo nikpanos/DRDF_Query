@@ -110,5 +110,6 @@ object Consts {
   final val parseString = "S"
   final val parseLongString = "LS"
   final val parseTripleLong = "LLL"
+  final val parseParquet = "parquet"
 }
 

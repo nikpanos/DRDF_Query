@@ -14,17 +14,17 @@ case class RdsDictionary() extends BasePhysicalPlan with TDictionary {
 
   override def pointSearchKey(params: pointSearchKeyParams): Option[Long] = DataStore.dictionaryRedis.getEncodedValue(params.value)
 
-    private def decodeColumn(df: DataFrame, columnName: String, newColumnName: String): DataFrame = {
-      val bCnf = DataStore.bConfig
+  private def decodeColumn(df: DataFrame, columnName: String, newColumnName: String): DataFrame = {
+    val bCnf = DataStore.bConfig
 
-      val translate: UserDefinedFunction = udf((field: Long) => {
-        if (!AppConfig.isAssigned) {
-          AppConfig.setConfig(bCnf.value)
-        }
-        DataStore.dictionaryRedis.getDecodedValue(field)
-      })
-      df.withColumn(newColumnName, translate(col(columnName)))
-    }
+    val translate: UserDefinedFunction = udf((field: Long) => {
+      if (!AppConfig.isAssigned) {
+        AppConfig.setConfig(bCnf.value)
+      }
+      DataStore.dictionaryRedis.getDecodedValue(field)
+    })
+    df.withColumn(newColumnName, translate(col(columnName)))
+  }
 
   override def translateColumn(params: translateColumnParams): DataFrame =
     decodeColumn(params.dfTriples, params.columnName, params.columnName + tripleTranslateSuffix)

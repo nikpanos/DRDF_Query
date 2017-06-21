@@ -12,7 +12,7 @@ abstract private[logical] class BaseLogicalPlan() {
   private[logical] val nSpatialBits: Int = AppConfig.getInt(Consts.qfpSpatialBits)
   private[logical] val nIDsBits: Int = AppConfig.getInt(Consts.qfpIDsBits)
 
-  private[logical] val encoder = new SimpleEncoder()
+  private[logical] val encoder = SimpleEncoder()
   
   def executePlan: DataFrame = {
     println("Query name: " + AppConfig.getString(Consts.qfpQueryName))

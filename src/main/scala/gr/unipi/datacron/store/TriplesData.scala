@@ -7,14 +7,15 @@ import org.apache.spark.sql.DataFrame
 private[store] class TriplesData() {
   import DataStore.spark.implicits._
 
-  val triplesPath: String = if (AppConfig.yarnMode) {
+  private[store] val triplesPath: String = if (AppConfig.yarnMode) {
     AppConfig.getString(qfpNamenode) + AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(qfpTriplesPath)
   }
   else {
     AppConfig.getString(qfpTriplesPath)
   }
   
-  val data: DataFrame = Benchmarks.doBenchmark[DataFrame](() => {(AppConfig.getString(qfpParseTriples) match {
+  private[store] val data: DataFrame = Benchmarks.doBenchmark[DataFrame](() => {(AppConfig.getString(qfpParseTriples) match {
+    case Consts.parseParquet => DataStore.spark.read.parquet(triplesPath)
     case Consts.parseString => DataStore.spark.read.text(triplesPath).toDF(tripleSpoStrField)
     case Consts.parseTripleLong => DataStore.spark.read.text(triplesPath).map(s => {
       val line = s.getString(0)

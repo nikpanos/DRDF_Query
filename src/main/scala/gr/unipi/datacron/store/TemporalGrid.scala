@@ -24,7 +24,7 @@ class TemporalGrid() {
     override def operationName: Option[String] = Some("Load time intervals dataset")
   })
 
-  val timeIntervals: Array[Long] = timeIntervalsStr.map(_.toLong)
+  private[store] val timeIntervals: Array[Long] = timeIntervalsStr.map(_.toLong)
 
   println("Time intervals dataset: " + intervalsPath)
 

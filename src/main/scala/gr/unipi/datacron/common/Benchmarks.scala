@@ -19,11 +19,12 @@ object Benchmarks {
       var result = foo()
 
       val resultCount = result match {
-        case result: Dataset[Row] =>
+        case result: Dataset[Row @unchecked] =>
           result.cache
-          result.count
+          0L
+          //result.count
         case result: Array[String] =>
-          result.length
+          result.length.toLong
         case _ => 1L
       }
       val endTime = System.currentTimeMillis
