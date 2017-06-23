@@ -14,7 +14,7 @@ class DictionaryData() {
     AppConfig.getString(qfpDicPath)
   }
 
-  val data: DataFrame = (AppConfig.getString(qfpParseDictionary) match {
+  val data: DataFrame = AppConfig.getString(qfpParseDictionary) match {
     case Consts.parseString => DataStore.spark.read.text(dicPath).toDF(dicLineStrField)
     case Consts.parseLongString => DataStore.spark.read.text(dicPath).map(s => {
         val line = s.getAs[String](0)
@@ -25,7 +25,7 @@ class DictionaryData() {
         (key, value)
       }).toDF(dicKeyLongField, dicValueStrField)
     case _ => throw new Exception("Dictionary parsing setting not found")
-  }).cache
+  }
 
   println("Dictionary dataset: " + dicPath)
 }

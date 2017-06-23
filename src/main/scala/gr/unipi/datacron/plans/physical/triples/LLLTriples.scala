@@ -27,24 +27,25 @@ case class LLLTriples() extends BaseTriples {
 
 
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
-
     val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
-    val spatialIds = DataStore.spatialGrid.getSpatialIds(params.constraints)
+    val bIntervalIds = DataStore.sc.broadcast(intervalIds)
+    val bSpatialIds = DataStore.sc.broadcast(DataStore.spatialGrid.getSpatialIds(params.constraints))
+    val bEncoder = DataStore.sc.broadcast(params.encoder)
 
     val result = if (params.df.hasColumn(tripleSubLongField)) params.df else addSubjectInfo(params.df)
 
     val getPruneKey = udf((sub: Long) => {
       var key = -1
       if (sub >= 0) {
-        val components = params.encoder.decodeComponentsFromKey(sub)
+        val components = bEncoder.value.decodeComponentsFromKey(sub)
 
-        if ((components._1 >= intervalIds._1) && (components._1 <= intervalIds._2)) {
+        if ((components._1 >= bIntervalIds.value._1) && (components._1 <= bIntervalIds.value._2)) {
           //not pruned by temporal
-          val sp = spatialIds.get(components._2)
+          val sp = bSpatialIds.value.get(components._2)
           if (sp.nonEmpty) {
             //not pruned by spatial
             key = 3  //initially set to need both refinements
-            if ((components._1 > intervalIds._1) && (components._1 < intervalIds._2)) {
+            if ((components._1 > bIntervalIds.value._1) && (components._1 < bIntervalIds.value._2)) {
               //does not need temporal refinement
               key -= 1
             }
@@ -58,6 +59,10 @@ case class LLLTriples() extends BaseTriples {
       key
     })
 
-    result.withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(triplePruneSubKeyField) > -1)
+    val lowerId = params.encoder.encodeKeyFromComponents(intervalIds._1, 0, 0)
+    val higherId = params.encoder.encodeKeyFromComponents(intervalIds._2 + 1, 0, 0)
+
+    result.filter(col(tripleSubLongField) >= lowerId).filter(col(tripleSubLongField) < higherId).
+      withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(triplePruneSubKeyField) > -1)
   }
 }

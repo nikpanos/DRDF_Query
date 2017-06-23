@@ -20,9 +20,8 @@ object Benchmarks {
 
       val resultCount = result match {
         case result: Dataset[Row @unchecked] =>
-          result.cache
-          0L
-          //result.count
+          //result.cache
+          result.count
         case result: Array[String] =>
           result.length.toLong
         case _ => 1L

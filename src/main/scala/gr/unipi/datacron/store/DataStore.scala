@@ -1,14 +1,11 @@
 package gr.unipi.datacron.store
 
-import com.typesafe.config.{Config, ConfigObject}
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.{col, udf}
 
 object DataStore {
   //IMPORTANT: all DataStore fields should be lazy evaluated because DataStore is being initialized on each node

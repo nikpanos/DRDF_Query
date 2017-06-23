@@ -17,6 +17,12 @@ class SimpleEncoder private (val bitsId: Long, val bitsSpatial: Long, val bitsTo
 		//EncodingDetails new_tuple = new EncodingDetails(,hilbert_index>>this.bits_id,index_val,0);
 		(time_val, hilbert_index)
   }
+
+  def encodeKeyFromComponents(timePartition: Long, hilbertValue: Long, index: Long): Long = {
+    val time_part_val = timePartition << (bitsSpatial + bitsId)
+    val hilbert_val = hilbertValue << this.bitsId
+    time_part_val + hilbert_val + index
+  }
 }
 
 object SimpleEncoder {
