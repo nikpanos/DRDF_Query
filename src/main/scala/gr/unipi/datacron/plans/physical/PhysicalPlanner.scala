@@ -3,7 +3,7 @@ package gr.unipi.datacron.plans.physical
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.physical.dictionary._
-import gr.unipi.datacron.plans.physical.joinTriples._
+import gr.unipi.datacron.plans.physical.joinTriples.{AJoinLLLTriples, _}
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.plans.physical.triples._
 import gr.unipi.datacron.common.Benchmarks.doBenchmark
@@ -19,6 +19,8 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples {
   private lazy val lsDictionary = LSDictionary()
   private lazy val sDictionary = SDictionary()
   private lazy val rdsDictionary = RdsDictionary()
+  private lazy val aJoinLLLTriples = AJoinLLLTriples()
+  private lazy val abJoinLLLTriples = ABJoinLLLTriples()
 
   private def pickTriplesPlanBasedOnRules: TTriples = AppConfig.getString(qfpTriples_trait) match {
       case Consts.tSTriples => sTriples
@@ -29,6 +31,8 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples {
   private def pickJoinTriplesPlanBasedOnRules: TJoinTriples = AppConfig.getString(qfpJoinTriples_trait) match {
       case Consts.tMBJoinSTriples => mbJoinSTriples
       case Consts.tMBJoinLLLTriples => mbJoinLLLTriples
+      case Consts.tAJoinLLLTriples => aJoinLLLTriples
+      case Consts.tABJoinLLLTriples => abJoinLLLTriples
       case _ => throw new Exception("JoinTriples trait not found")
     }
 

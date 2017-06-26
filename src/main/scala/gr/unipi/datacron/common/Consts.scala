@@ -80,6 +80,8 @@ object Consts {
   //TJoinTriples
   final val tMBJoinSTriples = "MBJoinSTriples"
   final val tMBJoinLLLTriples = "MBJoinLLLTriples"
+  final val tAJoinLLLTriples = "AJoinLLLTriples"
+  final val tABJoinLLLTriples = "ABJoinLLLTriples"
   
   //field separators
   final val tripleFieldsSeparator = " "
@@ -111,5 +113,8 @@ object Consts {
   final val parseLongString = "LS"
   final val parseTripleLong = "LLL"
   final val parseParquet = "parquet"
+
+  //spark params
+  final val myParam = "sparkParams.spark.sql.shuffle.partitions"
 }
 

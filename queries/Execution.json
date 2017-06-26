@@ -3,5 +3,5 @@
   namenode = "hdfs://dnode1:8020"
   hdfs_dir_prefix = "/user/pnikitopoulos/"
   verbose_logging = false
-  benchmark_enabled = true
+  benchmark_enabled = false
 }

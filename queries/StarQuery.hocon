@@ -8,9 +8,10 @@ query {
     physical {
       dictionary = "RedisDictionary"
       triples = "LLLTriples"
-      joinTriples = "MBJoinLLLTriples"
+      joinTriples = "ABJoinLLLTriples"
     }
     logical = ["SpatialFirstJoinStStarSptRange"]
   }
 }
 execution { include "Execution.json" }
+sparkParams { include "SparkParams.json" }

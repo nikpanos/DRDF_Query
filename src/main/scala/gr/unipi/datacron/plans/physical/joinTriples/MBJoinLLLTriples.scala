@@ -13,7 +13,7 @@ case class MBJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
   override def joinNewObjects(params: joinNewObjectsParams): DataFrame = {
     val subjects = params.df.select(params.subjectColumn).as[Long].collect.toSet
     val bSubjects = DataStore.sc.broadcast(subjects)
-    val bPredicates = DataStore.sc.broadcast(params.predicates)
+    val bPredicates = DataStore.sc.broadcast(params.predicates.keySet)
 
     val tmp = params.dfTriples.flatMap(row => {
       val s = row.getAs[Long](tripleSubLongField)

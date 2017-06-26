@@ -16,14 +16,14 @@ object TextToParquet {
       AppConfig.getString(qfpTriplesPath)
     }
 
-    val newTriplesPath = triplesPath.substring(0, triplesPath.lastIndexOf('.')) + ".sortedSPO.parquet"
+    val newTriplesPath = triplesPath.substring(0, triplesPath.lastIndexOf('.')) + ".parquet"
     println("Writing output to: " + newTriplesPath)
 
     DataStore.triplesData.printSchema()
 
-    DataStore.spark.sql("set spark.sql.shuffle.partitions=11")
+    //DataStore.spark.sql("set spark.sql.shuffle.partitions=11")
 
-    DataStore.triplesData.sort(tripleSubLongField, triplePredLongField, tripleObjLongField).write.parquet(newTriplesPath)
+    DataStore.triplesData.write.parquet(newTriplesPath)
 
     println("Done!")
   }

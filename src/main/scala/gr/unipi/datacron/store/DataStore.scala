@@ -41,11 +41,12 @@ object DataStore {
       Logger.getLogger("org").setLevel(Level.OFF)
       Logger.getLogger("akka").setLevel(Level.OFF)
     }
-    println("Initializing spark session and Redis connection")
+    println("Initializing Spark session and Redis connections")
     bConfig = sc.broadcast(AppConfig.getConfig)
     if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
       dictionaryRedis.getDecodedValue(-1L)
       dictionaryRedis.getEncodedValue("a")
     }
+    spark.sql("set spark.sql.shuffle.partitions=" + AppConfig.getInt(myParam))
   }
 }
