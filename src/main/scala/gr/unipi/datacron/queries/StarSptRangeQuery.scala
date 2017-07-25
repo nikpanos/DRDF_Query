@@ -9,6 +9,7 @@ case class StarSptRangeQuery() extends BaseQuery() {
       case Consts.spatialFirstStarSptRangeLPlan => Some(StarSpatialFirst())
       case Consts.rdfFirstStarSptRangeLPlan => Some(StarRdfFirst())
       case Consts.spatialFirstJoinStarSptRangeLPlan => Some(StarSpatialFirstJoinST())
+      case Consts.rdfFirstBestStarSptRangeLPlan => Some(StarRdfFirstBest())
       case _ => None
     }
 
@@ -17,9 +18,12 @@ case class StarSptRangeQuery() extends BaseQuery() {
       val startTime = System.currentTimeMillis
       val result = plan.get.executePlan.cache
       result.show
-      val endTime = System.currentTimeMillis
-      println("Global execution time (ms): " + (endTime - startTime))
       println("Result count: " + result.count)
+      val endTime = System.currentTimeMillis
+      //result.explain()
+      println("Global execution time (ms): " + (endTime - startTime))
+
+      //result.explain(true)
     }
   }
 }

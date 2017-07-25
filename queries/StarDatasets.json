@@ -1,10 +1,10 @@
 {
   dictionary { include "DicRedis.json" }
   triples {
-    path = "input/star/triplesSimple32_8_4.parquet"
-    parse = "parquet"
+    path = "input/star/ais_jan2016_20170329_sample_encoded.txt"
+    parse = "LLL"
   }
   intervals {
-    path = "input/star/timeintervalsSimple32_8_4.txt"
+    path = "input/star/timeintervalsSimple32_8_8.txt"
   }
 }

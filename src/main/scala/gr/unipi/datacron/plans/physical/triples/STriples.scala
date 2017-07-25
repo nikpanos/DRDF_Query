@@ -3,11 +3,11 @@ package gr.unipi.datacron.plans.physical.triples
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.DataFrameUtils._
-import gr.unipi.datacron.plans.physical.traits.{filterByPOParams, pointSearchObjectParams}
+import gr.unipi.datacron.plans.physical.traits.{filterByPOParams, filterByPOandKeepSpatioTemporalParams, pointSearchObjectParams}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.functions.udf
+import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 case class STriples() extends BaseTriples {
   import DataStore.spark.implicits._
@@ -43,6 +43,10 @@ case class STriples() extends BaseTriples {
     searchStr += params.obj.getOrElse("-?\\d+")
 
     params.df.filter(params.df(tripleSpoStrField) rlike searchStr)
+  }
+
+  def filterByPOandKeepSpatioTemporal(params: filterByPOandKeepSpatioTemporalParams): DataFrame = {
+    throw new NotImplementedException()
   }
   
   def pointSearchObject(params: pointSearchObjectParams): Option[Long] = {

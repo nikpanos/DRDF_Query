@@ -6,6 +6,7 @@ import org.apache.spark.sql.DataFrame
 
 trait TTriples {
   def filterByPO(params: filterByPOParams): DataFrame
+  def filterByPOandKeepSpatioTemporal(params: filterByPOandKeepSpatioTemporalParams): DataFrame
   def filterByColumn(params: filterByColumnParams): DataFrame
   def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame
   def pointSearchObject(params: pointSearchObjectParams): Option[Long]
@@ -14,6 +15,7 @@ trait TTriples {
 }
 
 case class filterByPOParams(df: DataFrame, pred: Option[Long], obj: Option[Long], override val operationName: Option[String] = None) extends BaseOperatorParams
+case class filterByPOandKeepSpatioTemporalParams(df: DataFrame, pred: Option[Long], obj: Option[Long], predTemporal: Long, predSpatial: Long, override val operationName: Option[String] = None) extends BaseOperatorParams
 case class filterByColumnParams(df: DataFrame, columnName: String, value: Any, override val operationName: Option[String] = None) extends BaseOperatorParams
 case class filterBySubSpatioTemporalInfoParams(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder,
                                                override val operationName: Option[String] = None) extends BaseOperatorParams

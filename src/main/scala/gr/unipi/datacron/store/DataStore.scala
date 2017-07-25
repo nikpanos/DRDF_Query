@@ -48,5 +48,6 @@ object DataStore {
       dictionaryRedis.getEncodedValue("a")
     }
     spark.sql("set spark.sql.shuffle.partitions=" + AppConfig.getInt(myParam))
+    temporalGrid.getIntervalId(0)  //to initialize the temporal grid
   }
 }

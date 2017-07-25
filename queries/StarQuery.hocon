@@ -3,6 +3,7 @@ datasets { include "StarDatasets.json" }
 query {
   name = "StarSpatialFirstJoin"
   type = "StarSptRange"
+  enableFilterByEncodedInfo = true
   predicates: { include "StarPredicates.json"}
   plans {
     physical {
@@ -10,7 +11,7 @@ query {
       triples = "LLLTriples"
       joinTriples = "ABJoinLLLTriples"
     }
-    logical = ["SpatialFirstJoinStStarSptRange"]
+    logical = ["RdfFirstStarSptRange"]
   }
 }
 execution { include "Execution.json" }

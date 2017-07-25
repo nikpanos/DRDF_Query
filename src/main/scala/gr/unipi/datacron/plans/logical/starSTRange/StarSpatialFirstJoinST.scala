@@ -17,7 +17,7 @@ case class StarSpatialFirstJoinST() extends BaseStar() {
 
     val extendedTriples = refinement.addSpatialAndTemporalColumns(filteredByIdInfo, filteredByIdInfo)
 
-    val filteredSPO = PhysicalPlanner.filterByPO(filterByPOParams(extendedTriples, qPredTrans, qObjTrans, Some("Filter by spo predicate"))).cache
+    val filteredSPO = PhysicalPlanner.filterByPO(filterByPOParams(extendedTriples, qPredTrans, qObjTrans, Some("Filter by spo predicate")))
 
     refinement.refineResults(filteredSPO, null, constraints)
   }

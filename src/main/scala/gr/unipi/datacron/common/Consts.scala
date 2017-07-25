@@ -56,6 +56,8 @@ object Consts {
 
   final val qfpLogicalPlans = "query.plans.logical"
 
+  final val qfpEnableFilterByEncodedInfo = "query.enableFilterByEncodedInfo"
+
   //Query types
   final val starSptRangeQuery = "StarSptRange"
   final val twoHopSptRangeQuery = "JoinSptRange"
@@ -64,6 +66,7 @@ object Consts {
   final val spatialFirstStarSptRangeLPlan = "SpatialFirstStarSptRange"
   final val spatialFirstJoinStarSptRangeLPlan = "SpatialFirstJoinStStarSptRange"
   final val rdfFirstStarSptRangeLPlan = "RdfFirstStarSptRange"
+  final val rdfFirstBestStarSptRangeLPlan = "RdfFirstBestStarSptRange"
 
   final val spatialFirstJoinSptRangeLPlan = "SpatialFirstJoinSptRange"
 
@@ -89,8 +92,8 @@ object Consts {
   final val lonLatSeparator = " "
   
   //RDF URIs
-  final val uriMBR = ":hasMBR_WKT"
-  final val uriTime = ":SemanticNodeTimeStart"
+  final val uriMBR = ":hasWKT"
+  final val uriTime = ":TimeStart"
   
   //Triples fields
   final val tripleSpoStrField = "spoStr"

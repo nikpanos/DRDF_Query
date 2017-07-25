@@ -9,8 +9,8 @@
   }
   rdf {
     condition {
-      p = ":SemanticNodeStatus"
-      o = "GAP END"
+      p = ":hasHeading"
+      o = "0.0"
     }
   }
 }
