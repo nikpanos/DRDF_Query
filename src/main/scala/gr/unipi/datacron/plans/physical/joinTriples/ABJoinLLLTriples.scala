@@ -1,10 +1,10 @@
 package gr.unipi.datacron.plans.physical.joinTriples
 
-import gr.unipi.datacron.common.Consts.triplePredLongField
+import gr.unipi.datacron.common.Consts.{triplePredLongField, tripleSubLongField}
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits.{TJoinTriples, joinNewObjectsParams}
 import gr.unipi.datacron.store.DataStore
-import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
 case class ABJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
@@ -16,7 +16,7 @@ case class ABJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
     val filtered = dfTriples.filter(col(triplePredLongField) === predicate._1).as("df2")
 
 
-    df.as("df1").join(broadcast(filtered), col("df1." + subjectColumn) === col("df2." + subjectColumn)).select(cols: _*)
+    df.as("df1").join(broadcast(filtered), col("df1." + subjectColumn) === col("df2." + tripleSubLongField), "cross").select(cols: _*)
   }
 
   override def joinNewObjects(params: joinNewObjectsParams): DataFrame = {

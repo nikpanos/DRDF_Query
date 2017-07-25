@@ -58,13 +58,15 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
 
   def filterbySpatioTemporalRange(params: filterbySpatioTemporalRangeParams): DataFrame = {
 
+    val format = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+
     params.df.filter(x => {
       var tmpResult = ((x.getAs[Int](triplePruneSubKeyField) >> 0) & 1) != 1
       var sptResult = ((x.getAs[Int](triplePruneSubKeyField) >> 1) & 1) != 1
 
       if (!tmpResult) {
         //refine temporal
-        val decodedObject = x.getAs[String](tripleTimeStartField + tripleTranslateSuffix).toLong
+        val decodedObject = format.parse(x.getAs[String](tripleTimeStartField + tripleTranslateSuffix)).getTime
         if ((decodedObject >= params.range.low.time) && (decodedObject <= params.range.high.time)) {
           tmpResult = true
         }

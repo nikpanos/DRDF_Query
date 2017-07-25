@@ -93,7 +93,10 @@ object Consts {
   
   //RDF URIs
   final val uriMBR = ":hasWKT"
-  final val uriTime = ":TimeStart"
+  final val uriTimeStart = ":TimeStart"
+
+  final val uriHasGeometry = ":hasGeometry"
+  final val uriHasTemporalFeature  = ":hasTemporalFeature"
   
   //Triples fields
   final val tripleSpoStrField = "spoStr"
@@ -105,6 +108,8 @@ object Consts {
   final val tripleMBRField = "mbr_wkt"
   final val tripleTimeStartField = "time_start"
   final val tripleJoinKey = "join_key"
+  final val tripleGeometryField = "geometryWKT"
+  final val tripleTemporalField = "temporalFeature"
   
   //Dictionary fields
   final val dicLineStrField = "lineStr"

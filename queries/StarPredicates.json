@@ -1,11 +1,11 @@
 {
   spatio_temporal {
-    lat_lower = 43.59634145261275
-    lon_lower = 13.414434723606927
-    lat_upper = 45.59634145261275
-    lon_upper = 16.6
-    time_lower = 1451736505000
-    time_upper = 1451746665000
+    lat_lower = 50.0
+    lon_lower = 0.0
+    lat_upper = 52.0
+    lon_upper = 5.0
+    time_lower = 1451635300000
+    time_upper = 1451636000000
   }
   rdf {
     condition {

@@ -9,12 +9,29 @@ import org.apache.spark.sql.DataFrame
 
 private[logical] case class SptRefinement() {
 
-  val encodedUriMBR = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriMBR, Some("Find encoded " + uriMBR))).get
-  val encodedUriTime = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriTime, Some("Find encoded " + uriTime))).get
+  val encodedUriMBR: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriMBR, Some("Find encoded " + uriMBR))).get
+  val encodedUriTime: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriTimeStart, Some("Find encoded " + uriTimeStart))).get
+
+  val encodedUriTemporalFeature: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriHasTemporalFeature, Some("Find encoded " + uriHasTemporalFeature))).get
+  val encodedUriGeometry: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriHasGeometry, Some("Find encoded " + uriHasGeometry))).get
 
   def addSpatialAndTemporalColumns(dfDestination: DataFrame, dfSource: DataFrame): DataFrame = {
-    val predicates = Map((encodedUriMBR, tripleMBRField), (encodedUriTime, tripleTimeStartField))
-    PhysicalPlanner.joinNewObjects(joinNewObjectsParams(dfDestination, dfSource, tripleSubLongField, predicates, Some("(Self join)Add encoded spatial and temporal columns")))
+
+    val predicates = Map((encodedUriGeometry, tripleGeometryField), (encodedUriTemporalFeature, tripleTemporalField))
+    val join1 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(dfDestination, dfSource, tripleSubLongField, predicates, Some("(Self join)Add encoded geometry and temporalFeature columns")))
+
+    val mbrPredicates = Map((encodedUriMBR, tripleMBRField))
+    val join2 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join1, dfSource, tripleGeometryField, mbrPredicates, Some("(Self join)Add encoded spatial column")))
+
+    //join2.filter("subLong=50217").show()
+
+    val temporalPredicates = Map((encodedUriTime, tripleTimeStartField))
+    val result = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join2, dfSource, tripleTemporalField, temporalPredicates, Some("(Self join)Add encoded temporal column")))
+
+    //result.filter("subLong=50217").show()
+    //dfSource.filter("subLong=-401").show()
+
+    result
   }
 
   def refineResults(dfFilteredTriples: DataFrame, dfAllTriples: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
@@ -26,10 +43,16 @@ private[logical] case class SptRefinement() {
 
     val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, Some("Filter by spatiotemporal columns")))
 
+    //result.show()
+
+    //result
+
+
     //Translate the result before returning
     val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))
     val outTranslated = PhysicalPlanner.translateColumns(translateColumnsParams(outPrepared, Array(tripleSubLongField, triplePredLongField, tripleObjLongField), Some("Final decode of columns")))
     val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
     outTranslated.select(outColumns.head, outColumns.tail: _*)
+
   }
 }
