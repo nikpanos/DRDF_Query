@@ -23,13 +23,8 @@ private[logical] case class SptRefinement() {
     val mbrPredicates = Map((encodedUriMBR, tripleMBRField))
     val join2 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join1, dfSource, tripleGeometryField, mbrPredicates, Some("(Self join)Add encoded spatial column")))
 
-    //join2.filter("subLong=50217").show()
-
     val temporalPredicates = Map((encodedUriTime, tripleTimeStartField))
     val result = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join2, dfSource, tripleTemporalField, temporalPredicates, Some("(Self join)Add encoded temporal column")))
-
-    //result.filter("subLong=50217").show()
-    //dfSource.filter("subLong=-401").show()
 
     result
   }
@@ -42,10 +37,6 @@ private[logical] case class SptRefinement() {
     val translatedExtendedTriples = PhysicalPlanner.translateColumns(translateColumnsParams(extendedTriples, Array(tripleMBRField, tripleTimeStartField), Some("Add decoded spatial and temporal columns")))
 
     val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, Some("Filter by spatiotemporal columns")))
-
-    //result.show()
-
-    //result
 
 
     //Translate the result before returning

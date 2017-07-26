@@ -31,7 +31,6 @@ case class LLLTriples() extends BaseTriples {
     Try(params.df.filter(col(tripleSubLongField) === params.sub).filter(col(triplePredLongField) === params.pred).
       first().getAs[Long](tripleObjLongField)).toOption
 
-
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
     if (AppConfig.getBoolean(qfpEnableFilterByEncodedInfo)) {
       val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
