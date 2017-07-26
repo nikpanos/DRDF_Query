@@ -12,7 +12,7 @@ case class StarRdfFirstBest() extends BaseStar() {
 
     val refinement = SptRefinement()
 
-    val filteredSPO = PhysicalPlanner.filterByPOandKeepSpatioTemporal(filterByPOandKeepSpatioTemporalParams(DataStore.triplesData, qPredTrans, qObjTrans, refinement.encodedUriTime, refinement.encodedUriMBR, Some("Filter by spo predicate and spatiotemporal columns")))
+    val filteredSPO = PhysicalPlanner.filterByPOandKeepSpatioTemporal(filterByPOandKeepSpatioTemporalParams(DataStore.triplesData, qPredTrans, qObjTrans, refinement.encodedUriTemporalFeature, refinement.encodedUriGeometry, Some("Filter by spo predicate and spatiotemporal columns")))
 
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(filteredSPO, constraints, encoder, Some("Filter by encoded spatiotemporal info"))).cache
 

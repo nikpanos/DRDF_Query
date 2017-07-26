@@ -5,6 +5,7 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
+import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
 private[logical] case class SptRefinement() {
@@ -17,14 +18,19 @@ private[logical] case class SptRefinement() {
 
   def addSpatialAndTemporalColumns(dfDestination: DataFrame, dfSource: DataFrame): DataFrame = {
 
+    println("first joins (temporal, spatial)")
     val predicates = Map((encodedUriGeometry, tripleGeometryField), (encodedUriTemporalFeature, tripleTemporalField))
     val join1 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(dfDestination, dfSource, tripleSubLongField, predicates, Some("(Self join)Add encoded geometry and temporalFeature columns")))
 
+    println("second join (spatial)")
+
     val mbrPredicates = Map((encodedUriMBR, tripleMBRField))
-    val join2 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join1, dfSource, tripleGeometryField, mbrPredicates, Some("(Self join)Add encoded spatial column")))
+    val join2 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join1, DataStore.triplesData, tripleGeometryField, mbrPredicates, Some("(Self join)Add encoded spatial column")))
+
+    println("second join (temporal)")
 
     val temporalPredicates = Map((encodedUriTime, tripleTimeStartField))
-    val result = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join2, dfSource, tripleTemporalField, temporalPredicates, Some("(Self join)Add encoded temporal column")))
+    val result = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join2, DataStore.triplesData, tripleTemporalField, temporalPredicates, Some("(Self join)Add encoded temporal column")))
 
     result
   }

@@ -15,6 +15,8 @@ case class AJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
 
     val filtered = dfTriples.filter(col(triplePredLongField) === predicate._1).as("df2")
 
+    println("r1.size = " + df.count())
+    println("r2.size = " + filtered.count())
 
     df.as("df1").join(filtered, col("df1." + subjectColumn) === col("df2." + tripleSubLongField)).select(cols: _*)
   }
