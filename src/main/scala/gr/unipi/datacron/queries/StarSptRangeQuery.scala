@@ -10,6 +10,7 @@ case class StarSptRangeQuery() extends BaseQuery() {
       case Consts.rdfFirstStarSptRangeLPlan => Some(StarRdfFirst())
       case Consts.spatialFirstJoinStarSptRangeLPlan => Some(StarSpatialFirstJoinST())
       case Consts.rdfFirstBestStarSptRangeLPlan => Some(StarRdfFirstBest())
+      case Consts.propertiesStarSptRangeLPlan => Some(StarProperties())
       case _ => None
     }
 

@@ -3,7 +3,7 @@ package gr.unipi.datacron.plans.logical.joinSTRange
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
-import gr.unipi.datacron.plans.logical.sptRefinement.SptRefinement
+import gr.unipi.datacron.plans.logical.sptRefinement.TriplesRefinement
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
@@ -16,7 +16,7 @@ case class JoinSpatialFirst() extends BaseLogicalPlan() {
     val transJoinKey = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(AppConfig.getString(qfpJoinKey)))
     val transPredicate = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(AppConfig.getString(qfpJoinTripleP))).get
     val encObj = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(AppConfig.getString(qfpJoinTripleO))).get
-    val refinement = SptRefinement()
+    val refinement = TriplesRefinement()
 
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(
       filterBySubSpatioTemporalInfoParams(DataStore.triplesData, constraints, encoder))

@@ -8,7 +8,7 @@ import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
-private[logical] case class SptRefinement() {
+private[logical] case class TriplesRefinement() extends BaseRefinement {
 
   val encodedUriMBR: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriMBR, Some("Find encoded " + uriMBR))).get
   val encodedUriTime: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriTimeStart, Some("Find encoded " + uriTimeStart))).get
@@ -40,16 +40,6 @@ private[logical] case class SptRefinement() {
     val extendedTriples = if (dfFilteredTriples.hasColumn(tripleMBRField)) dfFilteredTriples else
       addSpatialAndTemporalColumns(dfFilteredTriples, dfAllTriples)
 
-    val translatedExtendedTriples = PhysicalPlanner.translateColumns(translateColumnsParams(extendedTriples, Array(tripleMBRField, tripleTimeStartField), Some("Add decoded spatial and temporal columns")))
-
-    val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, Some("Filter by spatiotemporal columns")))
-
-
-    //Translate the result before returning
-    val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))
-    val outTranslated = PhysicalPlanner.translateColumns(translateColumnsParams(outPrepared, Array(tripleSubLongField, triplePredLongField, tripleObjLongField), Some("Final decode of columns")))
-    val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
-    outTranslated.select(outColumns.head, outColumns.tail: _*)
-
+    decodeDatesAndRefineResult(extendedTriples, constraints)
   }
 }

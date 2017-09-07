@@ -1,0 +1,23 @@
+package gr.unipi.datacron.plans.logical.sptRefinement
+
+import gr.unipi.datacron.common.Consts._
+import gr.unipi.datacron.common.SpatioTemporalRange
+import gr.unipi.datacron.plans.physical.PhysicalPlanner
+import gr.unipi.datacron.plans.physical.traits.{filterbySpatioTemporalRangeParams, prepareForFinalTranslationParams, translateColumnsParams}
+import org.apache.spark.sql.DataFrame
+
+private[sptRefinement] class BaseRefinement() {
+
+  def decodeDatesAndRefineResult(dfTriples: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
+    val translatedExtendedTriples = PhysicalPlanner.translateColumns(translateColumnsParams(dfTriples, Array(tripleMBRField, tripleTimeStartField), Some("Add decoded spatial and temporal columns")))
+
+    val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, Some("Filter by spatiotemporal columns")))
+
+
+    //Translate the result before returning
+    val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))
+    val outTranslated = PhysicalPlanner.translateColumns(translateColumnsParams(outPrepared, Array(tripleSubLongField, triplePredLongField, tripleObjLongField), Some("Final decode of columns")))
+    val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
+    outTranslated.select(outColumns.head, outColumns.tail: _*)
+  }
+}

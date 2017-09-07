@@ -7,10 +7,11 @@ import gr.unipi.datacron.plans.physical.joinTriples.{AJoinLLLTriples, _}
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.plans.physical.triples._
 import gr.unipi.datacron.common.Benchmarks.doBenchmark
+import gr.unipi.datacron.plans.physical.properties.Properties
 import org.apache.spark.sql.DataFrame
 
 
-object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples {
+object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with TProperties {
 
   private lazy val sTriples = STriples()
   private lazy val lllTriples = LLLTriples()
@@ -21,6 +22,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples {
   private lazy val rdsDictionary = RdsDictionary()
   private lazy val aJoinLLLTriples = AJoinLLLTriples()
   private lazy val abJoinLLLTriples = ABJoinLLLTriples()
+  private lazy val properties = Properties()
 
   private def pickTriplesPlanBasedOnRules: TTriples = AppConfig.getString(qfpTriples_trait) match {
       case Consts.tSTriples => sTriples
@@ -78,4 +80,16 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples {
 
   override def joinNewObjects(params: joinNewObjectsParams): DataFrame =
     doBenchmark[DataFrame](() => pickJoinTriplesPlanBasedOnRules.joinNewObjects(params), params)
+
+  override def addTemporaryColumnForRefinement(params: addTemporaryColumnForRefinementParams): DataFrame =
+    doBenchmark[DataFrame](() => properties.addTemporaryColumnForRefinement(params), params)
+
+  override def filterStarByTemporaryColumn(params: filterStarByTemporaryColumnParams): DataFrame =
+    doBenchmark[DataFrame](() => properties.filterStarByTemporaryColumn(params), params)
+
+  override def addSpatialAndTemporalColumnsByTemporaryColumn(params: addSpatialAndTemporalColumnsByTemporaryColumnParams): DataFrame =
+    doBenchmark[DataFrame](() => properties.addSpatialAndTemporalColumnsByTemporaryColumn(params), params)
+
+  override def filterNullProperties(params: filterNullPropertiesParams): DataFrame =
+    doBenchmark[DataFrame](() => properties.filterNullProperties(params), params)
 }

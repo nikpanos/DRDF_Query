@@ -67,6 +67,7 @@ object Consts {
   final val spatialFirstJoinStarSptRangeLPlan = "SpatialFirstJoinStStarSptRange"
   final val rdfFirstStarSptRangeLPlan = "RdfFirstStarSptRange"
   final val rdfFirstBestStarSptRangeLPlan = "RdfFirstBestStarSptRange"
+  final val propertiesStarSptRangeLPlan = "PropertiesStarSptRange"
 
   final val spatialFirstJoinSptRangeLPlan = "SpatialFirstJoinSptRange"
 
@@ -97,6 +98,9 @@ object Consts {
 
   final val uriHasGeometry = ":hasGeometry"
   final val uriHasTemporalFeature  = ":hasTemporalFeature"
+
+  final val uriTemporalShortcut = ":hasShortcutTemporal"
+  final val uriSpatialShortcut = ":hasShortcutSpatial"
   
   //Triples fields
   final val tripleSpoStrField = "spoStr"
@@ -104,12 +108,15 @@ object Consts {
   final val tripleSubLongField = "subLong"
   final val triplePredLongField = "predLong"
   final val tripleObjLongField = "objLong"
+  final val triplePropertiesStrField = "propertiesStr"
   final val tripleTranslateSuffix = "_trans"
   final val tripleMBRField = "mbr_wkt"
   final val tripleTimeStartField = "time_start"
   final val tripleJoinKey = "join_key"
   final val tripleGeometryField = "geometryWKT"
   final val tripleTemporalField = "temporalFeature"
+
+  final val tripleTemporaryRefinementField = "temporaryRefinement"
   
   //Dictionary fields
   final val dicLineStrField = "lineStr"
@@ -120,6 +127,7 @@ object Consts {
   final val parseString = "S"
   final val parseLongString = "LS"
   final val parseTripleLong = "LLL"
+  final val parseTripleLongProperties = "LLLProperties"
   final val parseParquet = "parquet"
 
   //spark params

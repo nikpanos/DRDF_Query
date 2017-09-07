@@ -1,6 +1,6 @@
 package gr.unipi.datacron.plans.logical.starSTRange
 
-import gr.unipi.datacron.plans.logical.sptRefinement.SptRefinement
+import gr.unipi.datacron.plans.logical.sptRefinement.TriplesRefinement
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
@@ -11,7 +11,7 @@ case class StarSpatialFirst() extends BaseStar() {
     val qPredTrans = encodePredicate(qPred)
     val qObjTrans = encodePredicate(qObj)
 
-    val refinement = SptRefinement()
+    val refinement = TriplesRefinement()
 
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(DataStore.triplesData, constraints, encoder))
 
