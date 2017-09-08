@@ -92,4 +92,13 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
 
   override def filterNullProperties(params: filterNullPropertiesParams): DataFrame =
     doBenchmark[DataFrame](() => properties.filterNullProperties(params), params)
+
+  override def filterByProperty(params: filterByPropertyParams): DataFrame =
+    doBenchmark[DataFrame](() => properties.filterByProperty(params), params)
+
+  override def addColumnByProperty(params: addColumnByPropertyParams): DataFrame =
+    doBenchmark[DataFrame](() => properties.addColumnByProperty(params), params)
+
+  override def addColumnsByProperty(params: addColumnsByPropertyParams): DataFrame =
+    doBenchmark[DataFrame](() => properties.addColumnsByProperty(params), params)
 }

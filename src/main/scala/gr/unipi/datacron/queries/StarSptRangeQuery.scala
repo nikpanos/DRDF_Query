@@ -18,8 +18,9 @@ case class StarSptRangeQuery() extends BaseQuery() {
       println("Starting global time counter")
       val startTime = System.currentTimeMillis
       val result = plan.get.executePlan.cache
-      result.show(100, truncate = false)
       println("Result count: " + result.count)
+      result.show(100, truncate = false)
+      //result.explain(true)
       val endTime = System.currentTimeMillis
       //result.explain()
       println("Global execution time (ms): " + (endTime - startTime))

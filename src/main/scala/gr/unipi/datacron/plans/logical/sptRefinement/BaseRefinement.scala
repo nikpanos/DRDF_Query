@@ -5,6 +5,8 @@ import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.{filterbySpatioTemporalRangeParams, prepareForFinalTranslationParams, translateColumnsParams}
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.TimestampType
 
 private[sptRefinement] class BaseRefinement() {
 
@@ -13,6 +15,7 @@ private[sptRefinement] class BaseRefinement() {
 
     val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, Some("Filter by spatiotemporal columns")))
 
+    //val result = translatedExtendedTriples
 
     //Translate the result before returning
     val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))

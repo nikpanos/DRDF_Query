@@ -1,5 +1,8 @@
 package gr.unipi.datacron.plans.physical.triples
 
+import java.sql.Timestamp
+import java.util.Date
+
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.physical.traits._
@@ -8,6 +11,7 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.TimestampType
 
 abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTriples {
   import DataStore.spark.implicits._
@@ -58,19 +62,15 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
 
   def filterbySpatioTemporalRange(params: filterbySpatioTemporalRangeParams): DataFrame = {
 
-    val format = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+    val lower = new Timestamp(params.range.low.time)
+    val upper = new Timestamp(params.range.high.time)
 
-    params.df.filter(x => {
-      var tmpResult = ((x.getAs[Int](triplePruneSubKeyField) >> 0) & 1) != 1
-      var sptResult = ((x.getAs[Int](triplePruneSubKeyField) >> 1) & 1) != 1
+    val dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
 
-      if (!tmpResult) {
-        //refine temporal
-        val decodedObject = format.parse(x.getAs[String](tripleTimeStartField + tripleTranslateSuffix)).getTime
-        if ((decodedObject >= params.range.low.time) && (decodedObject <= params.range.high.time)) {
-          tmpResult = true
-        }
-      }
+    val newDf = params.df
+                  .filter(to_utc_timestamp(col(tripleTimeStartField + tripleTranslateSuffix), dateFormat).between(lower, upper))
+      .filter(x => {
+      val sptResult = ((x.getAs[Int](triplePruneSubKeyField) >> 1) & 1) != 1
 
       if (!sptResult) {
         //refine spatial
@@ -80,13 +80,17 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
         val lat = lonlat(1).toDouble
         if ((lon >= params.range.low.longitude) && (lon <= params.range.high.longitude) &&
           (lat >= params.range.low.latitude) && (lat <= params.range.high.latitude)) {
-          sptResult = true
+          true
         }
-
+        else {
+          false
+        }
       }
-
-      tmpResult && sptResult
+      else {
+        true
+      }
     })
+    newDf
   }
 
   def prepareForFinalTranslation(params: prepareForFinalTranslationParams): DataFrame = {

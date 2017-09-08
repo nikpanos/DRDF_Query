@@ -33,6 +33,7 @@ case class LLLTriples() extends BaseTriples {
 
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
     if (AppConfig.getBoolean(qfpEnableFilterByEncodedInfo)) {
+      //println("filtering by subject info")
       val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
       val bIntervalIds = DataStore.sc.broadcast(intervalIds)
       val bSpatialIds = DataStore.sc.broadcast(DataStore.spatialGrid.getSpatialIds(params.constraints))
@@ -69,7 +70,7 @@ case class LLLTriples() extends BaseTriples {
       val higherId = params.encoder.encodeKeyFromComponents(intervalIds._2 + 1, 0, 0)
 
       result.filter(col(tripleSubLongField) >= lowerId).filter(col(tripleSubLongField) < higherId).
-        withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(triplePruneSubKeyField) > -1)
+        withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(tripleSubLongField) > -1)
     }
     else {
       params.df.withColumn(triplePruneSubKeyField, lit(3))

@@ -16,7 +16,7 @@ case class ABJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
     val filtered = dfTriples.filter(col(triplePredLongField) === predicate._1).as("df2")
 
 
-    df.as("df1").join(broadcast(filtered), col("df1." + subjectColumn) === col("df2." + tripleSubLongField)).select(cols: _*)
+    filtered.join(broadcast(df.as("df1")), col("df1." + subjectColumn) === col("df2." + tripleSubLongField)).select(cols: _*)
   }
 
   override def joinNewObjects(params: joinNewObjectsParams): DataFrame = {

@@ -1,6 +1,6 @@
 package gr.unipi.datacron.plans.logical.starSTRange
 
-import gr.unipi.datacron.plans.logical.sptRefinement.PropertiesRefinement
+import gr.unipi.datacron.plans.logical.sptRefinement.{PropertiesRefinement, PropertiesRefinement2}
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.{filterBySubSpatioTemporalInfoParams, filterNullPropertiesParams}
 import gr.unipi.datacron.store.DataStore
@@ -11,7 +11,7 @@ case class StarProperties() extends BaseStar() {
     val qPredEncoded = encodePredicate(qPred)
     val qObjEncoded = encodePredicate(qObj)
 
-    val refinement = PropertiesRefinement()
+    val refinement = PropertiesRefinement2()
 
     val notNullDf = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(DataStore.triplesData))
 
