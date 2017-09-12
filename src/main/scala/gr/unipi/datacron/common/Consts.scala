@@ -99,8 +99,8 @@ object Consts {
   final val uriHasGeometry = ":hasGeometry"
   final val uriHasTemporalFeature  = ":hasTemporalFeature"
 
-  final val uriTemporalShortcut = ":hasShortcutTemporal"
-  final val uriSpatialShortcut = ":hasShortcutSpatial"
+  //final val uriTemporalShortcut = ":hasShortcutTemporal"
+  //final val uriSpatialShortcut = ":hasShortcutSpatial"
   
   //Triples fields
   final val tripleSpoStrField = "spoStr"

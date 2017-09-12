@@ -2,7 +2,7 @@ package gr.unipi.datacron.store
 
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common._
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Row}
 
 private[store] class TriplesData() {
   import DataStore.spark.implicits._
@@ -19,34 +19,31 @@ private[store] class TriplesData() {
     case Consts.parseString => DataStore.spark.read.text(triplesPath).toDF(tripleSpoStrField)
     case Consts.parseTripleLong => DataStore.spark.read.text(triplesPath).map(s => {
       val line = s.getString(0)
-      val pos = line.indexOf(tripleFieldsSeparator)
-      val pos1 = line.lastIndexOf(tripleFieldsSeparator)
-      val sub = line.substring(0, pos).toLong
-      val pred = line.substring(pos + 1, pos1).toLong
-      val obj = line.substring(pos1 + 1).toLong
 
-      (sub, pred, obj)
+      val sub = TriplesParsingUtils.getNextToken(line, Some(0))
+      val pred = TriplesParsingUtils.getNextToken(line, sub._1)
+      val obj = TriplesParsingUtils.getNextToken(line, pred._1)
+
+      (sub._2, pred._2, obj._2)
       }).toDF(tripleSubLongField, triplePredLongField, tripleObjLongField)
     case Consts.parseTripleLongProperties => DataStore.spark.read.text(triplesPath).map(s => {
       val line = s.getString(0)
-      val pos = line.indexOf(tripleFieldsSeparator)
-      val pos1 = line.indexOf(tripleFieldsSeparator, pos + 1)
-      val pos2 = line.indexOf(tripleFieldsSeparator, pos1 + 1)
 
-      val sub = line.substring(0, pos).toLong
-      val pred = line.substring(pos + 1, pos1).toLong
-      if (pos2 > 0) {
-        val obj = line.substring(pos1 + 1, pos2).toLong
-        val props = line.substring(pos2 + 1)
-        (sub, pred, obj, props)
+      val sub = TriplesParsingUtils.getNextToken(line, Some(0))
+      val pred = TriplesParsingUtils.getNextToken(line, sub._1)
+      val obj = TriplesParsingUtils.getNextToken(line, pred._1)
+
+      if (obj._1.isDefined) {
+        val temporal = TriplesParsingUtils.getNextToken(line, obj._1)
+        val spatial = TriplesParsingUtils.getNextToken(line, temporal._1)
+        val properties = line.substring(spatial._1.get)
+        val tmp = (sub._2, pred._2, obj._2, temporal._2, spatial._2, properties)
+        tmp
       }
       else {
-        val obj = line.substring(pos1 + 1).toLong
-        (sub, pred, obj, null)
+        (sub._2, pred._2, obj._2, null.asInstanceOf[Long], null.asInstanceOf[Long], null)
       }
-
-
-      }).toDF(tripleSubLongField, triplePredLongField, tripleObjLongField, triplePropertiesStrField)
+    }).toDF(tripleSubLongField, triplePredLongField, tripleObjLongField, tripleTimeStartField, tripleMBRField, triplePropertiesStrField)
     case _ => throw new Exception("Triples parsing setting not found")
   }}, new BaseOperatorParams() {
     override def operationName: Option[String] = Some("Load triples dataset")
