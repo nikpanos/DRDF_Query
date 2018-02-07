@@ -27,5 +27,8 @@ case class StarSptRangeQuery() extends BaseQuery() {
 
       //result.explain(true)
     }
+    else {
+      println("Not a valid logical plan")
+    }
   }
 }

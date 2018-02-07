@@ -76,6 +76,7 @@ object Consts {
   final val tLSDictionary = "LSDictionary"
   final val tSDictionary = "SDictionary"
   final val tRedisDictionary = "RedisDictionary"
+  final val tRedisBatchDictionary = "RedisBatchDictionary"
 
   //TTriples
   final val tSTriples = "STriples"

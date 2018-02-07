@@ -20,6 +20,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   private lazy val lsDictionary = LSDictionary()
   private lazy val sDictionary = SDictionary()
   private lazy val rdsDictionary = RdsDictionary()
+  private lazy val rdsBatchDictionary = RdsBatchDictionary()
   private lazy val aJoinLLLTriples = AJoinLLLTriples()
   private lazy val abJoinLLLTriples = ABJoinLLLTriples()
   private lazy val properties = Properties()
@@ -42,6 +43,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
       case Consts.tLSDictionary => lsDictionary
       case Consts.tSDictionary => sDictionary
       case Consts.tRedisDictionary => rdsDictionary
+      case Consts.tRedisBatchDictionary => rdsBatchDictionary
       case _ => throw new Exception("Dictionary trait not found")
     }
 
