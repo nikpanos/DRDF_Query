@@ -1,13 +1,14 @@
 package gr.unipi.datacron.store
 
 import java.util
+import java.util.concurrent.ConcurrentHashMap
 
 import com.typesafe.config.ConfigObject
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import redis.clients.jedis.{HostAndPort, JedisCluster}
-
-import scala.collection.mutable
+import gr.unipi.datacron.common.RedisUtil
+import redis.clients.jedis.Response
 
 class DictionaryRedis() {
   private def getClusterConnection(configParam: String): JedisCluster = {
@@ -35,11 +36,41 @@ class DictionaryRedis() {
     }
   }*/
 
-  private val idToUri = getClusterConnection(qfpDicRedisIdToUriHosts)
+  protected val idToUri: JedisCluster = getClusterConnection(qfpDicRedisIdToUriHosts)
 
-  private val uriToId = getClusterConnection(qfpDicRedisUriToIdHosts)
+  protected val uriToId: JedisCluster = getClusterConnection(qfpDicRedisUriToIdHosts)
 
   def getDecodedValue(key: Long): Option[String] = Some(idToUri.get(key.toString))
 
   def getEncodedValue(key: String): Option[Long] = Some(uriToId.get(key.toString).toLong)
+
+
+  //-------------------------------------- BATCH REDIS PROCESSING BELOW THIS LINE --------------------------------------
+
+  private val nodeMapIdToUri = idToUri.getClusterNodes
+  private var anyHost = nodeMapIdToUri.keySet.iterator.next
+  private val slotHostMapIdToUri = RedisUtil.getSlotHostMap(anyHost)
+  //private val nodeMapUriToId = uriToId.getClusterNodes
+  //anyHost = nodeMapUriToId.keySet.iterator.next
+  //private val slotHostMapUriToId = RedisUtil.getSlotHostMap(anyHost)
+  private val pipeIdToUri = RedisUtil.getPipeDictionary(nodeMapIdToUri)
+  //private val pipeUriToId = RedisUtil.getPipeDictionary(nodeMapUriToId)
+  private val responses: util.HashMap[Long, Response[String]] = new util.HashMap[Long, Response[String]]()
+
+  def createResponseValueBatch(key: Long): Unit = responses.putIfAbsent(key, getResponseValueBatch(key.toString))
+
+  private def getResponseValueBatch(key: String): Response[String] = pipeIdToUri.get(RedisUtil.getShardName(key, slotHostMapIdToUri)).get(key)
+
+  def getDecodedValueBatch(key: Long): Option[String] = {
+    if (responses.containsKey(key)){
+      Some(responses.get(key).get())
+    }
+    else {
+      throw new Exception("AAAAAAAAAAAAAAAAAAA")
+    }
+  }
+
+  def syncAllBatch(): Unit = RedisUtil.syncAll(pipeIdToUri.values())
+
+  def clearResponses(): Unit = responses.clear()
 }
