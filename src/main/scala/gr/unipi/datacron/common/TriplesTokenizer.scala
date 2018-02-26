@@ -7,14 +7,15 @@ case class TriplesTokenizer(line: String) {
 
   def getNextToken: Option[Long] = {
     if (nextPos.isEmpty) return None
-    val pos = line.indexOf(tripleFieldsSeparator, nextPos.get)
-    if (pos >= 0) {
-      nextPos = Some(pos + 1)
-      Some(line.substring(nextPos.get, pos).toLong)
+    val pos = nextPos.get
+    val tmp = line.indexOf(tripleFieldsSeparator, pos)
+    nextPos = if (tmp >= 0) Some(tmp + 1)
+              else None
+    if (nextPos.isDefined) {
+      Some(line.substring(pos, nextPos.get - 1).toLong)
     }
     else {
-      nextPos = None
-      Some(line.substring(nextPos.get).toLong)
+      Some(line.substring(pos).toLong)
     }
   }
 

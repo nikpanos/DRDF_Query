@@ -32,6 +32,7 @@ object TextToParquet {
     println("Writing output to: " + newTriplesPath)
 
     DataStore.triplesData.printSchema()
+    //DataStore.triplesData.show()
 
     val triples = if (sorted) {
       if (partitionsNum == 0) {

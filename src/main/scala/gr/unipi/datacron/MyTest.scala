@@ -1,34 +1,26 @@
 package gr.unipi.datacron
 
 import gr.unipi.datacron.common.TriplesTokenizer
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.{Row, SparkSession}
-import org.apache.spark.sql.catalyst.encoders.{ExpressionEncoder, RowEncoder}
-import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
-import org.apache.spark.sql.types._
+import gr.unipi.datacron.common.schema.SemanticObject
 
 object MyTest {
-  def main(args : Array[String]): Unit = {
-    val spark: SparkSession = SparkSession.builder
-      .master("local[*]")
-      .appName("mytest")
-      .getOrCreate()
+  def main(args : Array[String]) {
+    val s = "5120 -3 -4 -5 -6 -7 -8 -9 -10 -11 -12 -13 -14 -15 -12 -16 -17"
+    SemanticObject.predicates = Array(-3, -5, -7, -9, -11, -13, -15, -16)
+    val tokenizer = TriplesTokenizer(s)
 
-    /*val sc: SparkContext = spark.sparkContext
+    val sub = tokenizer.getNextToken.get
+    val semObject = new SemanticObject(sub)
 
-    implicit val encoder: ExpressionEncoder[Row] = RowEncoder.apply(structType)
-
-    spark.read.text("test.txt").toDF("str").map(row => {
-      val tokenizer = TriplesTokenizer(row.getString(0))
-
-      val subj = tokenizer.getNextToken
-      val pred = tokenizer.getNextToken
-      val obje = tokenizer.getNextToken
-
-      val schema = StructType(Array(StructField("sub", IntegerType),
-                                    StructField(pred.get.toString, IntegerType)))
-
-      new GenericRowWithSchema(Array(subj, obje), schema)
-    })*/
+    var pred: Option[Long] = tokenizer.getNextToken
+    var obj: Option[Long] = tokenizer.getNextToken
+    while (pred.isDefined) {
+      semObject.setPropertyValue(pred.get, obj.get)
+      pred = tokenizer.getNextToken
+      obj = tokenizer.getNextToken
+    }
+    val test = semObject.getValues match {
+      case Array(a, b, c, d, e, f, g, h) => (semObject.subj, a, b, c, d, e, f, g, h)
+    }
   }
 }

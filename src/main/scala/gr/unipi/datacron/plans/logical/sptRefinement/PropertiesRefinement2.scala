@@ -1,30 +1,26 @@
 package gr.unipi.datacron.plans.logical.sptRefinement
 
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
 import org.apache.spark.sql.DataFrame
 
 private[logical] case class PropertiesRefinement2() extends BaseRefinement {
-  //val encodedUriSpatialShortcut: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriSpatialShortcut, Some("Find encoded " + uriSpatialShortcut))).get
-  //val encodedUriTemporalShortcut: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(uriTemporalShortcut, Some("Find encoded " + uriTemporalShortcut))).get
+  val encodedUriSpatialShortcut: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(tripleMBRField, Some("Find encoded " + tripleMBRField))).get
+  val encodedUriTemporalShortcut: Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(tripleTimeStartField, Some("Find encoded " + tripleTimeStartField))).get
 
   def refineResults(dfFilteredTriples: DataFrame, constraints: SpatioTemporalRange, qPredEncoded: Long, qObjEncoded: Long): DataFrame = {
-    //val predArray = Array(qPredEncoded, encodedUriSpatialShortcut, encodedUriTemporalShortcut)
-    //val dfWithTemporalColumn = PhysicalPlanner.addTemporaryColumnForRefinement(addTemporaryColumnForRefinementParams(dfFilteredTriples, predArray))
+    val translatedExtendedTriples = PhysicalPlanner.translateColumns(translateColumnsParams(dfFilteredTriples, Array(encodedUriSpatialShortcut.toString, encodedUriTemporalShortcut.toString), Some("Add decoded spatial and temporal columns")))
 
-    //val dfFilteredBySPO = PhysicalPlanner.filterStarByTemporaryColumn(filterStarByTemporaryColumnParams(dfWithTemporalColumn, qObjEncoded))
+    val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, encodedUriSpatialShortcut.toString + tripleTranslateSuffix, encodedUriTemporalShortcut.toString + tripleTranslateSuffix, Some("Filter by spatiotemporal columns")))
 
-    //val dfWithSpatialAndTemporal = PhysicalPlanner.addSpatialAndTemporalColumnsByTemporaryColumn(addSpatialAndTemporalColumnsByTemporaryColumnParams(dfFilteredBySPO, 1, 2))
+    //val result = translatedExtendedTriples
 
-    val filteredBySPO = PhysicalPlanner.filterByProperty(filterByPropertyParams(dfFilteredTriples, qPredEncoded, qObjEncoded))
-
-    //val namesAndPredicates = Array((tripleMBRField, encodedUriSpatialShortcut), (tripleTimeStartField, encodedUriTemporalShortcut))
-
-    //val dfWithSpatialAndTemporal = PhysicalPlanner.addColumnsByProperty(addColumnsByPropertyParams(filteredBySPO, namesAndPredicates))
-
-    //dfWithSpatialAndTemporal
-
-    decodeDatesAndRefineResult(filteredBySPO, constraints)
+    //Translate the result before returning
+    val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))
+    val outTranslated = PhysicalPlanner.translateColumns(translateColumnsParams(outPrepared, Array(tripleSubLongField, qPredEncoded.toString), Some("Final decode of columns")))
+    val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
+    outTranslated.select(outColumns.head, outColumns.tail: _*)
   }
 }

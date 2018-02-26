@@ -20,5 +20,5 @@ case class filterByColumnParams(df: DataFrame, columnName: String, value: Any, o
 case class filterBySubSpatioTemporalInfoParams(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder,
                                                override val operationName: Option[String] = None) extends BaseOperatorParams
 case class pointSearchObjectParams(df: DataFrame, sub: Long, pred: Long, override val operationName: Option[String] = None) extends BaseOperatorParams
-case class filterbySpatioTemporalRangeParams(df: DataFrame, range: SpatioTemporalRange, override val operationName: Option[String] = None) extends BaseOperatorParams
+case class filterbySpatioTemporalRangeParams(df: DataFrame, range: SpatioTemporalRange, spatialColumn: String, temporalColumn: String, override val operationName: Option[String] = None) extends BaseOperatorParams
 case class prepareForFinalTranslationParams(df: DataFrame, override val operationName: Option[String] = None) extends BaseOperatorParams

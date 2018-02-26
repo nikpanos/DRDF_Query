@@ -13,7 +13,7 @@ private[sptRefinement] class BaseRefinement() {
   def decodeDatesAndRefineResult(dfTriples: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
     val translatedExtendedTriples = PhysicalPlanner.translateColumns(translateColumnsParams(dfTriples, Array(tripleMBRField, tripleTimeStartField), Some("Add decoded spatial and temporal columns")))
 
-    val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, Some("Filter by spatiotemporal columns")))
+    val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, tripleMBRField + tripleTranslateSuffix, tripleTimeStartField + tripleTranslateSuffix, Some("Filter by spatiotemporal columns")))
 
     //val result = translatedExtendedTriples
 

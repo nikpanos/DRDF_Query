@@ -5,7 +5,7 @@ object Test {
   def printArray(arr: Array[(Long, Long)]): Unit = arr.foreach(println(_))
 
   def main(args : Array[String]): Unit = {
-    val obj = new SemanticObject("a", Array(2L, 1L))
+    /*val obj = new SemanticObject("a", Array(2L, 1L))
     //printArray(obj.getValues)
 
     obj.setPropertyValue(1L, 5L)
@@ -23,6 +23,6 @@ object Test {
     obj.setPropertyValue(1L, 0L)
 
     println()
-    //printArray(obj.getValues)
+    //printArray(obj.getValues)*/
   }
 }

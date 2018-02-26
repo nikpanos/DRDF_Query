@@ -68,13 +68,13 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
     val dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
 
     val newDf = params.df
-                  .filter(to_utc_timestamp(col(tripleTimeStartField + tripleTranslateSuffix), dateFormat).between(lower, upper))
+                  .filter(to_utc_timestamp(col(params.temporalColumn), dateFormat).between(lower, upper))
       .filter(x => {
       val sptResult = ((x.getAs[Int](triplePruneSubKeyField) >> 1) & 1) != 1
 
       if (!sptResult) {
         //refine spatial
-        val decodedObject = x.getAs[String](tripleMBRField + tripleTranslateSuffix).substring(7)
+        val decodedObject = x.getAs[String](params.spatialColumn).substring(7)
         val lonlat = decodedObject.substring(0, decodedObject.length - 1).split(lonLatSeparator)
         val lon = lonlat(0).toDouble
         val lat = lonlat(1).toDouble
