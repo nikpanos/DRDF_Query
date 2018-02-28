@@ -2,7 +2,7 @@ package gr.unipi.datacron.plans.physical.joinTriples
 
 import gr.unipi.datacron.common.Consts.{triplePredLongField, tripleSubLongField}
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
-import gr.unipi.datacron.plans.physical.traits.{TJoinTriples, joinNewObjectsParams}
+import gr.unipi.datacron.plans.physical.traits.{TJoinTriples, joinDataframesParams, joinNewObjectsParams}
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
@@ -28,4 +28,8 @@ case class AJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
     }
     result
   }
+
+  override def joinDataframes(params: joinDataframesParams): DataFrame =
+    params.df1.as(params.df1Alias).join(params.df2.as(params.df2Alias), col(params.df1Alias + params.df1JoinColumn) === col(params.df2Alias + params.df2JoinColumn))
+
 }

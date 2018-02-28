@@ -21,7 +21,11 @@ object DataStore {
   lazy val spatialGrid: SpatialGrid = new SpatialGrid()
   lazy val temporalGrid: TemporalGrid = new TemporalGrid()
 
-  lazy val triplesData: DataFrame = new TriplesData().data
+  lazy val triples: TriplesData = new TriplesData()
+  lazy val triplesData: DataFrame = triples.data
+
+  lazy val node: NodeProperties = new NodeProperties()
+  lazy val nodeData: DataFrame = node.data
 
   lazy val dictionaryData: DataFrame = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeFile)) {
     new DictionaryData().data

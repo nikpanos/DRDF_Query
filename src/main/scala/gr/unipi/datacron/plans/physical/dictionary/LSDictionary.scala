@@ -18,7 +18,7 @@ case class LSDictionary() extends BasePhysicalPlan with TDictionary {
   def pointSearchKey(params: pointSearchKeyParams): Option[Long] =
     Try(DataStore.dictionaryData.filter(col(dicValueStrField) === params.value).first().getAs[Long](dicKeyLongField)).toOption
 
-  def translateColumn(params: translateColumnParams): DataFrame = {
+  def decodeColumn(params: decodeColumnParams): DataFrame = {
     val collected = params.dfTriples.select(params.columnName).as[Long].collect.toSet
     val bCollected = DataStore.sc.broadcast(collected)
 
@@ -32,7 +32,7 @@ case class LSDictionary() extends BasePhysicalPlan with TDictionary {
     params.dfTriples.withColumn(params.columnName + tripleTranslateSuffix, translate(col(params.columnName)))
   }
 
-  def translateColumns(params: translateColumnsParams): DataFrame = {
+  def decodeColumns(params: decodeColumnsParams): DataFrame = {
     val bColumns = DataStore.sc.broadcast(params.columnNames)
 
     val collected = params.dfTriples.rdd.flatMap(row => {

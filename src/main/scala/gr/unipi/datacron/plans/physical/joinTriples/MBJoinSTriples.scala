@@ -44,4 +44,6 @@ case class MBJoinSTriples() extends BasePhysicalPlan with TJoinTriples {
     })
     result
   }
+
+  override def joinDataframes(params: joinDataframesParams): DataFrame = throw new CloneNotSupportedException()
 }

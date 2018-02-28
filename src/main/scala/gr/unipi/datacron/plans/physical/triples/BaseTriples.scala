@@ -110,4 +110,7 @@ abstract private[triples] class BaseTriples extends BasePhysicalPlan with TTripl
   override def filterByColumn(params: filterByColumnParams): DataFrame = {
     params.df.filter(col(params.columnName) === params.value)
   }
+
+  override def filterByPredicateAndRenameObject(params: filterByPredicateAndRenameObjectParams): DataFrame =
+    params.df.filter(col(triplePredLongField) === params.predicateValue).withColumnRenamed(tripleObjLongField, params.predicateValue.toString).drop(triplePredLongField)
 }

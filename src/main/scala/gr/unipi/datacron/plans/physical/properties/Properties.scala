@@ -42,7 +42,7 @@ case class Properties() extends BasePhysicalPlan with TProperties {
              .drop(tripleTemporaryRefinementField)
   }
 
-  override def filterNullProperties(params: filterNullPropertiesParams): DataFrame = params.df.na.drop(Array(triplePropertiesStrField))
+  override def filterNullProperties(params: filterNullPropertiesParams): DataFrame = params.df.na.drop(params.columnNames)
 
   override def filterByProperty(params: filterByPropertyParams): DataFrame = {
     val searchStr = params.predicateValue + tripleFieldsSeparator + params.objectValue

@@ -56,6 +56,9 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   override def filterByColumn(params: filterByColumnParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByColumn(params), params)
 
+  override def filterByPredicateAndRenameObject(params: filterByPredicateAndRenameObjectParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByPredicateAndRenameObject(params), params)
+
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterBySubSpatioTemporalInfo(params), params)
 
@@ -74,14 +77,17 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   override def pointSearchKey(params: pointSearchKeyParams): Option[Long] =
     doBenchmark[Option[Long]](() => pickDictionaryPlanBasedOnRules.pointSearchKey(params), params)
 
-  override def translateColumn(params: translateColumnParams): DataFrame =
-    doBenchmark[DataFrame](() => pickDictionaryPlanBasedOnRules.translateColumn(params), params)
+  override def decodeColumn(params: decodeColumnParams): DataFrame =
+    doBenchmark[DataFrame](() => pickDictionaryPlanBasedOnRules.decodeColumn(params), params)
 
-  override def translateColumns(params: translateColumnsParams): DataFrame =
-    doBenchmark[DataFrame](() => pickDictionaryPlanBasedOnRules.translateColumns(params), params)
+  override def decodeColumns(params: decodeColumnsParams): DataFrame =
+    doBenchmark[DataFrame](() => pickDictionaryPlanBasedOnRules.decodeColumns(params), params)
 
   override def joinNewObjects(params: joinNewObjectsParams): DataFrame =
     doBenchmark[DataFrame](() => pickJoinTriplesPlanBasedOnRules.joinNewObjects(params), params)
+
+  override def joinDataframes(params: joinDataframesParams): DataFrame =
+    doBenchmark[DataFrame](() => pickJoinTriplesPlanBasedOnRules.joinDataframes(params), params)
 
   override def addTemporaryColumnForRefinement(params: addTemporaryColumnForRefinementParams): DataFrame =
     doBenchmark[DataFrame](() => properties.addTemporaryColumnForRefinement(params), params)

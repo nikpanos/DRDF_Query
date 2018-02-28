@@ -33,12 +33,12 @@ case class SDictionary() extends BasePhysicalPlan with TDictionary {
     }
   }
 
-  override def translateColumn(params: translateColumnParams): DataFrame = {
+  override def decodeColumn(params: decodeColumnParams): DataFrame = {
     throw new NotImplementedError()
     //TODO: add implementation
   }
 
-  override def translateColumns(params: translateColumnsParams): DataFrame = {
+  override def decodeColumns(params: decodeColumnsParams): DataFrame = {
     throw new NotImplementedError()
     //TODO: add implementation
   }

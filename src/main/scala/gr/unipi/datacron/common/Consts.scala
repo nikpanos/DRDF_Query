@@ -30,6 +30,7 @@ object Consts {
   final val qfpDicPath = "datasets.dictionary.path"
   final val qfpTriplesPath = "datasets.triples.path"
   final val qfpIntrvlsPath = "datasets.intervals.path"
+  final val qfpNodePath = "datasets.node.path"
 
   final val qfpDicType = "datasets.dictionary.type"
   final val qfpDicTypeFile = "file"
@@ -43,6 +44,7 @@ object Consts {
 
   final val qfpParseDictionary = "datasets.dictionary.parse"
   final val qfpParseTriples = "datasets.triples.parse"
+  final val qfpParseNode = "datasets.node.parse"
 
   final val qfpSparkMaster = "execution.spark_master"
   final val qfpNamenode = "execution.namenode"
@@ -61,6 +63,7 @@ object Consts {
   //Query types
   final val starSptRangeQuery = "StarSptRange"
   final val twoHopSptRangeQuery = "JoinSptRange"
+  final val chainSptRangeQuery = "ChainSptRange"
 
   //Logical plans
   final val spatialFirstStarSptRangeLPlan = "SpatialFirstStarSptRange"
@@ -70,6 +73,8 @@ object Consts {
   final val propertiesStarSptRangeLPlan = "PropertiesStarSptRange"
 
   final val spatialFirstJoinSptRangeLPlan = "SpatialFirstJoinSptRange"
+
+  final val propertiesChainQueryPlan = "PropertiesChain"
 
   //Physical plans
   //TDictionary
@@ -127,8 +132,7 @@ object Consts {
   //parsing
   final val parseString = "S"
   final val parseLongString = "LS"
-  final val parseTripleLong = "LLL"
-  final val parseTripleLongProperties = "LLLProperties"
+  final val parseLong = "LLL"
   final val parseParquet = "parquet"
 
   //spark params

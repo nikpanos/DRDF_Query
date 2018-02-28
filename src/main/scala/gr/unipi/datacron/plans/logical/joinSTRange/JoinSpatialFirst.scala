@@ -28,7 +28,7 @@ case class JoinSpatialFirst() extends BaseLogicalPlan() {
 
     val filteredBySPO = PhysicalPlanner.filterByColumn(filterByColumnParams(secondHop, AppConfig.getString(qfpJoinTripleP), encObj))
 
-    val transFilteredByPO = PhysicalPlanner.translateColumn(translateColumnParams(filteredBySPO, AppConfig.getString(qfpJoinTripleP)))
+    val transFilteredByPO = PhysicalPlanner.decodeColumn(decodeColumnParams(filteredBySPO, AppConfig.getString(qfpJoinTripleP)))
 
     refinement.refineResults(transFilteredByPO, DataStore.triplesData, constraints)
   }

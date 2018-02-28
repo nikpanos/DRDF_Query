@@ -17,7 +17,7 @@ trait TProperties {
 case class addTemporaryColumnForRefinementParams(df: DataFrame, predicates: Array[Long], override val operationName: Option[String] = None) extends BaseOperatorParams
 case class filterStarByTemporaryColumnParams(df: DataFrame, value: Long, override val operationName: Option[String] = None) extends BaseOperatorParams
 case class addSpatialAndTemporalColumnsByTemporaryColumnParams(df: DataFrame, spatialColumn: Int, temporalColumn: Int, override val operationName: Option[String] = None) extends BaseOperatorParams
-case class filterNullPropertiesParams(df: DataFrame, override val operationName: Option[String] = None) extends BaseOperatorParams
+case class filterNullPropertiesParams(df: DataFrame, columnNames: Array[String], override val operationName: Option[String] = None) extends BaseOperatorParams
 case class filterByPropertyParams(df: DataFrame, predicateValue: Long, objectValue: Long, override val operationName: Option[String] = None) extends BaseOperatorParams
 case class addColumnByPropertyParams(df: DataFrame, columnName: String, predicateValue: Long, override val operationName: Option[String] = None) extends BaseOperatorParams
 case class addColumnsByPropertyParams(df: DataFrame, namesAndPredicates: Array[(String, Long)], override val operationName: Option[String] = None) extends BaseOperatorParams

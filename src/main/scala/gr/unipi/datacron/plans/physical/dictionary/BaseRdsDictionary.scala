@@ -13,10 +13,10 @@ abstract private[dictionary] class BaseRdsDictionary extends BasePhysicalPlan wi
 
   protected def decodeColumn(df: DataFrame, columnName: String, newColumnName: String): DataFrame
 
-  override def translateColumn(params: translateColumnParams): DataFrame =
+  override def decodeColumn(params: decodeColumnParams): DataFrame =
     decodeColumn(params.dfTriples, params.columnName, params.columnName + tripleTranslateSuffix)
 
-  override def translateColumns(params: translateColumnsParams): DataFrame = {
+  override def decodeColumns(params: decodeColumnsParams): DataFrame = {
     var result = params.dfTriples
     params.columnNames.foreach(c => {
       result = decodeColumn(result, c, c + tripleTranslateSuffix)
