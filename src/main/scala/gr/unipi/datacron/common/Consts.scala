@@ -31,6 +31,7 @@ object Consts {
   final val qfpTriplesPath = "datasets.triples.path"
   final val qfpIntrvlsPath = "datasets.intervals.path"
   final val qfpNodePath = "datasets.node.path"
+  final val qfpVesselsPath = "datasets.vessels.path"
 
   final val qfpDicType = "datasets.dictionary.type"
   final val qfpDicTypeFile = "file"
@@ -45,6 +46,7 @@ object Consts {
   final val qfpParseDictionary = "datasets.dictionary.parse"
   final val qfpParseTriples = "datasets.triples.parse"
   final val qfpParseNode = "datasets.node.parse"
+  final val qfpParseVessel = "datasets.vessels.parse"
 
   final val qfpSparkMaster = "execution.spark_master"
   final val qfpNamenode = "execution.namenode"
