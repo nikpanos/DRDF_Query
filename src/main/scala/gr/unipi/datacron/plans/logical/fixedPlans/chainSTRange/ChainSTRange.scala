@@ -1,10 +1,10 @@
-package gr.unipi.datacron.plans.logical.chainSTRange
+package gr.unipi.datacron.plans.logical.fixedPlans.chainSTRange
 
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
-import gr.unipi.datacron.common.Consts._
 import org.apache.spark.sql.DataFrame
 
 case class ChainSTRange() extends BaseLogicalPlan() {

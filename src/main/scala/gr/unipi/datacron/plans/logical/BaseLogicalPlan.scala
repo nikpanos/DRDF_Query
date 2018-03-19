@@ -6,7 +6,7 @@ import gr.unipi.datacron.encoding.SimpleEncoder
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
-abstract private[logical] class BaseLogicalPlan() {
+abstract class BaseLogicalPlan() {
   private[logical] val queryName: String = AppConfig.getString(Consts.qfpQueryName)
   private[logical] val nTotalBits: Int = AppConfig.getInt(Consts.qfpTotalBits)
   private[logical] val nSpatialBits: Int = AppConfig.getInt(Consts.qfpSpatialBits)
@@ -16,7 +16,7 @@ abstract private[logical] class BaseLogicalPlan() {
   
   def executePlan: DataFrame = {
     println("Query type: " + AppConfig.getString(Consts.qfpQueryType))
-    println("Logical plan: " + AppConfig.getStringList(Consts.qfpLogicalPlans).get(0))
+    println("Logical plan: " + AppConfig.getStringList(Consts.qfpLogicalPlans)(0))
     doExecutePlan()
   }
 

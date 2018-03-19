@@ -1,6 +1,6 @@
-package gr.unipi.datacron.plans.logical.starSTRange
+package gr.unipi.datacron.plans.logical.fixedPlans.starSTRange
 
-import gr.unipi.datacron.plans.logical.sptRefinement.{PropertiesRefinement, PropertiesRefinement2}
+import gr.unipi.datacron.plans.logical.fixedPlans.sptRefinement.{PropertiesRefinement, PropertiesRefinement2}
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.{filterByColumnParams, filterBySubSpatioTemporalInfoParams, filterNullPropertiesParams}
 import gr.unipi.datacron.store.DataStore

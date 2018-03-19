@@ -1,4 +1,4 @@
-package gr.unipi.datacron.plans.logical.sptRefinement
+package gr.unipi.datacron.plans.logical.fixedPlans.sptRefinement
 
 import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.physical.PhysicalPlanner

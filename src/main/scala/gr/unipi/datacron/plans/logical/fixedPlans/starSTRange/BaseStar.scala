@@ -1,4 +1,4 @@
-package gr.unipi.datacron.plans.logical.starSTRange
+package gr.unipi.datacron.plans.logical.fixedPlans.starSTRange
 
 
 import gr.unipi.datacron.common.Consts._

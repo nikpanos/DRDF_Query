@@ -1,26 +1,13 @@
 package gr.unipi.datacron
 
 import gr.unipi.datacron.common.{AppConfig, Consts}
-import gr.unipi.datacron.common.Consts.{myParam, qfpParseTriples}
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.store.DataStore
 
 object DuplicatesRemoval {
 
-  def printUsage(): Unit = {
-    println("2 arguments expected:")
-    println("\t1: Path to params file")
-    println("\t2: Path to output directory")
-  }
-
   def main(args : Array[String]): Unit = {
-    if (args.length != 2) {
-      printUsage()
-      return ;
-    }
-
-    val newTriplesPath = args(1)
-
-    AppConfig.init(args(0))
+    AppConfig.init()
 
     if (!AppConfig.getString(qfpParseTriples).equals(Consts.parseString)) {
       println("Triple parsing should be \"S\" (String)")
@@ -29,8 +16,8 @@ object DuplicatesRemoval {
 
     DataStore.init()
 
-    println("Writing output to: " + newTriplesPath)
-    println("Partitions number: " + AppConfig.getInt(myParam))
+    println("Writing output to: " + AppConfig.getString(qfpQueryOutputFolderPath))
+    println("Partitions number: " + AppConfig.getInt(partitionsNumberAfterShuffle))
 
     val res = DataStore.triplesData.rdd.map(x => {
       val spo = x.getAs[String](0)
@@ -39,6 +26,6 @@ object DuplicatesRemoval {
       a
     }).map((key) => {
       key._1
-    }).saveAsTextFile(newTriplesPath)
+    }).saveAsTextFile(AppConfig.getString(qfpQueryOutputFolderPath))
   }
 }

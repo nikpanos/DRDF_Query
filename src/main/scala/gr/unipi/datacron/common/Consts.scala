@@ -60,6 +60,23 @@ object Consts {
 
   final val qfpEnableFilterByEncodedInfo = "query.enableFilterByEncodedInfo"
 
+  final val qfpQueryOutputDevices = "output.outputDevices"
+  final val qfpQueryOutputFolderPath = "output.dirOutput.path"
+  final val qfpQueryOutputFolderRemoveExisting = "output.dirOutput.removeExisting"
+  final val qfpQueryOutputFolderFormat = "output.dirOutput.format"
+  final val qfpQueryOutputScreenHowMany = "output.screenOutput.howMany"
+  final val qfpQueryOutputScreenExplain = "output.screenOutput.explain"
+  final val qfpQueryOutputShouldBeSorted = "output.shouldBeSorted"
+
+  //Output devices
+  final val outputDeviceScreen = "screen"
+  final val outputDeviceDir = "dir"
+
+  //Output file formats
+  final val outputFormatParquet = "parquet"
+  final val outputFormatText = "text"
+  final val outputFormatCSV = "csv"
+
   //Query types
   final val starSptRangeQuery = "StarSptRange"
   final val twoHopSptRangeQuery = "JoinSptRange"
@@ -136,6 +153,6 @@ object Consts {
   final val parseParquet = "parquet"
 
   //spark params
-  final val myParam = "sparkParams.spark.sql.shuffle.partitions"
+  final val partitionsNumberAfterShuffle = "sparkParams.spark.sql.shuffle.partitions"
 }
 

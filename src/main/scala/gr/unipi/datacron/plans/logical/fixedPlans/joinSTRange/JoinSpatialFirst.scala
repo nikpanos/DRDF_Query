@@ -1,9 +1,9 @@
-package gr.unipi.datacron.plans.logical.joinSTRange
+package gr.unipi.datacron.plans.logical.fixedPlans.joinSTRange
 
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
-import gr.unipi.datacron.plans.logical.sptRefinement.TriplesRefinement
+import gr.unipi.datacron.plans.logical.fixedPlans.sptRefinement.TriplesRefinement
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore

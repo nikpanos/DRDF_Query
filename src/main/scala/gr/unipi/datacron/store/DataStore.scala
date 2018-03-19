@@ -2,6 +2,7 @@ package gr.unipi.datacron.store
 
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
@@ -39,6 +40,26 @@ object DataStore {
 
   var bConfig: Broadcast[String] = _
 
+  def hdfsDirectoryExists(directory: String): Boolean = {
+    val hdfs = FileSystem.get(sc.hadoopConfiguration)
+    try {
+      hdfs.exists(new Path(directory))
+    }
+    finally {
+      hdfs.close()
+    }
+  }
+
+  def deleteHdfsDirectory(directory: String): Boolean = {
+    val hdfs = FileSystem.get(sc.hadoopConfiguration)
+    try {
+      hdfs.delete(new Path(directory), true)
+    }
+    finally {
+      hdfs.close()
+    }
+  }
+
   def init(): Unit = {
     //Force initialization of spark context here in order to omit the initialization overhead
     if (!AppConfig.getBoolean(qfpVerboseLogging)) {
@@ -51,7 +72,9 @@ object DataStore {
       dictionaryRedis.getDecodedValue(-1L)
       dictionaryRedis.getEncodedValue("a")
     }
-    spark.sql("set spark.sql.shuffle.partitions=" + AppConfig.getInt(myParam))
+    if (AppConfig.getInt(partitionsNumberAfterShuffle) > 0) {
+      spark.sql("set spark.sql.shuffle.partitions=" + AppConfig.getInt(partitionsNumberAfterShuffle))
+    }
     temporalGrid.getIntervalId(0)  //to initialize the temporal grid
   }
 }

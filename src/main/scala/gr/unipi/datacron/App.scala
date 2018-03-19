@@ -2,6 +2,7 @@ package gr.unipi.datacron
 
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.queries._
+import gr.unipi.datacron.common.Consts._
 
 object App {
   
@@ -10,12 +11,12 @@ object App {
   }
   
   def processQueryFile(queryFile: String): Unit = {
-    AppConfig.init(queryFile)
+    AppConfig.init()
 
     val query = AppConfig.getString(Consts.qfpQueryType) match {
-      case Consts.starSptRangeQuery => Some(StarSptRangeQuery())
-      case Consts.twoHopSptRangeQuery => Some(TwoHopSptRangeQuery())
-      case Consts.chainSptRangeQuery => Some(ChainQuery())
+      case `starSptRangeQuery` => Some(StarSptRangeQuery())
+      case `twoHopSptRangeQuery` => Some(TwoHopSptRangeQuery())
+      case `chainSptRangeQuery` => Some(ChainQuery())
       case _ => None
     }
 

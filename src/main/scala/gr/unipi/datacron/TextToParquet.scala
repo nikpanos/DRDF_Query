@@ -6,28 +6,22 @@ import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.store.DataStore.spark
 import org.apache.spark.sql.DataFrame
 object TextToParquet {
-
-  def printUsage(): Unit = {
-    println("3 arguments expected:")
-    println("\t1: Path to params file")
-    println("\t2: The number of partitions of the output file, or 0 for default")
-    println("\t3: 1 for sorting enabled or anything else for sorting disabled")
-  }
-
-  def processDataframe(df: DataFrame, dfName: String, outputPath: String, partitionsNum: Int, sortingColumns: Option[Array[String]]) = {
+  def processDataframe(df: DataFrame, dfName: String, outputPath: String, sortingColumns: Option[Array[String]]) = {
     println("Writing " + dfName + " to: " + outputPath)
     df.printSchema()
+
+    val partitionsNum = AppConfig.getOptionalInt(partitionsNumberAfterShuffle).getOrElse(0)
 
     val data = if ((sortingColumns.isDefined) && (sortingColumns.get.length > 0)) {
       val cols = sortingColumns.get
       if (partitionsNum == 0) {
         throw new Exception("When sorting, you must specify the number of partitions")
       }
-      spark.sql("set spark.sql.shuffle.partitions=" + partitionsNum)
+      //spark.sql("set spark.sql.shuffle.partitions=" + partitionsNum)
       df.sort(cols(0), cols.drop(1):_*)
     }
     else if (partitionsNum != 0) {
-      df.repartition(partitionsNum)
+      df.repartition(AppConfig.getInt(partitionsNumberAfterShuffle))
     }
     else {
       df
@@ -39,17 +33,10 @@ object TextToParquet {
   }
 
   def main(args : Array[String]): Unit = {
-
-    if (args.length != 3) {
-      printUsage()
-      return ;
-    }
-
-    val partitionsNum = args(1).toInt
-    val sorted = args(2).equals("1")
-
-    AppConfig.init(args(0))
+    AppConfig.init()
     DataStore.init()
+
+    val sorted = AppConfig.getOptionalBoolean(qfpQueryOutputShouldBeSorted).getOrElse(false)
 
     var sortCols = if (sorted) {
       Some(Array(tripleSubLongField, triplePredLongField, tripleObjLongField))
@@ -59,7 +46,7 @@ object TextToParquet {
     }
 
     var outputPath = DataStore.triples.dataPath.replace("/text/", "/parquet/")  //TODO: dirty, maybe clean it
-    processDataframe(DataStore.triplesData, "triples", outputPath, partitionsNum, sortCols)
+    processDataframe(DataStore.triplesData, "triples", outputPath, sortCols)
 
     sortCols = if (sorted) {
       Some(Array(tripleSubLongField))
@@ -69,7 +56,7 @@ object TextToParquet {
     }
 
     outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/")  //TODO: dirty, maybe clean it
-    processDataframe(DataStore.nodeData, "node", outputPath, partitionsNum, sortCols)
+    processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
 
     println("Success!")
   }
