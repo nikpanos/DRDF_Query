@@ -28,6 +28,9 @@ object DataStore {
   lazy val node: NodeProperties = new NodeProperties()
   lazy val nodeData: DataFrame = node.data
 
+  lazy val vessels: VesselProperties = new VesselProperties()
+  lazy val vesselData: DataFrame = vessels.data
+
   lazy val dictionaryData: DataFrame = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeFile)) {
     new DictionaryData().data
   }

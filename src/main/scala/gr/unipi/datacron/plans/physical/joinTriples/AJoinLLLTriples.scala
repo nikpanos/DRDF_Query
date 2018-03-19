@@ -30,6 +30,6 @@ case class AJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
   }
 
   override def joinDataframes(params: joinDataframesParams): DataFrame =
-    params.df1.as(params.df1Alias).join(params.df2.as(params.df2Alias), col(params.df1Alias + params.df1JoinColumn) === col(params.df2Alias + params.df2JoinColumn))
+    params.df1.as(params.df1Alias).join(params.df2.as(params.df2Alias), col(params.df1Alias + "." + params.df1JoinColumn) === col(params.df2Alias + "." + params.df2JoinColumn))
 
 }
