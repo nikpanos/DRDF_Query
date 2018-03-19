@@ -1,16 +1,10 @@
 package gr.unipi.datacron.store
 
-import gr.unipi.datacron.common.{AppConfig, BaseOperatorParams, Benchmarks}
-import gr.unipi.datacron.common.Consts.{qfpHdfsPrefix, qfpNamenode, qfpTriplesPath}
+import gr.unipi.datacron.common.{BaseOperatorParams, Benchmarks, Utils}
 import org.apache.spark.sql.DataFrame
 
 abstract private[store] class BaseHDFSStore() {
-  val dataPath: String = if (AppConfig.yarnMode) {
-    AppConfig.getString(qfpNamenode) + AppConfig.getString(qfpHdfsPrefix) + AppConfig.getString(configPropertyForDataPath)
-  }
-  else {
-    AppConfig.getString(configPropertyForDataPath)
-  }
+  val dataPath: String = Utils.resolveHdfsPath(configPropertyForDataPath)
 
   protected def configPropertyForDataPath: String
 

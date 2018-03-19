@@ -4,6 +4,7 @@ import java.io.File
 import java.util
 
 import com.typesafe.config.{Config, ConfigFactory, ConfigObject, ConfigRenderOptions}
+import gr.unipi.datacron.common.AppConfig.config
 import gr.unipi.datacron.common.Consts.qfpSparkMaster
 
 import collection.JavaConverters._
@@ -29,6 +30,8 @@ object AppConfig extends Serializable {
   def getLong(s: String): Long = config.getLong(s)
 
   def getStringList(s: String): Array[String] = config.getStringList(s).asScala.toArray
+
+  def stringListContains(config: String, s: String): Boolean = getStringList(config).contains(s)
 
   def getObjectList(s: String): util.List[_ <: ConfigObject] = config.getObjectList(s)
 

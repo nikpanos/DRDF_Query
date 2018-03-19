@@ -31,11 +31,6 @@ object DataStore {
   lazy val vessels: VesselProperties = new VesselProperties()
   lazy val vesselData: DataFrame = vessels.data
 
-  lazy val dictionaryData: DataFrame = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeFile)) {
-    new DictionaryData().data
-  }
-  else null
-
   lazy val dictionaryRedis: DictionaryRedis = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
     new DictionaryRedis()
   }

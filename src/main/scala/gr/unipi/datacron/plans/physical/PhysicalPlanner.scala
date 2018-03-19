@@ -17,8 +17,6 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   private lazy val lllTriples = LLLTriples()
   private lazy val mbJoinSTriples = MBJoinSTriples()
   private lazy val mbJoinLLLTriples = MBJoinLLLTriples()
-  private lazy val lsDictionary = LSDictionary()
-  private lazy val sDictionary = SDictionary()
   private lazy val rdsDictionary = RdsDictionary()
   private lazy val rdsBatchDictionary = RdsBatchDictionary()
   private lazy val aJoinLLLTriples = AJoinLLLTriples()
@@ -40,8 +38,6 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
     }
 
   private def pickDictionaryPlanBasedOnRules: TDictionary = AppConfig.getString(qfpDictionaryTrait) match {
-      case Consts.tLSDictionary => lsDictionary
-      case Consts.tSDictionary => sDictionary
       case Consts.tRedisDictionary => rdsDictionary
       case Consts.tRedisBatchDictionary => rdsBatchDictionary
       case _ => throw new Exception("Dictionary trait not found")

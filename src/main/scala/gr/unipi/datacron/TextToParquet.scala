@@ -59,7 +59,7 @@ object TextToParquet {
     processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
 
     outputPath = DataStore.vessels.dataPath.replace("/text/", "/parquet/")  //TODO: dirty, maybe clean it
-    processDataframe(DataStore.vesselData, "vessels", outputPath, partitionsNum, sortCols)
+    processDataframe(DataStore.vesselData, "vessels", outputPath, sortCols)
 
     println("Success!")
   }

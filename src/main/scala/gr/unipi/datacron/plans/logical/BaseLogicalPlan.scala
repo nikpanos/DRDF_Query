@@ -16,7 +16,7 @@ abstract class BaseLogicalPlan() {
   
   def executePlan: DataFrame = {
     println("Query type: " + AppConfig.getString(Consts.qfpQueryType))
-    println("Logical plan: " + AppConfig.getStringList(Consts.qfpLogicalPlans)(0))
+    println("Logical plan: " + AppConfig.getString(Consts.qfpLogicalPlans))
     doExecutePlan()
   }
 

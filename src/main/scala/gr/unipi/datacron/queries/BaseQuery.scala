@@ -1,6 +1,6 @@
 package gr.unipi.datacron.queries
 
-import gr.unipi.datacron.common.AppConfig
+import gr.unipi.datacron.common.{AppConfig, Utils}
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 import gr.unipi.datacron.common.Consts._
@@ -13,11 +13,16 @@ abstract class BaseQuery() {
     val plan = getExecutionPlan()
 
     if (plan.isDefined) {
+
+      if (AppConfig.stringListContains(qfpQueryOutputDevices, outputDeviceDir) && AppConfig.getBoolean(qfpQueryOutputFolderRemoveExisting)) {
+        DataStore.deleteHdfsDirectory(AppConfig.getString(qfpQueryOutputFolderPath))
+      }
+
       println("Starting query execution")
       val startTime = System.currentTimeMillis
       val result = plan.get.executePlan
-      val endTime = System.currentTimeMillis
       processOutput(result)
+      val endTime = System.currentTimeMillis
       println("Query execution completed")
       println("Query execution time (ms): " + (endTime - startTime))
     }
@@ -35,10 +40,6 @@ abstract class BaseQuery() {
         result.show(AppConfig.getInt(qfpQueryOutputScreenHowMany), false)
       }
       case `outputDeviceDir` => {
-        if (AppConfig.getBoolean(qfpQueryOutputFolderRemoveExisting)) {
-          DataStore.deleteHdfsDirectory(AppConfig.getString(qfpQueryOutputFolderPath))
-        }
-
         AppConfig.getString(qfpQueryOutputFolderFormat) match {
           case `outputFormatParquet` => result.write.parquet(AppConfig.getString(qfpQueryOutputFolderPath))
           case `outputFormatText` => result.write.text(AppConfig.getString(qfpQueryOutputFolderPath))

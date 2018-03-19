@@ -97,8 +97,6 @@ object Consts {
 
   //Physical plans
   //TDictionary
-  final val tLSDictionary = "LSDictionary"
-  final val tSDictionary = "SDictionary"
   final val tRedisDictionary = "RedisDictionary"
   final val tRedisBatchDictionary = "RedisBatchDictionary"
 
@@ -150,8 +148,7 @@ object Consts {
 
   //parsing
   final val parseString = "S"
-  final val parseLongString = "LS"
-  final val parseLong = "LLL"
+  final val parseLong = "L"
   final val parseParquet = "parquet"
 
   //spark params

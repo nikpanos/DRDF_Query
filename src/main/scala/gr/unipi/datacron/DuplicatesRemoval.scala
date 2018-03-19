@@ -1,6 +1,6 @@
 package gr.unipi.datacron
 
-import gr.unipi.datacron.common.{AppConfig, Consts}
+import gr.unipi.datacron.common.{AppConfig, Consts, Utils}
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.store.DataStore
 
@@ -26,6 +26,6 @@ object DuplicatesRemoval {
       a
     }).map((key) => {
       key._1
-    }).saveAsTextFile(AppConfig.getString(qfpQueryOutputFolderPath))
+    }).saveAsTextFile(Utils.resolveHdfsPath(AppConfig.getString(qfpQueryOutputFolderPath)))
   }
 }
