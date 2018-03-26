@@ -6,7 +6,9 @@ import gr.unipi.datacron.common.Consts._
 
 object App {
   def main(args : Array[String]) {
-    AppConfig.init()
+    AppConfig.init(args(0))
+
+    println(AppConfig.getInt(Consts.partitionsNumberAfterShuffle))
 
     val query = AppConfig.getString(Consts.qfpQueryType) match {
       case `starSptRangeQuery` => Some(StarSptRangeQuery())

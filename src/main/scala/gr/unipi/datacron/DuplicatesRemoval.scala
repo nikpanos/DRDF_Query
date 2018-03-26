@@ -7,7 +7,7 @@ import gr.unipi.datacron.store.DataStore
 object DuplicatesRemoval {
 
   def main(args : Array[String]): Unit = {
-    AppConfig.init()
+    AppConfig.init(args(0))
 
     if (!AppConfig.getString(qfpParseTriples).equals(Consts.parseString)) {
       println("Triple parsing should be \"S\" (String)")

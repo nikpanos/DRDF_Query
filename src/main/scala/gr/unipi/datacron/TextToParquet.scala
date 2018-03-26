@@ -33,7 +33,7 @@ object TextToParquet {
   }
 
   def main(args : Array[String]): Unit = {
-    AppConfig.init()
+    AppConfig.init(args(0))
     DataStore.init()
 
     val sorted = AppConfig.getOptionalBoolean(qfpQueryOutputShouldBeSorted).getOrElse(false)

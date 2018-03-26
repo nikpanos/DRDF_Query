@@ -15,8 +15,10 @@ object AppConfig extends Serializable {
   //private var queryFile: File = _
   private var config: Config = _
 
-  def init(): Unit = {
-    config = ConfigFactory.load()
+  def init(filename: String): Unit = {
+    val queryFile: File = new File(filename)
+    val fileConfig = ConfigFactory.parseFile(queryFile)
+    config = ConfigFactory.load(fileConfig)
   }
 
   def getString(s: String): String = config.getString(s)
