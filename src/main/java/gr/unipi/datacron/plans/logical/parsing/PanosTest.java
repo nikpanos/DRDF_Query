@@ -5,7 +5,10 @@
  */
 package gr.unipi.datacron.plans.logical.parsing;
 
+import gr.unipi.datacron.common.AppConfig;
 import gr.unipi.datacron.plans.logical.parsing.operators.BaseOperator;
+import gr.unipi.datacron.store.DataStore;
+import scala.Option;
 
 /**
  *
@@ -13,7 +16,32 @@ import gr.unipi.datacron.plans.logical.parsing.operators.BaseOperator;
  */
 public class PanosTest {
 
+    private static Long getRedisEncodedValue(String key) {
+        Option<Object> optionValue = DataStore.dictionaryRedis().getEncodedValue(key);
+        Long value = null;
+        if (optionValue.isDefined()) {
+            value = (Long) optionValue.get();
+        }
+        return value;
+    }
+
+    private static String getRedisDecodedValue(Long key) {
+        Option<String> optionValue = DataStore.dictionaryRedis().getDecodedValue(key);
+        String value = null;
+        if (optionValue.isDefined()) {
+            value = optionValue.get();
+        }
+        return value;
+    }
+
     public static void main(String args[]) {
+        AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");
+
+        Long encodedValue = getRedisEncodedValue("a");
+        System.out.println(encodedValue);
+
+        String decodedValue = getRedisDecodedValue(-5L);
+        System.out.println(decodedValue);
 
         BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase("SELECT ?x"
                 + "WHERE"
