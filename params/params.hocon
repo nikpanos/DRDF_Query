@@ -1,0 +1,80 @@
+universe {
+    nTotalBits = 32
+    nSpatialBits = 8
+    nIDsBits = 8
+    lat_lower = 30
+    lon_lower = -12
+    lat_upper = 52
+    lon_upper = 37
+}
+datasets {
+    dictionary {
+        type = "redis"
+        idToUri {
+            hosts = [
+                { address = "127.0.0.1", port = 6377 }
+                { address = "127.0.0.1", port = 6378 }
+                { address = "127.0.0.1", port = 6379 }
+            ]
+        }
+        uriToId {
+            hosts = [
+                { address = "127.0.0.1", port = 6380 }
+                { address = "127.0.0.1", port = 6381 }
+                { address = "127.0.0.1", port = 6382 }
+            ]
+        }
+    }
+    triples {
+        path = "data/parquet/leftovers"
+        parse = "parquet"
+    }
+    intervals {
+        path = "data/intervals"
+    }
+    node {
+        path = "data/parquet/property/node.properties"
+        parse = "parquet"
+    }
+    vessels {
+        path = "data/parquet/property/vessels.properties"
+        parse = "parquet"
+    }
+}
+query {
+    name = "SparqlQuery"
+    type = "Sparql"
+    enableFilterByEncodedInfo = true
+    sparql {
+        source = "params/ExampleQuery.txt"
+    }
+    plans {
+        physical {
+            dictionary = "RedisDictionary"
+            triples = "LLLTriples"
+            joinTriples = "AJoinLLLTriples"
+        }
+    }
+}
+execution {
+    spark_master = "local[*]"
+    namenode = "hdfs://localhost:8020"
+    hdfs_dir_prefix = ""
+    verbose_logging = false
+    benchmark_enabled = false
+}
+sparkParams {
+    spark.sql.shuffle.partitions = 20
+}
+output {
+	outputDevices = ["screen"]
+	dirOutput {
+		path = "output"
+		removeExisting = true
+		format = "parquet"
+	}
+	screenOutput {
+		howMany = 100
+		explain = false
+	}
+}

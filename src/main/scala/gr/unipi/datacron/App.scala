@@ -14,6 +14,7 @@ object App {
       case `starSptRangeQuery` => Some(StarSptRangeQuery())
       case `twoHopSptRangeQuery` => Some(TwoHopSptRangeQuery())
       case `chainSptRangeQuery` => Some(ChainQuery())
+      case `sparqlQuery` => Some(SparqlQuery())
       case _ => None
     }
 

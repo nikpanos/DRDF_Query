@@ -3,7 +3,7 @@ package gr.unipi.datacron.queries
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
-import gr.unipi.datacron.plans.logical.fixedPlans.starSTRange._
+import gr.unipi.datacron.plans.logical.staticPlans.starSTRange._
 
 case class StarSptRangeQuery() extends BaseQuery() {
 

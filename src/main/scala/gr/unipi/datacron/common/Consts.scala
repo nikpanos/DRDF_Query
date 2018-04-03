@@ -83,6 +83,7 @@ object Consts {
   final val starSptRangeQuery = "StarSptRange"
   final val twoHopSptRangeQuery = "JoinSptRange"
   final val chainSptRangeQuery = "ChainSptRange"
+  final val sparqlQuery = "Sparql"
 
   //Logical plans
   final val spatialFirstStarSptRangeLPlan = "SpatialFirstStarSptRange"
@@ -153,5 +154,7 @@ object Consts {
 
   //spark params
   final val partitionsNumberAfterShuffle = "sparkParams.spark.sql.shuffle.partitions"
+
+  final val sparqlQuerySource = "query.sparql.source"
 }
 

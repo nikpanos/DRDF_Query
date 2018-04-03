@@ -1,0 +1,16 @@
+SELECT ?x
+WHERE
+{
+    ?ves <a> ?VesselType ;
+    <:hasFixingDevice> ?device ;
+    <:has_vesselMMSI> '244010219' ;
+    <:has_vesselName> ?name .
+    ?n <:ofMovingObject> ?ves ;
+    <:hasGeometry> ?g ;
+    <:hasTemporalFeature> ?t .
+    ?g <:hasWKT> ?pos .
+    ?t <:TimeStart> ?time .
+    ?event <:occurs> ?n .
+    ?n <:hasHeading> ?heading .
+    ?n <:hasSpeed> ?speed .
+}

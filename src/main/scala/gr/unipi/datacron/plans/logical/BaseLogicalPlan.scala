@@ -16,13 +16,9 @@ abstract class BaseLogicalPlan() {
   
   def executePlan: DataFrame = {
     println("Query type: " + AppConfig.getString(Consts.qfpQueryType))
-    println("Logical plan: " + AppConfig.getString(Consts.qfpLogicalPlans))
+    //println("Logical plan: " + AppConfig.getString(Consts.qfpLogicalPlans))
     doExecutePlan()
   }
 
   private[logical] def doExecutePlan(): DataFrame
-
-  private[logical] val constraints = SpatioTemporalRange(
-    SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), AppConfig.getLong(qfpTimeLower)),
-    SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), AppConfig.getLong(qfpTimeUpper)))
 }
