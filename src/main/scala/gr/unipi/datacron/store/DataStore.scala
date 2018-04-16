@@ -19,6 +19,8 @@ object DataStore {
 
   lazy val sc: SparkContext = spark.sparkContext
 
+  lazy val propertyData: Array[DataFrame] = Array(nodeData, vesselData)
+
   lazy val spatialGrid: SpatialGrid = new SpatialGrid()
   lazy val temporalGrid: TemporalGrid = new TemporalGrid()
 

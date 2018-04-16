@@ -150,4 +150,8 @@ public class FilterOf extends BaseOpW1Child {
     public String toString() {
         return this.toString("");
     }
+
+    public ColumnWithValue[] getFilters() {
+        return listofColumnsWithValues;
+    }
 }

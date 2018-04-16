@@ -7,6 +7,6 @@ object MyTest {
   def main(args : Array[String]) {
     AppConfig.init("params/params.hocon")
 
-    DynamicLogicalPlan().myPlanExecution()
+    DynamicLogicalPlan().executePlan
   }
 }
