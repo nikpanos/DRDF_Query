@@ -9,7 +9,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operators.{BaseOperator, Fil
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.{filterByColumnParams, filterNullPropertiesParams}
+import gr.unipi.datacron.plans.physical.traits.{filterByColumnParams, filterNullPropertiesParams, pointSearchKeyParams}
 import org.apache.spark.sql.DataFrame
 
 import collection.JavaConverters._
@@ -23,6 +23,15 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     executeTree(logicalPlan(0)).get
   }
 
+  private def getEncodedColumnName(decodedColumnName: String): String = {
+    println(decodedColumnName)
+    val enc = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(decodedColumnName)).getOrElse(0).toString
+    println(enc)
+    enc
+  }
+
+  private def getEncodedValue(decodedValue: String): Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(decodedValue)).getOrElse(0)
+
   private def getPredicateList(node: JoinOrOperator): Array[String] = {
     node.getBopChildren.asScala.foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
       if (child.isInstanceOf[JoinOrOperator]) preds ++ getPredicateList(child.asInstanceOf[JoinOrOperator])
@@ -32,7 +41,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
           column.getColumn.getColumnTypes == ColumnTypes.PREDICATE
         })
         if (column.isDefined) {
-          preds :+ column.get.getValue
+          preds :+ getEncodedColumnName(column.get.getValue)
         }
         else {
           preds
@@ -52,9 +61,11 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     })
 
     if (result.length == 0) {
+      println("Triples")
       Array(DataStore.triplesData)
     }
     else if (result.length == 1) {
+      println("one")
       result
     }
     else {
@@ -72,16 +83,27 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       var res = df.get
 
       if (sub.isDefined) {
-        res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, tripleSubLongField, sub.get.getValue))
+        val encodedFilter = getEncodedValue(sub.get.getValue)
+        println("subject filter: " + encodedFilter)
+        res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, tripleSubLongField, encodedFilter))
       }
 
       if ((pred.isDefined) && (obj.isDefined)) {
-        res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, pred.get.getValue, obj.get.getValue))
+        val encodedFilterPred = getEncodedColumnName(pred.get.getValue)
+        val encodedFilterObj = getEncodedValue(obj.get.getValue)
+
+        println("pred+obj filter: " + encodedFilterPred + " " + encodedFilterObj)
+
+        res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, encodedFilterPred, encodedFilterObj))
       }
       else if (pred.isDefined) {
-        res = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(res, Array(pred.get.getValue)))
+        val encodedFilterPred = getEncodedColumnName(pred.get.getValue)
+
+        println("pred filter: " + encodedFilterPred)
+
+        res = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(res, Array(encodedFilterPred)))
       }
-      else {
+      else if ((obj.isDefined) && (pred.isEmpty)) {
         throw new Exception("Filter on object without filter on predicate is not supported!")
       }
 

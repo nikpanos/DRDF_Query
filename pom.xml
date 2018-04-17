@@ -104,50 +104,23 @@
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>3.2.2</version>
 				<executions>
-					<!--<execution>-->
-						<!--<id>scala-compile-first</id>-->
-						<!--<phase>process-resources</phase>-->
-						<!--<goals>-->
-							<!--<goal>add-source</goal>-->
-							<!--<goal>compile</goal>-->
-						<!--</goals>-->
-					<!--</execution>-->
-					<!--<execution>-->
-						<!--<id>scala-test-compile</id>-->
-						<!--<phase>process-test-resources</phase>-->
-						<!--<goals>-->
-							<!--<goal>testCompile</goal>-->
-						<!--</goals>-->
-					<!--</execution>-->
 					<execution>
+						<id>scala-compile-first</id>
+						<phase>process-resources</phase>
 						<goals>
+							<goal>add-source</goal>
 							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>scala-test-compile</id>
+						<phase>process-test-resources</phase>
+						<goals>
 							<goal>testCompile</goal>
 						</goals>
-						<configuration>
-							<args>
-								<!-- <arg>-make:transitive</arg> -->
-								<arg>-dependencyfile</arg>
-								<arg>${project.build.directory}/.scala_dependencies</arg>
-                                <arg>-feature</arg>
-							</args>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			<!--<plugin>-->
-				<!--<groupId>org.apache.maven.plugins</groupId>-->
-				<!--<artifactId>maven-surefire-plugin</artifactId>-->
-				<!--<version>2.18.1</version>-->
-				<!--<configuration>-->
-					<!--<useFile>false</useFile>-->
-					<!--<disableXmlReport>true</disableXmlReport>-->
-					<!--<includes>-->
-						<!--<include>**/*Test.*</include>-->
-						<!--<include>**/*Suite.*</include>-->
-					<!--</includes>-->
-				<!--</configuration>-->
-			<!--</plugin>-->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
@@ -175,10 +148,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.6.1</version>
 				<configuration>
-					<includes>
-						<include>src/main/java</include>
-						<include>src/main/scala</include>
-					</includes>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 				<executions>
 					<execution>
@@ -189,44 +160,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.0.0</version>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/main/scala</source>
-								<source>src/main/java</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.5.8.201207111220</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>-->
 		</plugins>
 	</build>
 </project>

@@ -5,6 +5,7 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.parsing;
 
+import gr.unipi.datacron.common.Consts;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithValue;
@@ -185,11 +186,11 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     private List<FilterOf> checkForShortcuts(List<FilterOf> l) {
 
-        final Set<String> set = new HashSet<>(Arrays.asList(":hasGeometry", ":hasWKT", ":hasTemporalFeature", ":TimeStart"));
+        final Set<String> set = new HashSet<>(Arrays.asList(Consts.uriHasGeometry(), Consts.uriMBR(), Consts.uriHasTemporalFeature(), Consts.uriTimeStart()));
 
         Map<String[], String> hashMap = new HashMap<>();
-        hashMap.put(new String[]{":hasGeometry", ":hasWKT"}, ":hasWKTGeom");
-        hashMap.put(new String[]{":hasTemporalFeature", ":TimeStart"}, "something");
+        hashMap.put(new String[]{Consts.uriHasGeometry(), Consts.uriMBR()}, Consts.tripleMBRField());
+        hashMap.put(new String[]{Consts.uriHasTemporalFeature(), Consts.uriTimeStart()}, Consts.tripleTimeStartField());
 
         //word - The list which contains the word as a predicate
         Map<String, List<FilterOf>> p = l.stream().filter(f

@@ -10,6 +10,8 @@ import redis.clients.jedis.{HostAndPort, JedisCluster}
 import gr.unipi.datacron.common.RedisUtil
 import redis.clients.jedis.Response
 
+import scala.util.Try
+
 class DictionaryRedis() {
   private def getClusterConnection(configParam: String): JedisCluster = {
     val hosts = AppConfig.getObjectList(configParam)
@@ -40,9 +42,9 @@ class DictionaryRedis() {
 
   protected val uriToId: JedisCluster = getClusterConnection(qfpDicRedisUriToIdHosts)
 
-  def getDecodedValue(key: Long): Option[String] = Some(idToUri.get(key.toString))
+  def getDecodedValue(key: Long): Option[String] = Try(idToUri.get(key.toString)).toOption
 
-  def getEncodedValue(key: String): Option[Long] = Some(uriToId.get(key.toString).toLong)
+  def getEncodedValue(key: String): Option[Long] = Try(uriToId.get(key).toLong).toOption
 
 
   //-------------------------------------- BATCH REDIS PROCESSING BELOW THIS LINE --------------------------------------
