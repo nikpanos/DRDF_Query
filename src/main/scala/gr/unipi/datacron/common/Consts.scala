@@ -127,6 +127,8 @@ object Consts {
   //final val uriSpatialShortcut = ":hasShortcutSpatial"
   
   //Triples fields
+  final val datacronOntologyNamespace = "http://www.datacron-project.eu/datAcron#"
+
   final val tripleSpoStrField = "spoStr"
   final val triplePruneSubKeyField = "pruneSubKey"
   final val tripleSubLongField = "subLong"
@@ -134,8 +136,8 @@ object Consts {
   final val tripleObjLongField = "objLong"
   final val triplePropertiesStrField = "propertiesStr"
   final val tripleTranslateSuffix = "_trans"
-  final val tripleMBRField = ":hasShortcutSpatial"
-  final val tripleTimeStartField = ":hasShortcutTemporal"
+  final val tripleMBRField = "<" + datacronOntologyNamespace + "shortcutSpatial>"
+  final val tripleTimeStartField = "<" + datacronOntologyNamespace + "shortcutTemporal>"
   final val tripleJoinKey = "join_key"
   final val tripleGeometryField = "geometryWKT"
   final val tripleTemporalField = "temporalFeature"
