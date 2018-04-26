@@ -56,10 +56,16 @@ public class MyOpVisitorBase extends OpVisitorBase {
         triples.forEach((triple) -> {
             //form the list with the correct form of Subject, Predicate, Object
 
-            String subject = (triple.getSubject().toString().substring(0, 1).equals("?")) ? triple.getSubject().toString() : triple.getSubject().toString().substring(1, triple.getSubject().toString().length() - 1);
-            String predicate = (triple.getPredicate().toString().substring(1, 2).equals("?")) ? triple.getPredicate().toString() : (triple.getPredicate().toString().substring(1, 2).equals(":")) ? triple.getPredicate().toString().substring(1) : triple.getPredicate().toString().substring(triple.getPredicate().toString().lastIndexOf("/") + 1);
-            String object = (triple.getObject().toString().substring(0, 1).equals("?")) ? triple.getObject().toString() : triple.getObject().toString().substring(1, triple.getObject().toString().length() - 1);
+            //form the list with the correct form of Subject, Predicate, Object
 
+            String subject = triple.getSubject().toString();
+            String predicate =  triple.getPredicate().toString();
+            String object =  triple.getObject().toString();
+
+
+//            String subject = (triple.getSubject().toString().substring(0, 1).equals("?")) ? triple.getSubject().toString() : triple.getSubject().toString().substring(1, triple.getSubject().toString().length() - 1);
+//            String predicate = (triple.getPredicate().toString().substring(0, 1).equals("?")) ? triple.getPredicate().toString() : triple.getPredicate().toString().substring(1, triple.getPredicate().toString().length() - 1);
+//            String object = (triple.getObject().toString().substring(0, 1).equals("?")) ? triple.getObject().toString() : triple.getObject().toString().substring(1, triple.getObject().toString().length() - 1);
             TripleOperator to = TripleOperator.newTripleOperator(subject, predicate, object);
 
             Map<Column, Column> hm = new LinkedHashMap<>();
