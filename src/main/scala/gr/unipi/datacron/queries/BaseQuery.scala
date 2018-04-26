@@ -41,9 +41,9 @@ abstract class BaseQuery() {
       }
       case `outputDeviceDir` => {
         AppConfig.getString(qfpQueryOutputFolderFormat) match {
-          case `outputFormatParquet` => result.write.parquet(AppConfig.getString(qfpQueryOutputFolderPath))
-          case `outputFormatText` => result.write.text(AppConfig.getString(qfpQueryOutputFolderPath))
-          case `outputFormatCSV` => result.write.csv(AppConfig.getString(qfpQueryOutputFolderPath))
+          case `outputFormatParquet` => result.write.parquet(Utils.resolveHdfsPath(AppConfig.getString(qfpQueryOutputFolderPath)))
+          case `outputFormatText` => result.write.text(Utils.resolveHdfsPath(AppConfig.getString(qfpQueryOutputFolderPath)))
+          case `outputFormatCSV` => result.write.csv(Utils.resolveHdfsPath(AppConfig.getString(qfpQueryOutputFolderPath)))
         }
       }
     }

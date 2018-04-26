@@ -17,7 +17,14 @@ import scala.io.Source
 
 case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   override private[logical] def doExecutePlan(): DataFrame = {
-    val sparqlQuery = Source.fromFile(AppConfig.getString(sparqlQuerySource)).getLines.mkString(" ")
+    val q = AppConfig.getString(sparqlQuerySource)
+    val sparqlQuery = if (q.startsWith("file://")) {
+      val filename = q.substring(7)
+      Source.fromFile(filename).getLines.mkString(" ")
+    }
+    else {
+      q
+    }
     println(sparqlQuery)
     val logicalPlan = MyOpVisitorBase.newMyOpVisitorBase(sparqlQuery).getBop
     executeTree(logicalPlan(0)).get

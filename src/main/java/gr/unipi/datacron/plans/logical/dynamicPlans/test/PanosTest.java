@@ -7,6 +7,7 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.common.AppConfig;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.FilterOf;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase;
 import gr.unipi.datacron.store.DataStore;
 import scala.Option;
@@ -36,35 +37,30 @@ public class PanosTest {
     }
 
     public static void main(String args[]) {
-        AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");
+        //AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");
 
-        Long encodedValue = getRedisEncodedValue("a");
-        System.out.println(encodedValue);
+        //Long encodedValue = getRedisEncodedValue("a");
+        //System.out.println(encodedValue);
 
-        String decodedValue = getRedisDecodedValue(-5L);
-        System.out.println(decodedValue);
+        //String decodedValue = getRedisDecodedValue(-5L);
+        //System.out.println(decodedValue);
 
-        BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase("SELECT ?x"
-                + "WHERE"
-                + "{"
-                + " ?ves <a> ?VesselType ;"
-                + " <:hasFixingDevice> ?device ;"
-                + " <:has_vesselMMSI> '244010219' ;"
-                + " <:has_vesselName> ?name ."
-                + " ?n <:ofMovingObject> ?ves ;"
-                + " <:hasGeometry> ?g ;"
-                + " <:hasTemporalFeature> ?t ."               
-                + " ?g <:hasWKT> ?pos ."
-                + " ?t <:TimeStart> ?time ."
-                + " ?event <:occurs> ?n ."
-                + " ?n <:hasHeading> ?heading ."
-                + " ?n <:hasSpeed> ?speed ."                             
-                + "}").getBop();
+        BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
+                "Prefix : <http://www.datacron-project.eu/datAcron#>\n" +
+                          "Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                          "SELECT *\n" +
+                          "WHERE\n" +
+                          "{\n" +
+                          "    :nodeA a :Node\n" +
+                          "}").getBop();
         
         System.out.println("NumberOfTrees: " + bop.length);
         for(BaseOperator b:bop){
             System.out.println("--------------------------");
             System.out.println(bop[0].toString());
+            System.out.println(((FilterOf) bop[0]).getSubject());
+            System.out.println(((FilterOf) bop[0]).getPredicate());
+            System.out.println(((FilterOf) bop[0]).getObject());
         }
     }
 }

@@ -26,6 +26,6 @@ object DuplicatesRemoval {
       a
     }).map((key) => {
       key._1
-    }).saveAsTextFile(Utils.resolveHdfsPath(AppConfig.getString(qfpQueryOutputFolderPath)))
+    }).saveAsTextFile(Utils.resolveHdfsPath(qfpQueryOutputFolderPath))
   }
 }
