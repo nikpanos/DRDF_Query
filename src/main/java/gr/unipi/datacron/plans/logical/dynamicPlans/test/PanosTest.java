@@ -46,8 +46,8 @@ public class PanosTest {
         //System.out.println(decodedValue);
 
         BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
-                "Prefix : <http://www.datacron-project.eu/datAcron#>\n" +
-                          "Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "Prefix : <www.datacron-project.eu/datAcron#>\n" +
+                          "Prefix rdf: <www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                           "SELECT *\n" +
                           "WHERE\n" +
                           "{\n" +

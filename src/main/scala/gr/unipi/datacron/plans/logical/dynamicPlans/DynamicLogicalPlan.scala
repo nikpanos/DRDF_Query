@@ -39,28 +39,24 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def getEncodedValue(decodedValue: String): Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(decodedValue)).getOrElse(0)
 
-  private def getPredicateList(node: JoinOrOperator): Array[String] = {
-    node.getBopChildren.asScala.foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
-      if (child.isInstanceOf[JoinOrOperator]) preds ++ getPredicateList(child.asInstanceOf[JoinOrOperator])
-      else if (child.isInstanceOf[FilterOf]) {
-        val filter = child.asInstanceOf[FilterOf]
-        val column = filter.getFilters.find(column => {
-          column.getColumn.getColumnTypes == ColumnTypes.PREDICATE
-        })
-        if (column.isDefined) {
-          preds :+ getEncodedColumnName(column.get.getValue)
-        }
-        else {
-          preds
-        }
-      }
-      else {
-        throw new Exception("Only support JoinOr and FilterOf under JoinOr")
-      }
-    })
+  private def getPredicateList(node: BaseOperator): Array[String] = {
+    if (node.isInstanceOf[JoinOrOperator]) {
+      node.getBopChildren.asScala.foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
+        preds ++ getPredicateList(child.asInstanceOf[JoinOrOperator])
+      })
+    }
+    else if (node.isInstanceOf[FilterOf]) {
+      val filter = node.asInstanceOf[FilterOf]
+      filter.getFilters.filter(column => {
+        column.getColumn.getColumnTypes == ColumnTypes.PREDICATE
+      }).map(column => getEncodedColumnName(column.getValue))
+    }
+    else {
+      throw new Exception("Only support JoinOr and FilterOf under JoinOr")
+    }
   }
 
-  private def guessDataFrame(node: JoinOrOperator): Array[DataFrame] = {
+  private def guessDataFrame(node: BaseOperator): Array[DataFrame] = {
     val predicates = getPredicateList(node)
 
     val result = DataStore.propertyData.filter(df => {
@@ -87,7 +83,12 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       val pred = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.PREDICATE)
       val obj = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
 
-      var res = df.get
+      var res = if (df.isEmpty) {
+        guessDataFrame(filter)(0)
+      }
+      else {
+        df.get
+      }
 
       if (sub.isDefined) {
         val encodedFilter = getEncodedValue(sub.get.getValue)
