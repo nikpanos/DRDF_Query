@@ -51,8 +51,11 @@ public class PanosTest {
                           "SELECT *\n" +
                           "WHERE\n" +
                           "{\n" +
-                          "    :nodeA a :Node\n" +
-                          "}").getBop();
+                          "    \":nodeA\" a ':Node'\n" +
+                        "FILTER(\n" +
+                        "?time<'2016-04-18T00:00:00') "+
+                          "FILTER((\n" +
+                        "?time<'2016-04-18T00:00:00') && (?time>\"2016-04-11T00:00:00\"))}").getBop();
         
         System.out.println("NumberOfTrees: " + bop.length);
         for(BaseOperator b:bop){

@@ -19,6 +19,7 @@ import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitorBase;
 import org.apache.jena.sparql.algebra.OpWalker;
 import org.apache.jena.sparql.algebra.op.OpBGP;
+import org.apache.jena.sparql.algebra.op.OpFilter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,7 +48,15 @@ public class MyOpVisitorBase extends OpVisitorBase {
     }
 
     @Override
+     public void visit(final OpFilter opFilter){
+        System.out.println("OPFILTER: "+opFilter.toString());
+        opFilter.getExprs().getList().forEach(e -> System.out.println(e) );
+
+    }
+
+    @Override
     public void visit(final OpBGP opBGP) {
+
 
         List<Triple> triples = opBGP.getPattern().getList();
 
@@ -58,9 +67,10 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
             //form the list with the correct form of Subject, Predicate, Object
 
-            String subject = triple.getSubject().toString();
+
+            String subject = (triple.getSubject().toString().substring(0, 1).equals("\"")) ? (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("\"")) ? (triple.getSubject().toString().substring(1, (triple.getSubject().toString().length() - 1))) : triple.getSubject().toString() : triple.getSubject().toString();
             String predicate =  triple.getPredicate().toString();
-            String object =  triple.getObject().toString();
+            String object =  (triple.getObject().toString().substring(0, 1).equals("\"")) ? (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("\"")) ? (triple.getObject().toString().substring(1, (triple.getObject().toString().length() - 1))) : triple.getObject().toString() : triple.getObject().toString();
 
 
 //            String subject = (triple.getSubject().toString().substring(0, 1).equals("?")) ? triple.getSubject().toString() : triple.getSubject().toString().substring(1, triple.getSubject().toString().length() - 1);
