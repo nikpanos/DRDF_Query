@@ -38,6 +38,7 @@ abstract class BaseQuery() {
           result.explain(true)
         }
         result.show(AppConfig.getInt(qfpQueryOutputScreenHowMany), false)
+        println("Result count: " + result.count)
       }
       case `outputDeviceDir` => {
         AppConfig.getString(qfpQueryOutputFolderFormat) match {

@@ -1,6 +1,6 @@
 package gr.unipi.datacron
 
-import gr.unipi.datacron.common.AppConfig
+import gr.unipi.datacron.common.{AppConfig, Consts}
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.store.DataStore.spark
@@ -48,18 +48,21 @@ object TextToParquet {
     var outputPath = DataStore.triples.dataPath.replace("/text/", "/parquet/")  //TODO: dirty, maybe clean it
     processDataframe(DataStore.triplesData, "triples", outputPath, sortCols)
 
-    sortCols = if (sorted) {
-      Some(Array(tripleSubLongField))
-    }
-    else {
-      None
-    }
+    if (AppConfig.getOptionalBoolean(Consts.qfpDataPropertyEnabled).getOrElse(true)) {
 
-    outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/")  //TODO: dirty, maybe clean it
-    processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
+      sortCols = if (sorted) {
+        Some(Array(tripleSubLongField))
+      }
+      else {
+        None
+      }
 
-    outputPath = DataStore.vessels.dataPath.replace("/text/", "/parquet/")  //TODO: dirty, maybe clean it
-    processDataframe(DataStore.vesselData, "vessels", outputPath, sortCols)
+      outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
+      processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
+
+      outputPath = DataStore.vessels.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
+      processDataframe(DataStore.vesselData, "vessels", outputPath, sortCols)
+    }
 
     println("Success!")
   }

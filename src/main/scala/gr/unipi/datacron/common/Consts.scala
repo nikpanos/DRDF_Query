@@ -27,6 +27,8 @@ object Consts {
   final val qfpUniverseLatUpper = "universe.lat_upper"
   final val qfpUniverseLonUpper = "universe.lon_upper"
 
+  final val qfpDataPropertyEnabled = "datasets.property.enabled"
+
   final val qfpDicPath = "datasets.dictionary.path"
   final val qfpTriplesPath = "datasets.triples.path"
   final val qfpIntrvlsPath = "datasets.intervals.path"

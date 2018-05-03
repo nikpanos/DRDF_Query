@@ -30,26 +30,26 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     executeTree(logicalPlan(0)).get
   }
 
-  private def getEncodedColumnName(decodedColumnName: String): String = {
+  private def getEncodedStr(decodedColumnName: String): String = {
     println(decodedColumnName)
     val enc = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(decodedColumnName)).getOrElse(0).toString
     println(enc)
     enc
   }
 
-  private def getEncodedValue(decodedValue: String): Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(decodedValue)).getOrElse(0)
+  private def getEncodedLong(decodedValue: String): Long = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(decodedValue)).getOrElse(0)
 
   private def getPredicateList(node: BaseOperator): Array[String] = {
     if (node.isInstanceOf[JoinOrOperator]) {
       node.getBopChildren.asScala.foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
-        preds ++ getPredicateList(child.asInstanceOf[JoinOrOperator])
+        preds ++ getPredicateList(child)
       })
     }
     else if (node.isInstanceOf[FilterOf]) {
       val filter = node.asInstanceOf[FilterOf]
       filter.getFilters.filter(column => {
         column.getColumn.getColumnTypes == ColumnTypes.PREDICATE
-      }).map(column => getEncodedColumnName(column.getValue))
+      }).map(column => getEncodedStr(column.getValue))
     }
     else {
       throw new Exception("Only support JoinOr and FilterOf under JoinOr")
@@ -65,7 +65,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
     if (result.length == 0) {
       println("Triples")
-      Array(DataStore.triplesData)
+      //Array(DataStore.triplesData)
+      throw new Exception("Does not support queries on leftovers")
     }
     else if (result.length == 1) {
       println("one")
@@ -91,21 +92,24 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       }
 
       if (sub.isDefined) {
-        val encodedFilter = getEncodedValue(sub.get.getValue)
+        val encodedFilter = getEncodedLong(sub.get.getValue)
         println("subject filter: " + encodedFilter)
         res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, tripleSubLongField, encodedFilter))
       }
 
       if ((pred.isDefined) && (obj.isDefined)) {
-        val encodedFilterPred = getEncodedColumnName(pred.get.getValue)
-        val encodedFilterObj = getEncodedValue(obj.get.getValue)
+        val encodedFilterPred = getEncodedStr(pred.get.getValue)
+
+        //val objFilter = if (obj.get.getValue.startsWith("\"")) obj.get.getValue.substring(1, obj.get.getValue.length - 1)
+        //                else obj.get.getValue
+        val encodedFilterObj = getEncodedLong(obj.get.getValue)
 
         println("pred+obj filter: " + encodedFilterPred + " " + encodedFilterObj)
 
         res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, encodedFilterPred, encodedFilterObj))
       }
       else if (pred.isDefined) {
-        val encodedFilterPred = getEncodedColumnName(pred.get.getValue)
+        val encodedFilterPred = getEncodedStr(pred.get.getValue)
 
         println("pred filter: " + encodedFilterPred)
 

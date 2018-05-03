@@ -46,16 +46,13 @@ public class PanosTest {
         //System.out.println(decodedValue);
 
         BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
-                "Prefix : <www.datacron-project.eu/datAcron#>\n" +
-                          "Prefix rdf: <www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                          "SELECT *\n" +
-                          "WHERE\n" +
-                          "{\n" +
-                          "    \":nodeA\" a ':Node'\n" +
-                        "FILTER(\n" +
-                        "?time<'2016-04-18T00:00:00') "+
-                          "FILTER((\n" +
-                        "?time<'2016-04-18T00:00:00') && (?time>\"2016-04-11T00:00:00\"))}").getBop();
+                "Prefix : <http://www.datacron-project.eu/datAcron#>\n" +
+                        "\n" +
+                        "SELECT *\n" +
+                        "WHERE\n" +
+                        "{\n" +
+                        "    ?n  :hasSpeed       \"0.0\"\n" +
+                        "}\n").getBop();
         
         System.out.println("NumberOfTrees: " + bop.length);
         for(BaseOperator b:bop){
