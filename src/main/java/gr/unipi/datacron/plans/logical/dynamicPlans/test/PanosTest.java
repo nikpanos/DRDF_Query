@@ -6,8 +6,10 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.common.AppConfig;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.FilterOf;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.JoinOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase;
 import gr.unipi.datacron.store.DataStore;
 import scala.Option;
@@ -51,16 +53,31 @@ public class PanosTest {
                         "SELECT *\n" +
                         "WHERE\n" +
                         "{\n" +
-                        "    ?n  :hasSpeed       \"0.0\"\n" +
+                        "    ?ves :has_vesselMMSI '244010219' .\n" +
+                        "    ?n :ofMovingObject ?ves .\n" +
                         "}\n").getBop();
         
         System.out.println("NumberOfTrees: " + bop.length);
         for(BaseOperator b:bop){
             System.out.println("--------------------------");
             System.out.println(bop[0].toString());
-            System.out.println(((FilterOf) bop[0]).getSubject());
-            System.out.println(((FilterOf) bop[0]).getPredicate());
-            System.out.println(((FilterOf) bop[0]).getObject());
+            Column[] cs = ((JoinOperator)bop[0]).getColumnJoinPredicate();
+            System.out.println(cs.length);
+            System.out.println();
+            System.out.println(cs[0].getColumnName());
+            System.out.println(cs[0].getColumnTypes());
+            System.out.println();
+            System.out.println(cs[1].getColumnName());
+            System.out.println(cs[1].getColumnTypes());
+            System.out.println();
+            System.out.println();
+
+            for (Column c : bop[0].getArrayColumns()) {
+                System.out.println();
+                System.out.println(c.getColumnName());
+                System.out.println(c.getColumnTypes());
+                System.out.println(c.getQueryString());
+            }
         }
     }
 }

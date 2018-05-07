@@ -1,15 +1,15 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans
 
-import gr.unipi.datacron.common.AppConfig
+import gr.unipi.datacron.common.{AppConfig, Consts}
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.{BaseOperator, FilterOf, JoinOrOperator}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes}
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.{BaseOperator, FilterOf, JoinOperator, JoinOrOperator}
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.{filterByColumnParams, filterNullPropertiesParams, pointSearchKeyParams}
+import gr.unipi.datacron.plans.physical.traits.{filterByColumnParams, filterNullPropertiesParams, joinDataframesParams, pointSearchKeyParams}
 import org.apache.spark.sql.DataFrame
 
 import collection.JavaConverters._
@@ -77,67 +77,98 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
+  private def processFilterOf(filter: FilterOf, df: Option[DataFrame]) : Option[DataFrame] = {
+    val sub = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.SUBJECT)
+    val pred = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.PREDICATE)
+    val obj = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
+
+    var res = if (df.isEmpty) {
+      guessDataFrame(filter)(0)
+    }
+    else {
+      df.get
+    }
+
+    if (sub.isDefined) {
+      val encodedFilter = getEncodedLong(sub.get.getValue)
+      println("subject filter: " + encodedFilter)
+      res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, tripleSubLongField, encodedFilter))
+    }
+
+    if ((pred.isDefined) && (obj.isDefined)) {
+      val encodedFilterPred = getEncodedStr(pred.get.getValue)
+      val encodedFilterObj = getEncodedLong(obj.get.getValue)
+
+      println("pred+obj filter: " + encodedFilterPred + " " + encodedFilterObj)
+
+      res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, encodedFilterPred, encodedFilterObj))
+    }
+    else if (pred.isDefined) {
+      val encodedFilterPred = getEncodedStr(pred.get.getValue)
+
+      println("pred filter: " + encodedFilterPred)
+
+      res = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(res, Array(encodedFilterPred)))
+    }
+    else if ((obj.isDefined) && (pred.isEmpty)) {
+      throw new Exception("Filter on object without filter on predicate is not supported!")
+    }
+
+    Option(res)
+  }
+
+  private def processJoinOr(joinOr: JoinOrOperator, df: Option[DataFrame]) : Option[DataFrame] = {
+    val df1 = if (df.isEmpty) {
+      Option(guessDataFrame(joinOr)(0))
+    }
+    else {
+      df
+    }
+
+    joinOr.getBopChildren.asScala.foldLeft(df1)((dfTmp: Option[DataFrame], child: BaseOperator) => {
+      recursivelyExecuteNode(child, dfTmp)
+    })
+  }
+
+  private def getColumnNameForJoin(joinOp: JoinOperator, c: Column): String = {
+    c.getColumnTypes match {
+      case ColumnTypes.SUBJECT => Consts.tripleSubLongField
+      case ColumnTypes.PREDICATE => throw new Exception("Does not support join predicates on Predicate columns")
+      case _ => {
+        val fil = c.getColumnName.substring(0, c.getColumnName.indexOf('.')) + ".Predicate"
+        println(fil)
+        val colName = joinOp.getArrayColumns.find(_.getColumnName.equals(fil)).get.getQueryString
+        getEncodedStr(colName)
+      }
+    }
+  }
+
+  private def processJoin(joinOp: JoinOperator, df: Option[DataFrame]) : Option[DataFrame] = {
+    val children = joinOp.getBopChildren.asScala
+    val df1 = recursivelyExecuteNode(children(0), df).get
+    val df2 = recursivelyExecuteNode(children(1), df).get
+
+    val joinPredicates = joinOp.getColumnJoinPredicate
+    val columnName1 = getColumnNameForJoin(joinOp, joinPredicates(0))
+    val columnName2 = getColumnNameForJoin(joinOp, joinPredicates(1))
+
+    Option(PhysicalPlanner.joinDataframes(joinDataframesParams(df1, df2, columnName1, columnName2, "a", "b")))
+  }
+
   private def recursivelyExecuteNode(node: BaseOperator, df: Option[DataFrame]): Option[DataFrame] = {
     if (node.isInstanceOf[FilterOf]) {
-      val filter = node.asInstanceOf[FilterOf]
-      val sub = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.SUBJECT)
-      val pred = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.PREDICATE)
-      val obj = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
-
-      var res = if (df.isEmpty) {
-        guessDataFrame(filter)(0)
-      }
-      else {
-        df.get
-      }
-
-      if (sub.isDefined) {
-        val encodedFilter = getEncodedLong(sub.get.getValue)
-        println("subject filter: " + encodedFilter)
-        res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, tripleSubLongField, encodedFilter))
-      }
-
-      if ((pred.isDefined) && (obj.isDefined)) {
-        val encodedFilterPred = getEncodedStr(pred.get.getValue)
-
-        //val objFilter = if (obj.get.getValue.startsWith("\"")) obj.get.getValue.substring(1, obj.get.getValue.length - 1)
-        //                else obj.get.getValue
-        val encodedFilterObj = getEncodedLong(obj.get.getValue)
-
-        println("pred+obj filter: " + encodedFilterPred + " " + encodedFilterObj)
-
-        res = PhysicalPlanner.filterByColumn(filterByColumnParams(res, encodedFilterPred, encodedFilterObj))
-      }
-      else if (pred.isDefined) {
-        val encodedFilterPred = getEncodedStr(pred.get.getValue)
-
-        println("pred filter: " + encodedFilterPred)
-
-        res = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(res, Array(encodedFilterPred)))
-      }
-      else if ((obj.isDefined) && (pred.isEmpty)) {
-        throw new Exception("Filter on object without filter on predicate is not supported!")
-      }
-
-      Option(res)
+      processFilterOf(node.asInstanceOf[FilterOf], df)
     }
     else if (node.isInstanceOf[JoinOrOperator]) {
-      val joinOr = node.asInstanceOf[JoinOrOperator]
-
-      val df1 = if (df.isEmpty) {
-        Option(guessDataFrame(joinOr)(0))
-      }
-      else {
-        df
-      }
-
-      joinOr.getBopChildren.asScala.foldLeft(df1)((dfTmp: Option[DataFrame], child: BaseOperator) => {
-        recursivelyExecuteNode(child, dfTmp)
-      })
+      processJoinOr(node.asInstanceOf[JoinOrOperator], df)
+    }
+    else if (node.isInstanceOf[JoinOperator]) {
+      processJoin(node.asInstanceOf[JoinOperator], df)
     }
     else {
       None
     }
+
   }
 
   private def executeTree(root: BaseOperator): Option[DataFrame] = {
