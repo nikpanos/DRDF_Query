@@ -27,13 +27,13 @@ case class ChainSTRange() extends StaticLogicalPlan() {
 
     val filteredByPredicate3 = PhysicalPlanner.filterByPredicateAndRenameObject(filterByPredicateAndRenameObjectParams(DataStore.triplesData, predicate3))
 
-    val joinedDf = PhysicalPlanner.joinDataframes(joinDataframesParams(filteredByPredicate3, filteredByIdInfo, predicate3.toString, tripleSubLongField, "df1", "df2"))
+    val joinedDf = PhysicalPlanner.joinDataframes(joinDataframesParams(filteredByPredicate3, filteredByIdInfo, predicate3.toString, tripleSubLongField, Option("df1"), Option("df2")))
 
     val vesDF = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(DataStore.vesselData, Array(vesPredicate1.toString, vesPredicate2.toString, vesPredicate5.toString)))
 
     val filteredVesDF = PhysicalPlanner.filterByColumn(filterByColumnParams(vesDF, vesPredicate3.toString, vesPredicate4))
 
-    val joined2Df = PhysicalPlanner.joinDataframes(joinDataframesParams(joinedDf, filteredVesDF, predicate4.toString, tripleSubLongField, "df1", "df2"))
+    val joined2Df = PhysicalPlanner.joinDataframes(joinDataframesParams(joinedDf, filteredVesDF, predicate4.toString, tripleSubLongField, Option("df1"), Option("df2")))
 
     joined2Df
   }

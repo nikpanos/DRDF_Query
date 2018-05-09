@@ -53,31 +53,36 @@ public class PanosTest {
                         "SELECT *\n" +
                         "WHERE\n" +
                         "{\n" +
-                        "    ?ves :has_vesselMMSI '244010219' .\n" +
-                        "    ?n :ofMovingObject ?ves .\n" +
+                        "    ?ves a ?VesselType ;\n" +
+                        "    :has_vesselFixingDeviceType ?device ;\n" +
+                        "    :has_vesselMMSI '244010219' ;\n" +
+                        "    :vesselName ?name .\n" +
+                        "    ?n :ofMovingObject ?ves ;\n" +
+                        "    :hasGeometry ?g ;\n" +
+                        "    :hasTemporalFeature ?t ;\n" +
+                        "    :hasHeading ?heading ;\n" +
+                        "    :hasSpeed ?speed .\n" +
                         "}\n").getBop();
         
-        System.out.println("NumberOfTrees: " + bop.length);
-        for(BaseOperator b:bop){
-            System.out.println("--------------------------");
-            System.out.println(bop[0].toString());
-            Column[] cs = ((JoinOperator)bop[0]).getColumnJoinPredicate();
-            System.out.println(cs.length);
-            System.out.println();
-            System.out.println(cs[0].getColumnName());
-            System.out.println(cs[0].getColumnTypes());
-            System.out.println();
-            System.out.println(cs[1].getColumnName());
-            System.out.println(cs[1].getColumnTypes());
-            System.out.println();
-            System.out.println();
+        /*System.out.println("NumberOfTrees: " + bop.length);
+        System.out.println("--------------------------");
+        System.out.println(bop[0].toString());
+        Column[] cs = ((JoinOperator)bop[0]).getColumnJoinPredicate();
+        System.out.println(cs.length);
+        System.out.println();
+        System.out.println(cs[0].getColumnName());
+        System.out.println(cs[0].getColumnTypes());
+        System.out.println();
+        System.out.println(cs[1].getColumnName());
+        System.out.println(cs[1].getColumnTypes());
+        System.out.println();
+        System.out.println();*/
 
-            for (Column c : bop[0].getArrayColumns()) {
-                System.out.println();
-                System.out.println(c.getColumnName());
-                System.out.println(c.getColumnTypes());
-                System.out.println(c.getQueryString());
-            }
+        for (Column c : bop[0].getArrayColumns()) {
+            System.out.println();
+            System.out.println(c.getColumnName());
+            System.out.println(c.getColumnTypes());
+            System.out.println(c.getQueryString());
         }
     }
 }

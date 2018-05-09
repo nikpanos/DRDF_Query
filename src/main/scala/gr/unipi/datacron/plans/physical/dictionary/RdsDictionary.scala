@@ -5,6 +5,7 @@ import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.DataFrame
+import gr.unipi.datacron.common.DataFrameUtils._
 
 case class RdsDictionary() extends BaseRdsDictionary {
 
@@ -17,6 +18,6 @@ case class RdsDictionary() extends BaseRdsDictionary {
       }
       DataStore.dictionaryRedis.getDecodedValue(field)
     })
-    df.withColumn(newColumnName, translate(col(columnName)))
+    df.withColumn(newColumnName, translate(col(sanitize(columnName))))
   }
 }

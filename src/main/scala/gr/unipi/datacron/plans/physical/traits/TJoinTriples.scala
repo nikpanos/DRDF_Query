@@ -11,4 +11,5 @@ trait TJoinTriples {
 case class joinNewObjectsParams(df: DataFrame, dfTriples: DataFrame, subjectColumn: String, predicates: Map[Long, String],
                                 override val operationName: Option[String] = None) extends BaseOperatorParams
 case class joinDataframesParams(df1: DataFrame, df2: DataFrame, df1JoinColumn: String, df2JoinColumn: String,
-                                df1Alias: String, df2Alias: String, override val operationName: Option[String] = None) extends BaseOperatorParams
+                                df1Alias: Option[String], df2Alias: Option[String],
+                                override val operationName: Option[String] = None) extends BaseOperatorParams

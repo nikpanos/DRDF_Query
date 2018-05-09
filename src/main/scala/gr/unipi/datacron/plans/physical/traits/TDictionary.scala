@@ -12,5 +12,5 @@ trait TDictionary {
 
 case class pointSearchValueParams(key: Long, override val operationName: Option[String] = None) extends BaseOperatorParams
 case class pointSearchKeyParams(value: String, override val operationName: Option[String] = None) extends BaseOperatorParams
-case class decodeColumnParams(dfTriples: DataFrame, columnName: String, override val operationName: Option[String] = None) extends BaseOperatorParams
-case class decodeColumnsParams(dfTriples: DataFrame, columnNames: Array[String], override val operationName: Option[String] = None) extends BaseOperatorParams
+case class decodeColumnParams(dfTriples: DataFrame, columnName: String, preserveColumnName: Boolean = false, override val operationName: Option[String] = None) extends BaseOperatorParams
+case class decodeColumnsParams(dfTriples: DataFrame, columnNames: Array[String], preserveColumnNames: Boolean = false, override val operationName: Option[String] = None) extends BaseOperatorParams
