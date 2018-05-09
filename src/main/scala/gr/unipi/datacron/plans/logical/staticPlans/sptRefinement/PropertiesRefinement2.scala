@@ -18,9 +18,10 @@ private[logical] case class PropertiesRefinement2() extends BaseRefinement {
     //val result = translatedExtendedTriples
 
     //Translate the result before returning
-    val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))
+    /*val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))
     val outTranslated = PhysicalPlanner.decodeColumns(decodeColumnsParams(outPrepared, Array(tripleSubLongField, qPredEncoded.toString), false, Some("Final decode of columns")))
     val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
-    outTranslated.select(outColumns.head, outColumns.tail: _*)
+    outTranslated.select(outColumns.head, outColumns.tail: _*)*/
+    result
   }
 }

@@ -15,8 +15,9 @@ case class StarSpatialFirst() extends BaseStar() {
 
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(DataStore.triplesData, constraints, encoder))
 
-    val filteredSPO = PhysicalPlanner.filterByPO(filterByPOParams(filteredByIdInfo, qPredTrans, qObjTrans)).cache
+    /*val filteredSPO = PhysicalPlanner.filterByPO(filterByPOParams(filteredByIdInfo, qPredTrans, qObjTrans)).cache
 
-    refinement.refineResults(filteredSPO, DataStore.triplesData, constraints)
+    refinement.refineResults(filteredSPO, DataStore.triplesData, constraints)*/
+    filteredByIdInfo
   }
 }

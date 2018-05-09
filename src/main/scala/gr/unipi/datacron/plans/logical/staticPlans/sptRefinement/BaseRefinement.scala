@@ -3,7 +3,7 @@ package gr.unipi.datacron.plans.logical.staticPlans.sptRefinement
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.{filterbySpatioTemporalRangeParams, prepareForFinalTranslationParams, decodeColumnsParams}
+import gr.unipi.datacron.plans.physical.traits.{filterbySpatioTemporalRangeParams, decodeColumnsParams}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
@@ -18,9 +18,10 @@ private[sptRefinement] class BaseRefinement() {
     //val result = translatedExtendedTriples
 
     //Translate the result before returning
-    val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))
+    /*val outPrepared = PhysicalPlanner.prepareForFinalTranslation(prepareForFinalTranslationParams(result))
     val outTranslated = PhysicalPlanner.decodeColumns(decodeColumnsParams(outPrepared, Array(tripleSubLongField, triplePredLongField, tripleObjLongField), false, Some("Final decode of columns")))
     val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
-    outTranslated.select(outColumns.head, outColumns.tail: _*)
+    outTranslated.select(outColumns.head, outColumns.tail: _*)*/
+    result
   }
 }

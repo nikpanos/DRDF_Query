@@ -14,10 +14,11 @@ private[logical] case class PropertiesRefinement() extends BaseRefinement {
     val predArray = Array(qPredEncoded)
     val dfWithTemporalColumn = PhysicalPlanner.addTemporaryColumnForRefinement(addTemporaryColumnForRefinementParams(dfFilteredTriples, predArray))
 
-    val dfFilteredBySPO = PhysicalPlanner.filterStarByTemporaryColumn(filterStarByTemporaryColumnParams(dfWithTemporalColumn, qObjEncoded))
+    /*val dfFilteredBySPO = PhysicalPlanner.filterStarByTemporaryColumn(filterStarByTemporaryColumnParams(dfWithTemporalColumn, qObjEncoded))
 
     //val dfWithSpatialAndTemporal = LogicalPlanner.addSpatialAndTemporalColumnsByTemporaryColumn(addSpatialAndTemporalColumnsByTemporaryColumnParams(dfFilteredBySPO, 1, 2))
 
-    decodeDatesAndRefineResult(dfFilteredBySPO, constraints)
+    decodeDatesAndRefineResult(dfFilteredBySPO, constraints)*/
+    dfWithTemporalColumn
   }
 }

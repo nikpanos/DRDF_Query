@@ -18,7 +18,7 @@ private[logical] case class TriplesRefinement() extends BaseRefinement {
 
   def addSpatialAndTemporalColumns(dfDestination: DataFrame, dfSource: DataFrame): DataFrame = {
     val predicates = Map((encodedUriGeometry, tripleGeometryField), (encodedUriTemporalFeature, tripleTemporalField))
-    val join1 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(dfDestination, dfSource, tripleSubLongField, predicates, Some("(Self join)Add encoded geometry and temporalFeature columns")))
+    /*val join1 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(dfDestination, dfSource, tripleSubLongField, predicates, Some("(Self join)Add encoded geometry and temporalFeature columns")))
 
     val mbrPredicates = Map((encodedUriMBR, tripleMBRField))
     val join2 = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join1, DataStore.triplesData, tripleGeometryField, mbrPredicates, Some("(Self join)Add encoded spatial column")))
@@ -26,7 +26,8 @@ private[logical] case class TriplesRefinement() extends BaseRefinement {
     val temporalPredicates = Map((encodedUriTime, tripleTimeStartField))
     val result = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(join2, DataStore.triplesData, tripleTemporalField, temporalPredicates, Some("(Self join)Add encoded temporal column")))
 
-    result
+    result*/
+    dfDestination
   }
 
   def refineResults(dfFilteredTriples: DataFrame, dfAllTriples: DataFrame, constraints: SpatioTemporalRange): DataFrame = {

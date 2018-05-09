@@ -23,7 +23,7 @@ case class ChainSTRange() extends StaticLogicalPlan() {
 
     val filteredDF = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(DataStore.nodeData, Array(predicate1.toString, predicate2.toString, predicate4.toString)))
 
-    val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(filteredDF, constraints, encoder))
+    /*val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(filteredDF, constraints, encoder))
 
     val filteredByPredicate3 = PhysicalPlanner.filterByPredicateAndRenameObject(filterByPredicateAndRenameObjectParams(DataStore.triplesData, predicate3))
 
@@ -35,6 +35,7 @@ case class ChainSTRange() extends StaticLogicalPlan() {
 
     val joined2Df = PhysicalPlanner.joinDataframes(joinDataframesParams(joinedDf, filteredVesDF, predicate4.toString, tripleSubLongField, Option("df1"), Option("df2")))
 
-    joined2Df
+    joined2Df*/
+    filteredDF
   }
 }

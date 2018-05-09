@@ -21,7 +21,7 @@ case class JoinSpatialFirst() extends StaticLogicalPlan() {
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(
       filterBySubSpatioTemporalInfoParams(DataStore.triplesData, constraints, encoder))
 
-    val firstHop = PhysicalPlanner.filterByPO(filterByPOParams(filteredByIdInfo, transJoinKey, None))
+    /*val firstHop = PhysicalPlanner.filterByPO(filterByPOParams(filteredByIdInfo, transJoinKey, None))
 
     val predicates2 = Map((transPredicate, AppConfig.getString(qfpJoinTripleP)))
     val secondHop = PhysicalPlanner.joinNewObjects(joinNewObjectsParams(firstHop, DataStore.triplesData, tripleObjLongField, predicates2))
@@ -30,6 +30,7 @@ case class JoinSpatialFirst() extends StaticLogicalPlan() {
 
     val transFilteredByPO = PhysicalPlanner.decodeColumn(decodeColumnParams(filteredBySPO, AppConfig.getString(qfpJoinTripleP)))
 
-    refinement.refineResults(transFilteredByPO, DataStore.triplesData, constraints)
+    refinement.refineResults(transFilteredByPO, DataStore.triplesData, constraints)*/
+    filteredByIdInfo
   }
 }

@@ -32,10 +32,6 @@ case class Properties() extends BasePhysicalPlan with TProperties {
     params.df.withColumn(tripleTemporaryRefinementField, myUDf(col(triplePropertiesStrField)))
   }
 
-  override def filterStarByTemporaryColumn(params: filterStarByTemporaryColumnParams): DataFrame = {
-    params.df.filter(col(tripleTemporaryRefinementField)(0) === params.value)
-  }
-
   override def addSpatialAndTemporalColumnsByTemporaryColumn(params: addSpatialAndTemporalColumnsByTemporaryColumnParams): DataFrame = {
     params.df.withColumn(tripleMBRField, col(tripleTemporaryRefinementField)(params.spatialColumn))
              .withColumn(tripleTimeStartField, col(tripleTemporaryRefinementField)(params.temporalColumn))
@@ -43,23 +39,4 @@ case class Properties() extends BasePhysicalPlan with TProperties {
   }
 
   override def filterNullProperties(params: filterNullPropertiesParams): DataFrame = params.df.na.drop(params.columnNames)
-
-  override def filterByProperty(params: filterByPropertyParams): DataFrame = {
-    val searchStr = params.predicateValue + tripleFieldsSeparator + params.objectValue
-    params.df.filter(col(triplePropertiesStrField).contains(searchStr))
-  }
-
-  override def addColumnByProperty(params: addColumnByPropertyParams): DataFrame = {
-    val regexString = params.predicateValue + tripleFieldsSeparator + "-\\d+"
-    params.df.withColumn(params.columnName, split(regexp_extract(col(triplePropertiesStrField), regexString, 0), tripleFieldsSeparator)(1))
-  }
-
-  override def addColumnsByProperty(params: addColumnsByPropertyParams): DataFrame = {
-    var result = params.df
-    for (tuple <- params.namesAndPredicates) {
-      result = addColumnByProperty(addColumnByPropertyParams(result, tuple._1, tuple._2))
-    }
-    //result.show(false)
-    result
-  }
 }

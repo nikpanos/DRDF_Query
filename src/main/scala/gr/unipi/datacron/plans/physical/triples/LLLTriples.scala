@@ -11,26 +11,6 @@ import org.apache.spark.sql.functions._
 import scala.util.Try
 
 case class LLLTriples() extends BaseTriples {
-  override def filterByPO(params: filterByPOParams): DataFrame = {
-    var result = params.df
-    if (params.pred.isDefined) {
-      result = result.filter(col(triplePredLongField) === params.pred.get)
-    }
-    if (params.obj.isDefined) {
-      result = result.filter(col(tripleObjLongField) === params.obj.get)
-    }
-    result
-  }
-
-  def filterByPOandKeepSpatioTemporal(params: filterByPOandKeepSpatioTemporalParams): DataFrame = {
-    params.df.filter((col(triplePredLongField) === params.pred.get).and(col(tripleObjLongField) === params.obj.get).or(
-                      (col(triplePredLongField) === params.predSpatial).or(col(triplePredLongField) === params.predTemporal)))
-  }
-
-  override def pointSearchObject(params: pointSearchObjectParams): Option[Long] =
-    Try(params.df.filter(col(tripleSubLongField) === params.sub).filter(col(triplePredLongField) === params.pred).
-      first().getAs[Long](tripleObjLongField)).toOption
-
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
     if (AppConfig.getBoolean(qfpEnableFilterByEncodedInfo)) {
       //println("filtering by subject info")

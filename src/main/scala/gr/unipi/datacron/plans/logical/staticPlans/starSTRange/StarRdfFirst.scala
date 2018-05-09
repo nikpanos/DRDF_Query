@@ -20,10 +20,11 @@ case class StarRdfFirst() extends BaseStar() {
 
     val refinement = TriplesRefinement()
 
-    val filteredSPO = PhysicalPlanner.filterByPO(filterByPOParams(DataStore.triplesData, qPredTrans, qObjTrans, Some("Filter by spo predicate")))
+    /*val filteredSPO = PhysicalPlanner.filterByPO(filterByPOParams(DataStore.triplesData, qPredTrans, qObjTrans, Some("Filter by spo predicate")))
 
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(filteredSPO, constraints, encoder, Some("Filter by encoded spatiotemporal info"))).cache
 
-    refinement.refineResults(filteredByIdInfo, DataStore.triplesData, constraints)
+    refinement.refineResults(filteredByIdInfo, DataStore.triplesData, constraints)*/
+    DataStore.triplesData
   }
 }
