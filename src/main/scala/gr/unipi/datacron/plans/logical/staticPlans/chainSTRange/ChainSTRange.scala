@@ -9,16 +9,16 @@ import org.apache.spark.sql.DataFrame
 
 case class ChainSTRange() extends StaticLogicalPlan() {
   override private[logical] def doExecutePlan(): DataFrame = {
-    val predicate1 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(":hasHeading")).get
-    val predicate2 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(":hasSpeed")).get
-    val predicate3 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(":occurs")).get
-    val predicate4 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(":ofMovingObject")).get
+    val predicate1 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(":hasHeading")).get
+    val predicate2 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(":hasSpeed")).get
+    val predicate3 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(":occurs")).get
+    val predicate4 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(":ofMovingObject")).get
 
-    val vesPredicate1 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams("a")).get
-    val vesPredicate2 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(":has_vesselFixingDeviceType")).get
-    val vesPredicate3 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(":has_vesselMMSI")).get
-    val vesPredicate4 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams("244010219")).get
-    val vesPredicate5 = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(":vesselName")).get
+    val vesPredicate1 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams("a")).get
+    val vesPredicate2 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(":has_vesselFixingDeviceType")).get
+    val vesPredicate3 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(":has_vesselMMSI")).get
+    val vesPredicate4 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams("244010219")).get
+    val vesPredicate5 = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(":vesselName")).get
 
 
     val filteredDF = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(DataStore.nodeData, Array(predicate1.toString, predicate2.toString, predicate4.toString)))

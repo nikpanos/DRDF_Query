@@ -8,5 +8,4 @@ trait TJoinTriples {
 }
 
 case class joinDataframesParams(df1: DataFrame, df2: DataFrame, df1JoinColumn: String, df2JoinColumn: String,
-                                df1Alias: Option[String], df2Alias: Option[String],
                                 override val operationName: Option[String] = None) extends BaseOperatorParams

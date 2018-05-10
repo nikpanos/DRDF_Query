@@ -1,8 +1,16 @@
+Prefix : <http://www.datacron-project.eu/datAcron#>
+
 SELECT *
 WHERE
 {
-    ?ves <a> ?VesselType ;
-    <:hasFixingDevice> ?device ;
-    <:has_vesselMMSI> '244010219' ;
-    <:has_vesselName> ?name .
+    ?ves a ?VesselType ;
+    :has_vesselFixingDeviceType ?device ;
+    :has_vesselMMSI '244010219' ;
+    :vesselName ?name .
+    ?n :ofMovingObject ?ves ;
+    :hasGeometry ?g ;
+    :hasTemporalFeature ?t ;
+    :hasHeading ?heading ;
+    :hasSpeed ?speed .
+    ?event :occurs ?n .
 }

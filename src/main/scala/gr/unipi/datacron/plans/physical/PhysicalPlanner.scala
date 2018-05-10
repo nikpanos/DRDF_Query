@@ -7,11 +7,12 @@ import gr.unipi.datacron.plans.physical.joinTriples.{AJoinLLLTriples, _}
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.plans.physical.triples._
 import gr.unipi.datacron.common.Benchmarks.doBenchmark
+import gr.unipi.datacron.plans.physical.projection.Projection
 import gr.unipi.datacron.plans.physical.properties.Properties
 import org.apache.spark.sql.DataFrame
 
 
-object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with TProperties {
+object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with TProperties with TProjection {
 
   private lazy val lllTriples = LLLTriples()
   private lazy val mbJoinSTriples = MBJoinSTriples()
@@ -21,6 +22,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   private lazy val aJoinLLLTriples = AJoinLLLTriples()
   private lazy val abJoinLLLTriples = ABJoinLLLTriples()
   private lazy val properties = Properties()
+  private lazy val projection = Projection()
 
   private def pickTriplesPlanBasedOnRules: TTriples = AppConfig.getString(qfpTriples_trait) match {
       case Consts.tLLLTriples => lllTriples
@@ -50,11 +52,11 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   override def filterbySpatioTemporalRange(params: filterbySpatioTemporalRangeParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterbySpatioTemporalRange(params), params)
 
-  override def pointSearchValue(params: pointSearchValueParams): Option[String] =
-    doBenchmark[Option[String]](() => pickDictionaryPlanBasedOnRules.pointSearchValue(params), params)
+  override def decodeSingleKey(params: decodeSingleKeyParams): Option[String] =
+    doBenchmark[Option[String]](() => pickDictionaryPlanBasedOnRules.decodeSingleKey(params), params)
 
-  override def pointSearchKey(params: pointSearchKeyParams): Option[Long] =
-    doBenchmark[Option[Long]](() => pickDictionaryPlanBasedOnRules.pointSearchKey(params), params)
+  override def encodeSingleValue(params: encodeSingleValueParams): Option[Long] =
+    doBenchmark[Option[Long]](() => pickDictionaryPlanBasedOnRules.encodeSingleValue(params), params)
 
   override def decodeColumn(params: decodeColumnParams): DataFrame =
     doBenchmark[DataFrame](() => pickDictionaryPlanBasedOnRules.decodeColumn(params), params)
@@ -73,4 +75,13 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
 
   override def filterNullProperties(params: filterNullPropertiesParams): DataFrame =
     doBenchmark[DataFrame](() => properties.filterNullProperties(params), params)
+
+  override def dropColumns(params: dropColumnsParams): DataFrame =
+  doBenchmark[DataFrame](() => projection.dropColumns(params), params)
+
+  override def renameColumns(params: renameColumnsParams): DataFrame =
+    doBenchmark[DataFrame](() => projection.renameColumns(params), params)
+
+  override def prefixColumns(params: prefixColumnsParams): DataFrame =
+    doBenchmark[DataFrame](() => projection.prefixColumns(params), params)
 }

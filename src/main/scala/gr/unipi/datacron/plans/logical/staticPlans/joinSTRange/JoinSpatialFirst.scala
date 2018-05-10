@@ -13,9 +13,9 @@ import scala.collection.immutable.Map
 
 case class JoinSpatialFirst() extends StaticLogicalPlan() {
   override private[logical] def doExecutePlan(): DataFrame = {
-    val transJoinKey = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(AppConfig.getString(qfpJoinKey)))
-    val transPredicate = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(AppConfig.getString(qfpJoinTripleP))).get
-    val encObj = PhysicalPlanner.pointSearchKey(pointSearchKeyParams(AppConfig.getString(qfpJoinTripleO))).get
+    val transJoinKey = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(AppConfig.getString(qfpJoinKey)))
+    val transPredicate = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(AppConfig.getString(qfpJoinTripleP))).get
+    val encObj = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(AppConfig.getString(qfpJoinTripleO))).get
     val refinement = TriplesRefinement()
 
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(
