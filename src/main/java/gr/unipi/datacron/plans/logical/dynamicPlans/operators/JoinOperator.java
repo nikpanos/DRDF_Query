@@ -33,6 +33,8 @@ public class JoinOperator extends BaseOpW2Child {
 
         this.addChild(bo1,bo2);
         this.fillAndFormArrayColumns();
+        setOutputSize(this.estimateOutputSize(bo1,bo2));
+
 
     }
 
@@ -96,7 +98,7 @@ public class JoinOperator extends BaseOpW2Child {
     @Override
     protected String toString(String margin){
         StringBuilder s = new StringBuilder();
-        s.append(margin).append("Operator: ").append(this.getClass()).append(" JOIN ON COLUMNS:");
+        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append(" JOIN ON COLUMNS:");
         for(Column c:getColumnJoinPredicate()){
             s.append("ColumnName: ").append(c.getColumnName()).append(" Variable: ").append(c.getQueryString()).append(" ");
         }
@@ -119,5 +121,18 @@ public class JoinOperator extends BaseOpW2Child {
     @Override
     public String toString(){
         return this.toString("");
-    }     
+    }
+
+    @Override
+    protected long estimateOutputSize(BaseOperator... bo){
+
+        Long i = 1L;
+        for (BaseOperator b : bo) {
+            i = i * b.getOutputSize();
+        }
+
+        return i;
+
+    }
+
 }

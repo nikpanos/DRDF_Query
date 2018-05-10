@@ -25,6 +25,7 @@ public class JoinOrOperator extends BaseOpWnChild {
     private JoinOrOperator(BaseOperator... bo) {
         this.addChild(bo);
         this.fillAndFormArrayColumns();
+        setOutputSize(this.estimateOutputSize(bo));
     }
 
     @Override
@@ -78,7 +79,7 @@ public class JoinOrOperator extends BaseOpWnChild {
     @Override
     protected String toString(String margin){
         StringBuilder s = new StringBuilder();
-        s.append(margin).append("Operator: ").append(this.getClass()).append(" JOIN ON COLUMNS:");
+        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append(" JOIN ON COLUMNS:");
         for(Column c:getColumnJoinPredicate()){
             s.append("ColumnName: ").append(c.getColumnName()).append(" Variable: ").append(c.getQueryString()).append(" ");
         }
@@ -101,6 +102,21 @@ public class JoinOrOperator extends BaseOpWnChild {
     @Override
     public String toString(){
         return this.toString("");
-    }     
+    }
+
+    @Override
+    protected long estimateOutputSize(BaseOperator... bo){
+
+        Long i= Long.MAX_VALUE;
+        for (BaseOperator b : bo) {
+            if(b.getOutputSize()<i){
+                i = b.getOutputSize();
+            }
+
+        }
+
+        return i;
+
+    }
     
 }

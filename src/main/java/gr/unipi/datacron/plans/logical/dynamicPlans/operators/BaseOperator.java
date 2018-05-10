@@ -19,6 +19,8 @@ public abstract class BaseOperator {
 
     private final List<BaseOperator> bopChildren = new ArrayList<>();//list with base operators children
     private BaseOperator parent;
+    private long outputSize;
+
 
     private Column[] arrayColumns;//only column values
 
@@ -95,4 +97,16 @@ public abstract class BaseOperator {
     }
 
 
+    protected long estimateOutputSize(BaseOperator... bo){
+        return 0;
+    }
+
+
+    public long getOutputSize() {
+        return outputSize;
+    }
+
+    protected void setOutputSize(long outputSize) {
+        this.outputSize = outputSize;
+    }
 }
