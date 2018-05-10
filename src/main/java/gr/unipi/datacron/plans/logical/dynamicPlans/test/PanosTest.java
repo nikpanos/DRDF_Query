@@ -53,15 +53,20 @@ public class PanosTest {
                         "SELECT *\n" +
                         "WHERE\n" +
                         "{\n" +
-                        "    ?ves a ?VesselType ;\n" +
-                        "    :has_vesselFixingDeviceType ?device ;\n" +
-                        "    :has_vesselMMSI '244010219' ;\n" +
-                        "    :vesselName ?name .\n" +
                         "    ?n :ofMovingObject ?ves ;\n" +
                         "    :hasGeometry ?g ;\n" +
                         "    :hasTemporalFeature ?t ;\n" +
                         "    :hasHeading ?heading ;\n" +
                         "    :hasSpeed ?speed .\n" +
+
+                        "    ?event :occurs ?n .\n" +
+
+
+
+                        "    ?ves a ?VesselType ;\n" +
+                        "    :has_vesselFixingDeviceType ?device ;\n" +
+                        "    :has_vesselMMSI '244010219' ;\n" +
+                        "    :vesselName ?name .\n" +
                         "}\n").getBop();
         
         /*System.out.println("NumberOfTrees: " + bop.length);
@@ -84,5 +89,6 @@ public class PanosTest {
             System.out.println(c.getColumnTypes());
             System.out.println(c.getQueryString());
         }
+        System.out.println(bop[0].toString());
     }
 }

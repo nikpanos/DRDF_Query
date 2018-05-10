@@ -93,7 +93,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
                 }
             }
 
-            listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new)));
+            listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),new java.util.Random().nextInt(5000)+1));
         });
 
         formBaseOperatorArray(formStarQueriesAndRemainingTriplets(checkForShortcuts(listOfFilters)));
@@ -130,7 +130,6 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
             for (int k = i + 1; k < listOfFilters.size(); k++) {
 
-                // it was if (excludedElements.contains(i)) {
                 if (excludedElements.contains(k)) {
                     continue;
                 }
@@ -164,6 +163,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     private void formBaseOperatorArray(List<BaseOperator> l) {
 
+        //sort the list by the value of outputSize
+        l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
         Set<Integer> excludedFromList = new HashSet<>();
 
         List<BaseOperator> bopList = new ArrayList<>();
@@ -241,7 +242,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
                                 }
                             }
 
-                            l.set(l.indexOf(l1), FilterOf.newFilterOf(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new)));
+                            l.set(l.indexOf(l1), FilterOf.newFilterOf(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new),new java.util.Random().nextInt(50)+1));
 
                             l.remove(list2.get(i));
 
