@@ -93,7 +93,15 @@ public class MyOpVisitorBase extends OpVisitorBase {
                 }
             }
 
-            listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),new java.util.Random().nextInt(5000)+1));
+            if(subject.equals("?event")){
+                listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),3));
+
+            }
+            else{
+                listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),2));
+
+            }
+
         });
 
         formBaseOperatorArray(formStarQueriesAndRemainingTriplets(checkForShortcuts(listOfFilters)));
@@ -242,7 +250,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
                                 }
                             }
 
-                            l.set(l.indexOf(l1), FilterOf.newFilterOf(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new),new java.util.Random().nextInt(50)+1));
+                            l.set(l.indexOf(l1), FilterOf.newFilterOf(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new),new java.util.Random().nextInt(2000)+1));
 
                             l.remove(list2.get(i));
 
