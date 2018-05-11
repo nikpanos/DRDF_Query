@@ -29,6 +29,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
     println(sparqlQuery)
     val logicalPlan = MyOpVisitorBase.newMyOpVisitorBase(sparqlQuery).getBop
+    println(logicalPlan(0))
     executeTree(logicalPlan(0)).get
   }
 
@@ -58,26 +59,32 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def guessDataFrame(dfO: Option[DataFrame], node: BaseOperator): DataFrame = {
+  private def guessDataFrame(dfO: Option[DataFrame], node: BaseOperator): Array[DataFrame] = {
     if (dfO.isEmpty) {
       val predicates = getPredicateList(node)
 
       val result = DataStore.propertyData.filter(df => {
-        df.hasColumns(predicates)
+        df.getIncludingColumns(predicates).length > 0
       })
 
       if (result.length == 0) {
-        DataStore.triplesData
+        Array(DataStore.triplesData)
       }
       else if (result.length == 1) {
-        result(0)
+        val df = result(0)
+        if (df.getExcludingColumns(predicates).length > 0) {
+          Array(df, DataStore.triplesData)
+        }
+        else {
+          Array(df)
+        }
       }
       else {
         throw new Exception("Does not support more than one dataframes")
       }
     }
     else {
-      dfO.get
+      Array(dfO.get)
     }
   }
 
@@ -90,7 +97,13 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       throw new Exception("A predicate filter should be provided!")
     }
 
-    var df = guessDataFrame(dfO, filter)
+    val dfs = guessDataFrame(dfO, filter)
+
+    if (dfs.length > 1) {
+      throw new Exception("Multiple dataframes are not expected here!")
+    }
+
+    var df = dfs(0)
 
     if (sub.isDefined) {
       val encodedFilter = getEncodedLong(sub.get.getValue)
@@ -121,19 +134,21 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   }
 
   private def processJoinOr(joinOr: JoinOrOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {
-    val df = Option(guessDataFrame(dfO, joinOr))
+    val dfs = guessDataFrame(dfO, joinOr)
 
-    if (df.isDefined && df.get.isPropertyTable) {
-      joinOr.getBopChildren.asScala.foldLeft(df)((dfTmp: Option[DataFrame], child: BaseOperator) => {
-        recursivelyExecuteNode(child, dfTmp)
-      })
-    }
-    else if (df.isDefined) {
-      executeJoin(joinOr, joinOr.getColumnJoinPredicate, df)
-    }
-    else {
-      None
-    }
+    val results = dfs.map(df => {
+      val dfO = Option(df)
+      if (df.isPropertyTable) {
+        joinOr.getBopChildren.asScala.foldLeft(dfO)((dfTmp: Option[DataFrame], child: BaseOperator) => {
+          recursivelyExecuteNode(child, dfTmp)
+        })
+      }
+      else {
+        executeJoin(joinOr, joinOr.getColumnJoinPredicate, dfO)
+      }
+    })
+
+
   }
 
   private def getColumnNameForJoin(op: BaseOperator, c: Column, prefix: String): String = {
@@ -160,6 +175,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def getDfAndColNameForJoin(op: BaseOperator, col: Column, dfO: Option[DataFrame]): (DataFrame, String) = {
     val df1 = recursivelyExecuteNode(op, dfO).get
+    println("joinChild: " + op.getClass)
     val prefix1 = getPrefixForColumn(df1, op, col)
     val columnName1 = getColumnNameForJoin(op, col, prefix1._1)
 

@@ -14,3 +14,26 @@ WHERE
     :hasSpeed ?speed .
     ?event :occurs ?n .
 }
+
+Prefix : <http://www.datacron-project.eu/datAcron#>
+
+SELECT *
+WHERE
+{
+    ?ves a ?VesselType ;
+    :has_vesselFixingDeviceType ?device ;
+    :vesselName ?name .
+    ?n :ofMovingObject ?ves ;
+    :hasGeometry ?g ;
+    :hasTemporalFeature ?t ;
+    :hasHeading ?heading ;
+    :hasSpeed ?speed .
+    ?event :occurs ?n .
+}
+
+
+
+
+1 size: 1
+2 size: 14.314.312
+3 size: 20.152.147

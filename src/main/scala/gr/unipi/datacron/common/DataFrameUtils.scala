@@ -13,6 +13,9 @@ object DataFrameUtils {
     }
     def isPrefixed: Boolean = df.columns(0).contains('.')
     def isPropertyTable: Boolean = !df.hasColumn(triplePredLongField)
+
+    def getIncludingColumns(cols: Array[String]): Array[String] = cols.filter(df.columns.contains)
+    def getExcludingColumns(cols: Array[String]): Array[String] = cols.filter(!df.columns.contains(_))
   }
 
   def sanitize(input: String): String = s"`$input`"

@@ -160,5 +160,7 @@ object Consts {
   final val partitionsNumberAfterShuffle = "sparkParams.spark.sql.shuffle.partitions"
 
   final val sparqlQuerySource = "query.sparql.source"
+
+  final val rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 }
 
