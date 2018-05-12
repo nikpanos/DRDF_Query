@@ -63,6 +63,7 @@ object Consts {
   final val qfpLogicalPlans = "query.plans.logical"
 
   final val qfpEnableFilterByEncodedInfo = "query.enableFilterByEncodedInfo"
+  final val qfpEnableMultipleFilterJoinOr = "query.enableMultipleFilterJoinOr"
 
   final val qfpQueryOutputDevices = "output.outputDevices"
   final val qfpQueryOutputFolderPath = "output.dirOutput.path"

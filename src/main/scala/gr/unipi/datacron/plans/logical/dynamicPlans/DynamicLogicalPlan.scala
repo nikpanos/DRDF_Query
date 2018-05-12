@@ -11,7 +11,6 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
-import gr.unipi.datacron.common.DataFrameUtils
 import org.apache.spark.sql.DataFrame
 
 import collection.JavaConverters._
@@ -174,7 +173,14 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
         })
       }
       else {
-        executeJoin(joinOr, joinOr.getColumnJoinPredicate, dfO)
+        val df = if (AppConfig.getBoolean(qfpEnableMultipleFilterJoinOr)) {
+          val filters = getPredicateList(joinOr).map((triplePredLongField, _))
+          Option(PhysicalPlanner.filterByMultipleOr(filterByMultipleOrParams(dfO.get, filters)).cache)
+        } else {
+          dfO
+        }
+
+        executeJoin(joinOr, joinOr.getColumnJoinPredicate, df)
       }
     }
   }

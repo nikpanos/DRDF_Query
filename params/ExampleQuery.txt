@@ -35,7 +35,14 @@ WHERE
 
 
 
+Prefix : <http://www.datacron-project.eu/datAcron#>
 
-1 size: 1
-2 size: 14.314.312
-3 size: 20.152.147
+SELECT *
+WHERE
+{
+    ?n :hasWeatherCondition ?w .
+    ?w a :WeatherCondition ;
+    :windDirectionMin "77.13083" ;
+    :reportedMaxTemperature ?temp ;
+    :reportedDewPoint ?d .
+}

@@ -5,7 +5,7 @@ import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
 import scala.util.Try
@@ -55,5 +55,18 @@ case class LLLTriples() extends BaseTriples {
     else {
       params.df.withColumn(triplePruneSubKeyField, lit(3))
     }
+  }
+
+  private def getFilter(df: DataFrame, fil: (String, String)): Column = {
+    df(fil._1) === fil._2
+  }
+
+  override def filterByMultipleOr(params: filterByMultipleOrParams): DataFrame = {
+    val df = params.df
+    val filters = params.colNamesAndValues.tail.foldLeft(getFilter(df, params.colNamesAndValues.head))((c: Column, fil: (String, String)) => {
+      c.or(getFilter(df, fil))
+    })
+    println(filters)
+    params.df.filter(filters)
   }
 }
