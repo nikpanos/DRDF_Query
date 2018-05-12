@@ -16,6 +16,8 @@ object DataFrameUtils {
 
     def getIncludingColumns(cols: Array[String]): Array[String] = cols.filter(df.columns.contains)
     def getExcludingColumns(cols: Array[String]): Array[String] = cols.filter(!df.columns.contains(_))
+
+    def findColumnNameWithPrefix(colName: String): Option[String] = df.columns.find(_.endsWith(colName))
   }
 
   def sanitize(input: String): String = s"`$input`"

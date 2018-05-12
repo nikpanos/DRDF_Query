@@ -11,6 +11,7 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
+import gr.unipi.datacron.common.DataFrameUtils
 import org.apache.spark.sql.DataFrame
 
 import collection.JavaConverters._
@@ -44,14 +45,27 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def getPrefix(s: String): String = s.substring(0, s.indexOf('.') + 1)
   private def getSuffix(s: String): String = s.substring(s.indexOf('.') + 1)
 
+  private def getNewJoinOrOperator(node: JoinOrOperator, preds: Array[String]): JoinOrOperator = {
+    val filters = node.getBopChildren.asScala.toArray.filter(op => {
+      preds.contains(op.asInstanceOf[FilterOf].getPredicate)
+    })
+    JoinOrOperator.newJoinOrOperator(filters: _*)
+  }
+
+  private def convertJoinOr(joinOrOperator: JoinOrOperator, incl: Array[String], excl: Array[String]): JoinOperator = {
+    val joinOr1 = getNewJoinOrOperator(joinOrOperator, incl)
+    val joinOr2 = getNewJoinOrOperator(joinOrOperator, excl)
+
+    JoinOperator.newJoinOperator(joinOr1, joinOr2)
+  }
+
   private def getPredicateList(node: BaseOperator): Array[String] = {
     node match {
       case _: JoinOrOperator =>
         node.getBopChildren.asScala.foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
           preds ++ getPredicateList(child)
         })
-      case _: FilterOf =>
-        val filter = node.asInstanceOf[FilterOf]
+      case filter: FilterOf =>
         filter.getFilters.filter(column => {
           column.getColumn.getColumnTypes == PREDICATE
         }).map(column => getEncodedStr(column.getValue))
@@ -61,7 +75,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def guessDataFrame(dfO: Option[DataFrame], node: BaseOperator): Array[DataFrame] = {
     if (dfO.isEmpty) {
-      val predicates = getPredicateList(node)
+      val rdfTypeEnc = getEncodedStr(rdfType)
+      val predicates = getPredicateList(node).filter(!_.equals(rdfTypeEnc))
 
       val result = DataStore.propertyData.filter(df => {
         df.getIncludingColumns(predicates).length > 0
@@ -72,7 +87,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       }
       else if (result.length == 1) {
         val df = result(0)
-        if (df.getExcludingColumns(predicates).length > 0) {
+        var excl = df.getExcludingColumns(predicates)
+        if (excl.length > 0) {
           Array(df, DataStore.triplesData)
         }
         else {
@@ -86,6 +102,15 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     else {
       Array(dfO.get)
     }
+  }
+
+  private def getIncludingAndExcludingCols(propertyDf: DataFrame, node: BaseOperator): (Array[String], Array[String]) = {
+    val predicates = getPredicateList(node)
+
+    val incl = propertyDf.getIncludingColumns(predicates).map(_.toLong).map(getDecodedStr)
+    val excl = propertyDf.getExcludingColumns(predicates).map(_.toLong).map(getDecodedStr)
+
+    (incl, excl)
   }
 
   private def processFilterOf(filter: FilterOf, dfO: Option[DataFrame]) : Option[DataFrame] = {
@@ -136,9 +161,14 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def processJoinOr(joinOr: JoinOrOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {
     val dfs = guessDataFrame(dfO, joinOr)
 
-    val results = dfs.map(df => {
-      val dfO = Option(df)
-      if (df.isPropertyTable) {
+    if (dfs.length > 1) {
+      val (incl, excl) = getIncludingAndExcludingCols(dfs(0), joinOr)
+      val join = convertJoinOr(joinOr, incl, excl)
+      recursivelyExecuteNode(join, None)
+    }
+    else {
+      val dfO = Option(dfs(0))
+      if (dfO.get.isPropertyTable) {
         joinOr.getBopChildren.asScala.foldLeft(dfO)((dfTmp: Option[DataFrame], child: BaseOperator) => {
           recursivelyExecuteNode(child, dfTmp)
         })
@@ -146,9 +176,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       else {
         executeJoin(joinOr, joinOr.getColumnJoinPredicate, dfO)
       }
-    })
-
-
+    }
   }
 
   private def getColumnNameForJoin(op: BaseOperator, c: Column, prefix: String): String = {

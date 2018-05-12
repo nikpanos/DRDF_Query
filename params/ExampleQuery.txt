@@ -29,6 +29,8 @@ WHERE
     :hasHeading ?heading ;
     :hasSpeed ?speed .
     ?event :occurs ?n .
+    ?n :hasWeatherCondition ?w.
+    ?w :windDirectionMin "77.13083"
 }
 
 
