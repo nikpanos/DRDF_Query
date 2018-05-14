@@ -75,27 +75,44 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def guessDataFrame(dfO: Option[DataFrame], node: BaseOperator): Array[DataFrame] = {
     if (dfO.isEmpty) {
       val rdfTypeEnc = getEncodedStr(rdfType)
-      val predicates = getPredicateList(node).filter(!_.equals(rdfTypeEnc))
+      var predicates = getPredicateList(node)
 
-      val result = DataStore.propertyData.filter(df => {
-        df.getIncludingColumns(predicates).length > 0
-      })
-
-      if (result.length == 0) {
-        Array(DataStore.triplesData)
-      }
-      else if (result.length == 1) {
-        val df = result(0)
-        var excl = df.getExcludingColumns(predicates)
-        if (excl.length > 0) {
-          Array(df, DataStore.triplesData)
+      if ((predicates.length == 1) && (predicates(0) == getEncodedStr(rdfType))) {
+        if (node.isInstanceOf[FilterOf]) {
+          val objFilter = node.asInstanceOf[FilterOf].getFilters.find(_.getColumn.getColumnTypes == OBJECT)
+          if (objFilter.isDefined) {
+            val encodedObjFilter = getEncodedStr(objFilter.get.getValue)
+            return DataStore.findDataframeBasedOnRdfType(encodedObjFilter)
+          }
         }
-        else {
-          Array(df)
-        }
+        DataStore.propertyData.filter(df => {
+          df.getIncludingColumns(predicates).length > 0
+        }) :+ DataStore.triplesData
       }
       else {
-        throw new Exception("Does not support more than one dataframes")
+
+        predicates = predicates.filter(!_.equals(rdfTypeEnc))
+
+        val result = DataStore.propertyData.filter(df => {
+          df.getIncludingColumns(predicates).length > 0
+        })
+
+        if (result.length == 0) {
+          Array(DataStore.triplesData)
+        }
+        else if (result.length == 1) {
+          val df = result(0)
+          var excl = df.getExcludingColumns(predicates)
+          if (excl.length > 0) {
+            Array(df, DataStore.triplesData)
+          }
+          else {
+            Array(df)
+          }
+        }
+        else {
+          throw new Exception("Does not support more than one dataframes")
+        }
       }
     }
     else {
@@ -123,38 +140,47 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
     val dfs = guessDataFrame(dfO, filter)
 
-    if (dfs.length > 1) {
-      throw new Exception("Multiple dataframes are not expected here!")
-    }
-
-    var df = dfs(0)
-
-    if (sub.isDefined) {
-      val encodedFilter = getEncodedLong(sub.get.getValue)
-      df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, tripleSubLongField, encodedFilter))
-    }
-
     val encodedFilterPred = getEncodedStr(pred.get.getValue)
-    if (df.isPropertyTable) {
-      if (obj.isDefined) {
-        val encodedFilterObj = getEncodedLong(obj.get.getValue)
-        df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, encodedFilterPred, encodedFilterObj))
-      }
-      else {
-        df = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(df, Array(encodedFilterPred)))
-      }
+
+    if (dfs.length > 1) {
+      var dfHead = processFilterOf(filter, Option(dfs.head)).get
+      dfHead = PhysicalPlanner.selectColumns(selectColumnsParams(dfHead, Array(tripleSubLongField, encodedFilterPred)))
+
+      Option(dfs.tail.foldLeft(dfHead)((df1, df2) => {
+        var df = processFilterOf(filter, Option(df2)).get
+        df = PhysicalPlanner.selectColumns(selectColumnsParams(df, Array(tripleSubLongField, encodedFilterPred)))
+        PhysicalPlanner.unionDataframes(unionDataframesParams(df1, df))
+      }))
     }
     else {
-      df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, triplePredLongField, encodedFilterPred))
-      if (obj.isDefined) {
-        val encodedFilterObj = getEncodedLong(obj.get.getValue)
-        df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, tripleObjLongField, encodedFilterObj))
-      }
-      df = PhysicalPlanner.dropColumns(dropColumnsParams(df, Array(triplePredLongField)))
-      df = PhysicalPlanner.renameColumns(renameColumnsParams(df, Map((tripleObjLongField, encodedFilterPred))))
-    }
+      var df = dfs(0)
 
-    Option(df)
+      if (sub.isDefined) {
+        val encodedFilter = getEncodedLong(sub.get.getValue)
+        df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, tripleSubLongField, encodedFilter))
+      }
+
+      if (df.isPropertyTable) {
+        if (obj.isDefined) {
+          val encodedFilterObj = getEncodedLong(obj.get.getValue)
+          df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, encodedFilterPred, encodedFilterObj))
+        }
+        else {
+          df = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(df, Array(encodedFilterPred)))
+        }
+      }
+      else {
+        df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, triplePredLongField, encodedFilterPred))
+        if (obj.isDefined) {
+          val encodedFilterObj = getEncodedLong(obj.get.getValue)
+          df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, tripleObjLongField, encodedFilterObj))
+        }
+        df = PhysicalPlanner.dropColumns(dropColumnsParams(df, Array(triplePredLongField)))
+        df = PhysicalPlanner.renameColumns(renameColumnsParams(df, Map((tripleObjLongField, encodedFilterPred))))
+      }
+
+      Option(df)
+    }
   }
 
   private def processJoinOr(joinOr: JoinOrOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {

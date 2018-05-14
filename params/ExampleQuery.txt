@@ -12,6 +12,8 @@ WHERE
     :hasTemporalFeature ?t ;
     :hasHeading ?heading ;
     :hasSpeed ?speed .
+    ?g :hasWKT ?pos .
+    ?t :TimeStart ?time .
     ?event :occurs ?n .
 }
 
@@ -40,9 +42,34 @@ Prefix : <http://www.datacron-project.eu/datAcron#>
 SELECT *
 WHERE
 {
-    ?n :hasWeatherCondition ?w .
+    ?n :hasWeatherCondition ?w ;
+    :hasGeometry ?g ;
+    :hasTemporalFeature ?t .
+    ?g :hasWKT ?pos .
+    ?t :TimeStart ?time .
+    ?event :occurs ?n .
     ?w a :WeatherCondition ;
     :windDirectionMin "77.13083" ;
     :reportedMaxTemperature ?temp ;
     :reportedDewPoint ?d .
+}
+
+Prefix : <http://www.datacron-project.eu/datAcron#>
+
+SELECT *
+WHERE
+{
+    ?ves a ?VesselType .
+    ?n :ofMovingObject ?ves ;
+    :hasGeometry ?g ;
+    :hasTemporalFeature ?t .
+}
+
+Prefix : <http://www.datacron-project.eu/datAcron#>
+
+SELECT *
+WHERE
+{
+    ?n a ?node .
+    ?event :occurs ?n .
 }

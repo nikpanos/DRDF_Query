@@ -40,6 +40,16 @@ object DataStore {
 
   var bConfig: Broadcast[String] = _
 
+  private def convertDecodedArrayToEncodedSet(arr: Array[String]): Set[Long] = arr.map(dictionaryRedis.getEncodedValue(_).get).toSet
+
+  private lazy val nodeTypesEncoded: Set[Long] = convertDecodedArrayToEncodedSet(nodeTypes)
+
+  def findDataframeBasedOnRdfType(encodedRdfType: String): Array[DataFrame] = {
+    val encodedRdfTypeL = encodedRdfType.toLong
+    if (nodeTypesEncoded.contains(encodedRdfTypeL)) Array(nodeData)
+    else Array(vesselData, triplesData)
+  }
+
   def hdfsDirectoryExists(directory: String): Boolean = {
     val hdfs = FileSystem.get(sc.hadoopConfiguration)
     try {

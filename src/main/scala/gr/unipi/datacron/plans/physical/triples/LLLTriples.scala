@@ -8,8 +8,6 @@ import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
-import scala.util.Try
-
 case class LLLTriples() extends BaseTriples {
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
     if (AppConfig.getBoolean(qfpEnableFilterByEncodedInfo)) {
@@ -69,4 +67,6 @@ case class LLLTriples() extends BaseTriples {
     println(filters)
     params.df.filter(filters)
   }
+
+  override def unionDataframes(params: unionDataframesParams): DataFrame = params.df1.union(params.df2)
 }

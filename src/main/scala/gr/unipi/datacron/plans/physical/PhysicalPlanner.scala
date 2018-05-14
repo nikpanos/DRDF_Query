@@ -55,6 +55,9 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   override def filterByMultipleOr(params: filterByMultipleOrParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByMultipleOr(params), params)
 
+  override def unionDataframes(params: unionDataframesParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.unionDataframes(params), params)
+
   override def decodeSingleKey(params: decodeSingleKeyParams): Option[String] =
     doBenchmark[Option[String]](() => pickDictionaryPlanBasedOnRules.decodeSingleKey(params), params)
 
@@ -87,4 +90,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
 
   override def prefixColumns(params: prefixColumnsParams): DataFrame =
     doBenchmark[DataFrame](() => projection.prefixColumns(params), params)
+
+  override def selectColumns(params: selectColumnsParams): DataFrame =
+    doBenchmark[DataFrame](() => projection.selectColumns(params), params)
 }

@@ -162,6 +162,11 @@ object Consts {
 
   final val sparqlQuerySource = "query.sparql.source"
 
-  final val rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+  final val rdfNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  final val datacronNamespace = "http://www.datacron-project.eu/datAcron#"
+
+  final val rdfType = rdfNamespace + "type"
+  final val nodeTypes = Array("Node").map(datacronNamespace + _)
+
 }
 
