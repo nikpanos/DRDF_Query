@@ -14,6 +14,9 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase;
 import gr.unipi.datacron.store.DataStore;
 import scala.Option;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * @author nicholaskoutroumanis
@@ -47,27 +50,8 @@ public class PanosTest {
         //String decodedValue = getRedisDecodedValue(-5L);
         //System.out.println(decodedValue);
 
-        BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
-                "Prefix : <http://www.datacron-project.eu/datAcron#>\n" +
-                        "\n" +
-                        "SELECT *\n" +
-                        "WHERE\n" +
-                        "{\n" +
-                        "    ?n :ofMovingObject ?ves ;\n" +
-                        "    :hasGeometry ?g ;\n" +
-                        "    :hasTemporalFeature ?t ;\n" +
-                        "    :hasHeading ?heading ;\n" +
-                        "    :hasSpeed ?speed .\n" +
-
-                        "    ?event :occurs ?n .\n" +
-
-
-
-                        "    ?ves a ?VesselType ;\n" +
-                        "    :has_vesselFixingDeviceType ?device ;\n" +
-                        "    :has_vesselMMSI '244010219' ;\n" +
-                        "    :vesselName ?name .\n" +
-                        "}\n").getBop();
+        //BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
+        //        "SELECT ?p WHERE {?s <test> [] . ?s <test1> []}").getBop();
         
         /*System.out.println("NumberOfTrees: " + bop.length);
         System.out.println("--------------------------");
@@ -83,12 +67,17 @@ public class PanosTest {
         System.out.println();
         System.out.println();*/
 
-        for (Column c : bop[0].getArrayColumns()) {
+        /*for (Column c : bop[0].getArrayColumns()) {
             System.out.println();
             System.out.println(c.getColumnName());
             System.out.println(c.getColumnTypes());
             System.out.println(c.getQueryString());
         }
-        System.out.println(bop[0].toString());
+        System.out.println(bop[0].toString());*/
+
+        Date d = new Date();
+        d.setTime(1451636000000L);
+        SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss");
+        System.out.println(df.format(d));
     }
 }

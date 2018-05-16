@@ -13,7 +13,7 @@ private[logical] case class PropertiesRefinement2() extends BaseRefinement {
   def refineResults(dfFilteredTriples: DataFrame, constraints: SpatioTemporalRange, qPredEncoded: Long, qObjEncoded: Long): DataFrame = {
     val translatedExtendedTriples = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfFilteredTriples, Array(encodedUriSpatialShortcut.toString, encodedUriTemporalShortcut.toString), false, Some("Add decoded spatial and temporal columns")))
 
-    val result = PhysicalPlanner.filterbySpatioTemporalRange(filterbySpatioTemporalRangeParams(translatedExtendedTriples, constraints, encodedUriSpatialShortcut.toString + tripleTranslateSuffix, encodedUriTemporalShortcut.toString + tripleTranslateSuffix, Some("Filter by spatiotemporal columns")))
+    val result = PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(translatedExtendedTriples, constraints, encodedUriSpatialShortcut.toString + tripleTranslateSuffix, encodedUriTemporalShortcut.toString + tripleTranslateSuffix, Some("Filter by spatiotemporal columns")))
 
     //val result = translatedExtendedTriples
 

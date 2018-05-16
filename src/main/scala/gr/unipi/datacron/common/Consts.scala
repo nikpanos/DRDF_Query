@@ -5,12 +5,12 @@ object Consts {
   final val qfpQueryName = "query.name"
   final val qfpQueryType = "query.type"
 
-  final val qfpLatLower = "query.predicates.spatio_temporal.lat_lower"
-  final val qfpLonLower = "query.predicates.spatio_temporal.lon_lower"
-  final val qfpLatUpper = "query.predicates.spatio_temporal.lat_upper"
-  final val qfpLonUpper = "query.predicates.spatio_temporal.lon_upper"
-  final val qfpTimeLower = "query.predicates.spatio_temporal.time_lower"
-  final val qfpTimeUpper = "query.predicates.spatio_temporal.time_upper"
+  final val qfpLatLower = "query.predicates.lat_lower"
+  final val qfpLonLower = "query.predicates.lon_lower"
+  final val qfpLatUpper = "query.predicates.lat_upper"
+  final val qfpLonUpper = "query.predicates.lon_upper"
+  final val qfpTimeLower = "query.predicates.time_lower"
+  final val qfpTimeUpper = "query.predicates.time_upper"
 
   final val qfpTripleP = "query.predicates.rdf.condition.p"
   final val qfpTripleO = "query.predicates.rdf.condition.o"
@@ -55,6 +55,7 @@ object Consts {
   final val qfpHdfsPrefix = "execution.hdfs_dir_prefix"
   final val qfpVerboseLogging = "execution.verbose_logging"
   final val qfpBenchmarkEnabled = "execution.benchmark_enabled"
+  final val qfpWebExecution = "execution.web"
 
   final val qfpDictionaryTrait = "query.plans.physical.dictionary"
   final val qfpTriples_trait = "query.plans.physical.triples"
@@ -76,6 +77,7 @@ object Consts {
   //Output devices
   final val outputDeviceScreen = "screen"
   final val outputDeviceDir = "dir"
+  final val outputDeviceWeb = "web"
 
   //Output file formats
   final val outputFormatParquet = "parquet"
@@ -131,6 +133,7 @@ object Consts {
   
   //Triples fields
   final val datacronOntologyNamespace = "http://www.datacron-project.eu/datAcron#"
+  final val rdfOntologyNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 
   final val tripleSpoStrField = "spoStr"
   final val triplePruneSubKeyField = "pruneSubKey"
@@ -139,8 +142,8 @@ object Consts {
   final val tripleObjLongField = "objLong"
   final val triplePropertiesStrField = "propertiesStr"
   final val tripleTranslateSuffix = "_trans"
-  final val tripleMBRField = "<" + datacronOntologyNamespace + "shortcutSpatial>"
-  final val tripleTimeStartField = "<" + datacronOntologyNamespace + "shortcutTemporal>"
+  final val tripleMBRField = datacronOntologyNamespace + "shortcutSpatial"
+  final val tripleTimeStartField = datacronOntologyNamespace + "shortcutTemporal"
   final val tripleJoinKey = "join_key"
   final val tripleGeometryField = "geometryWKT"
   final val tripleTemporalField = "temporalFeature"
@@ -162,11 +165,8 @@ object Consts {
 
   final val sparqlQuerySource = "query.sparql.source"
 
-  final val rdfNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-  final val datacronNamespace = "http://www.datacron-project.eu/datAcron#"
-
-  final val rdfType = rdfNamespace + "type"
-  final val nodeTypes = Array("Node").map(datacronNamespace + _)
+  final val rdfType = rdfOntologyNamespace + "type"
+  final val nodeTypes = Array("Node").map(datacronOntologyNamespace + _)
 
 }
 

@@ -1,58 +1,89 @@
 package gr.unipi.datacron.plans.physical.triples
 
-import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.DataFrameUtils._
+import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
-case class LLLTriples() extends BaseTriples {
+case class LLLTriples() extends BasePhysicalPlan with TTriples {
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
-    if (AppConfig.getBoolean(qfpEnableFilterByEncodedInfo)) {
-      //println("filtering by subject info")
-      val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
-      val bIntervalIds = DataStore.sc.broadcast(intervalIds)
-      val bSpatialIds = DataStore.sc.broadcast(DataStore.spatialGrid.getSpatialIds(params.constraints))
-      val bEncoder = DataStore.sc.broadcast(params.encoder)
+    val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
+    val spatialIds = DataStore.spatialGrid.getSpatialIds(params.constraints)
 
-      val result = if (params.df.hasColumn(tripleSubLongField)) params.df else addSubjectInfo(params.df)
+    val result = params.df
 
-      val getPruneKey = udf((sub: Long) => {
-        var key = -1
-        if (sub >= 0) {
-          val components = bEncoder.value.decodeComponentsFromKey(sub)
+    val getPruneKey = udf((sub: Long) => {
+      var key = -1
+      if (sub >= 0) {
+        val components = params.encoder.decodeComponentsFromKey(sub)
 
-          if ((components._1 >= bIntervalIds.value._1) && (components._1 <= bIntervalIds.value._2)) {
-            //not pruned by temporal
-            val sp = bSpatialIds.value.get(components._2)
-            if (sp.nonEmpty) {
-              //not pruned by spatial
-              key = 3 //initially set to need both refinements
-              if ((components._1 > bIntervalIds.value._1) && (components._1 < bIntervalIds.value._2)) {
-                //does not need temporal refinement
-                key -= 1
-              }
-              if (!sp.get) {
-                //does not need spatial refinement
-                key -= 2
-              }
+        if ((components._1 >= intervalIds._1) && (components._1 <= intervalIds._2)) {
+          //not pruned by temporal
+          val sp = spatialIds.get(components._2)
+          if (sp.nonEmpty) {
+            //not pruned by spatial
+            key = 3  //initially set to need both refinements
+            if ((components._1 > intervalIds._1) && (components._1 < intervalIds._2)) {
+              //does not need temporal refinement
+              key -= 1
+            }
+            if (!sp.get) {
+              //does not need spatial refinement
+              key -= 2
             }
           }
         }
-        key
-      })
+      }
+      key
+    })
 
-      val lowerId = params.encoder.encodeKeyFromComponents(intervalIds._1, 0, 0)
-      val higherId = params.encoder.encodeKeyFromComponents(intervalIds._2 + 1, 0, 0)
+    val lowerId = params.encoder.encodeKeyFromComponents(intervalIds._1, 0, 0)
+    val higherId = params.encoder.encodeKeyFromComponents(intervalIds._2 + 1, 0, 0)
 
-      result.filter(col(tripleSubLongField) >= lowerId).filter(col(tripleSubLongField) < higherId).
-        withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(tripleSubLongField) > -1)
-    }
-    else {
-      params.df.withColumn(triplePruneSubKeyField, lit(3))
-    }
+    result.filter(col(tripleSubLongField) >= lowerId).filter(col(tripleSubLongField) < higherId).
+      withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(triplePruneSubKeyField) > -1)
+  }
+
+  override def filterBySpatioTemporalRange(params: filterBySpatioTemporalRangeParams): DataFrame = {
+    val lower = params.range.low.time / 1000L
+    val upper = params.range.high.time / 1000L
+
+    val dateFormat = "YYYY-MM-dd'T'HH:mm:ss"
+
+    val filterBy = udf((pruneKey: Int, decodedSpatial: String) => {
+      val sptResult = ((pruneKey >> 1) & 1) != 1
+
+      if (!sptResult) {
+        //refine spatial
+        val decodedObject = decodedSpatial.substring(7, decodedSpatial.length - 1)
+        val lonlat = decodedObject.split(lonLatSeparator)
+        val lon = lonlat(0).toDouble
+        val lat = lonlat(1).toDouble
+        if ((lon >= params.range.low.longitude) && (lon <= params.range.high.longitude) &&
+          (lat >= params.range.low.latitude) && (lat <= params.range.high.latitude)) {
+          true
+        }
+        else {
+          false
+        }
+      }
+      else {
+        true
+      }
+    })
+
+    val pruneKey = params.df.findColumnNameWithPrefix(triplePruneSubKeyField).get
+
+    params.df
+      .filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
+      .filter(filterBy(col(sanitize(pruneKey)), col(sanitize(params.spatialColumn))))
+  }
+
+  override def filterByColumn(params: filterByColumnParams): DataFrame = {
+    params.df.filter(col(params.columnName) === params.value)
   }
 
   private def getFilter(df: DataFrame, fil: (String, String)): Column = {
@@ -64,7 +95,6 @@ case class LLLTriples() extends BaseTriples {
     val filters = params.colNamesAndValues.tail.foldLeft(getFilter(df, params.colNamesAndValues.head))((c: Column, fil: (String, String)) => {
       c.or(getFilter(df, fil))
     })
-    println(filters)
     params.df.filter(filters)
   }
 

@@ -49,8 +49,8 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterBySubSpatioTemporalInfo(params), params)
 
-  override def filterbySpatioTemporalRange(params: filterbySpatioTemporalRangeParams): DataFrame =
-    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterbySpatioTemporalRange(params), params)
+  override def filterBySpatioTemporalRange(params: filterBySpatioTemporalRangeParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterBySpatioTemporalRange(params), params)
 
   override def filterByMultipleOr(params: filterByMultipleOrParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByMultipleOr(params), params)

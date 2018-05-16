@@ -15,6 +15,7 @@ object DataStore {
   lazy val spark: SparkSession = SparkSession.builder
     .master(AppConfig.getString(qfpSparkMaster))
     .appName(AppConfig.getString(qfpQueryName))
+    .config("spark.ui.showConsoleProgress", !AppConfig.getOptionalBoolean(qfpWebExecution).getOrElse(false))
     .getOrCreate()
 
   lazy val sc: SparkContext = spark.sparkContext
@@ -69,6 +70,8 @@ object DataStore {
       hdfs.close()
     }
   }
+
+  lazy val spatialAndTemporalShortcutCols: Array[String] = Array(tripleMBRField, tripleTimeStartField).map(dictionaryRedis.getEncodedValue(_).get.toString)
 
   def init(): Unit = {
     //Force initialization of spark context here in order to omit the initialization overhead

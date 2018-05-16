@@ -23,13 +23,19 @@ object AppConfig extends Serializable {
 
   def getString(s: String): String = config.getString(s)
 
+  def getOptionalString(s: String): Option[String] = Try(config.getString(s)).toOption
+
   def getInt(s: String): Int = config.getInt(s)
 
   def getOptionalInt(s: String): Option[Int] = Try(config.getInt(s)).toOption
 
   def getDouble(s: String): Double = config.getDouble(s)
 
+  def getOptionalDouble(s: String): Option[Double] = Try(config.getDouble(s)).toOption
+
   def getLong(s: String): Long = config.getLong(s)
+
+  def getOptionalLong(s: String): Option[Long] = Try(config.getLong(s)).toOption
 
   def getStringList(s: String): Array[String] = config.getStringList(s).asScala.toArray
 

@@ -1,6 +1,8 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans
 
-import gr.unipi.datacron.common.{AppConfig, Consts}
+import java.text.SimpleDateFormat
+
+import gr.unipi.datacron.common.{AppConfig, Consts, SpatioTemporalInfo, SpatioTemporalRange}
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase
 import gr.unipi.datacron.common.Consts._
@@ -16,8 +18,27 @@ import org.apache.spark.sql.DataFrame
 import collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
+import scala.util.Try
 
 case class DynamicLogicalPlan() extends BaseLogicalPlan() {
+  val dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss")
+
+  private[dynamicPlans] val constraints = Try(SpatioTemporalRange(
+    SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
+    SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
+
+  private def filterBySpatioTemporalInfo(dfO: Option[DataFrame]): Option[DataFrame] = {
+    if (dfO.isDefined && constraints.isDefined && AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true) && dfO.get.hasSpatialAndTemporalShortcutCols) {
+      println("Filtering by spatio-temporal info")
+      val res = Option(PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(dfO.get, constraints.get, encoder)))
+      println("Count after filtering by info: " + res.get.count)
+      res
+    }
+    else {
+      dfO
+    }
+  }
+
   override private[logical] def doExecutePlan(): DataFrame = {
     val q = AppConfig.getString(sparqlQuerySource)
     val sparqlQuery = if (q.startsWith("file://")) {
@@ -29,7 +50,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
     println(sparqlQuery)
     val logicalPlan = MyOpVisitorBase.newMyOpVisitorBase(sparqlQuery).getBop
-    println(logicalPlan(0))
+    //println(logicalPlan(0))
     executeTree(logicalPlan(0)).get
   }
 
@@ -194,9 +215,10 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     else {
       val dfO = Option(dfs(0))
       if (dfO.get.isPropertyTable) {
-        joinOr.getBopChildren.asScala.foldLeft(dfO)((dfTmp: Option[DataFrame], child: BaseOperator) => {
+        val result = joinOr.getBopChildren.asScala.foldLeft(dfO)((dfTmp: Option[DataFrame], child: BaseOperator) => {
           recursivelyExecuteNode(child, dfTmp)
         })
+        filterBySpatioTemporalInfo(result)
       }
       else {
         val df = if (AppConfig.getBoolean(qfpEnableMultipleFilterJoinOr)) {
@@ -235,7 +257,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def getDfAndColNameForJoin(op: BaseOperator, col: Column, dfO: Option[DataFrame]): (DataFrame, String) = {
     val df1 = recursivelyExecuteNode(op, dfO).get
-    println("joinChild: " + op.getClass)
+    //println("joinChild: " + op.getClass)
     val prefix1 = getPrefixForColumn(df1, op, col)
     val columnName1 = getColumnNameForJoin(op, col, prefix1._1)
 
@@ -261,6 +283,25 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       case j: JoinOperator => processJoin(j)
       case _ => None
     }
+  }
+
+  private def refineBySpatioTemporal(dfO: Option[DataFrame]): Option[DataFrame] = {
+    if (dfO.isDefined && constraints.isDefined && dfO.get.hasSpatialAndTemporalShortcutCols()) {
+      println("Filtering by spatio-temporal predicates")
+      val spatialShortcutCol = dfO.get.getSpatioTemporalShortucutCols
+      val spatialShortcutCol_trans = spatialShortcutCol.map(_ + tripleTranslateSuffix)
+      val df = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfO.get, spatialShortcutCol))
+
+      Option(PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(df, constraints.get, spatialShortcutCol_trans(0), spatialShortcutCol_trans(1))))
+    }
+    else {
+      dfO
+    }
+  }
+
+  private def filterFinalResults(dfO: Option[DataFrame]): Option[DataFrame] = {
+    //Perform filtering based on Filter operators here...
+    refineBySpatioTemporal(dfO)
   }
 
   private def projectResults(dfO: Option[DataFrame], root: BaseOperator): Option[DataFrame] = {
@@ -309,6 +350,6 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   }
 
   private def executeTree(root: BaseOperator): Option[DataFrame] = {
-    projectResults(recursivelyExecuteNode(root, None), root)
+    projectResults(filterFinalResults(recursivelyExecuteNode(root, None)), root)
   }
 }
