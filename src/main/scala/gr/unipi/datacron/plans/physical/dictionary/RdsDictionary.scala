@@ -18,6 +18,6 @@ case class RdsDictionary() extends BaseRdsDictionary {
       }
       DataStore.dictionaryRedis.getDecodedValue(field)
     })
-    df.withColumn(newColumnName, translate(col(sanitize(columnName))))
+    df.withColumn(newColumnName, translate(df(sanitize(columnName))))
   }
 }

@@ -19,6 +19,8 @@ abstract class BaseQuery() {
         DataStore.deleteHdfsDirectory(AppConfig.getString(qfpQueryOutputFolderPath))
       }
 
+      plan.get.preparePlan
+
       println("Starting query execution")
       val startTime = System.currentTimeMillis
       val result = plan.get.executePlan

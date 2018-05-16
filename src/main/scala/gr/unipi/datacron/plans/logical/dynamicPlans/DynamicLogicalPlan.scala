@@ -21,25 +21,11 @@ import scala.io.Source
 import scala.util.Try
 
 case class DynamicLogicalPlan() extends BaseLogicalPlan() {
-  val dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss")
+  private val dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss")
 
-  private[dynamicPlans] val constraints = Try(SpatioTemporalRange(
-    SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
-    SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
+  private var logicalPlan: BaseOperator = _
 
-  private def filterBySpatioTemporalInfo(dfO: Option[DataFrame]): Option[DataFrame] = {
-    if (dfO.isDefined && constraints.isDefined && AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true) && dfO.get.hasSpatialAndTemporalShortcutCols) {
-      println("Filtering by spatio-temporal info")
-      val res = Option(PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(dfO.get, constraints.get, encoder)))
-      println("Count after filtering by info: " + res.get.count)
-      res
-    }
-    else {
-      dfO
-    }
-  }
-
-  override private[logical] def doExecutePlan(): DataFrame = {
+  override def preparePlan: Unit = {
     val q = AppConfig.getString(sparqlQuerySource)
     val sparqlQuery = if (q.startsWith("file://")) {
       val filename = q.substring(7)
@@ -49,9 +35,26 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       q
     }
     println(sparqlQuery)
-    val logicalPlan = MyOpVisitorBase.newMyOpVisitorBase(sparqlQuery).getBop
-    //println(logicalPlan(0))
-    executeTree(logicalPlan(0)).get
+    logicalPlan = MyOpVisitorBase.newMyOpVisitorBase(sparqlQuery).getBop()(0)
+    //println(logicalPlan)
+  }
+
+  override private[logical] def doExecutePlan(): DataFrame = {
+    executeTree(logicalPlan).get
+  }
+
+  private[dynamicPlans] val constraints = Try(SpatioTemporalRange(
+    SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
+    SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
+
+  private def filterBySpatioTemporalInfo(dfO: Option[DataFrame]): Option[DataFrame] = {
+    if (dfO.isDefined && constraints.isDefined && AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true) && dfO.get.hasSpatialAndTemporalShortcutCols) {
+      println("Filtering by spatio-temporal info")
+      Option(PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(dfO.get, constraints.get, encoder)))
+    }
+    else {
+      dfO
+    }
   }
 
   private val prefixMappings: mutable.HashMap[String, String] = mutable.HashMap[String, String]()
@@ -288,7 +291,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def refineBySpatioTemporal(dfO: Option[DataFrame]): Option[DataFrame] = {
     if (dfO.isDefined && constraints.isDefined && dfO.get.hasSpatialAndTemporalShortcutCols()) {
       println("Filtering by spatio-temporal predicates")
-      val spatialShortcutCol = dfO.get.getSpatioTemporalShortucutCols
+      val spatialShortcutCol = dfO.get.getSpatioTemporalShortucutCols()
       val spatialShortcutCol_trans = spatialShortcutCol.map(_ + tripleTranslateSuffix)
       val df = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfO.get, spatialShortcutCol))
 
@@ -333,19 +336,21 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       })
       val newDf = df.select(cols.head, cols.tail: _*)
 
-      val newDf1 = PhysicalPlanner.decodeColumns(decodeColumnsParams(newDf, newDf.columns.filter(!_.endsWith(tripleTranslateSuffix)), preserveColumnNames = true))
-
-      val renamedColumns = newDf1.columns.map(c => {
-        val res = subjects.get(c)
-        val newColName = if (res.isDefined) {
-          res.get
-        }
-        else {
-          getDecodedStr(getSuffix(c).toLong)
-        }
-        newDf1(sanitize(c)).as(s"$newColName")
-      })
-      Option(newDf1.select(renamedColumns: _*))
+      if (AppConfig.getOptionalBoolean(qfpEnableResultDecode).getOrElse(true)) {
+        val newDf1 = PhysicalPlanner.decodeColumns(decodeColumnsParams(newDf, newDf.columns.filter(!_.endsWith(tripleTranslateSuffix)), preserveColumnNames = true))
+        val renamedColumns = newDf1.columns.map(c => {
+          val res = subjects.get(c)
+          val newColName = if (res.isDefined) {
+            res.get
+          }
+          else {
+            getDecodedStr(getSuffix(c).toLong)
+          }
+          newDf1(sanitize(c)).as(s"$newColName")
+        })
+        Option(newDf1.select(renamedColumns: _*))
+      }
+      else Option(newDf)
     }
   }
 

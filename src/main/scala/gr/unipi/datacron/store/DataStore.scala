@@ -2,6 +2,8 @@ package gr.unipi.datacron.store
 
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
+import gr.unipi.datacron.plans.physical.PhysicalPlanner
+import gr.unipi.datacron.plans.physical.traits.decodeColumnParams
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
@@ -21,18 +23,19 @@ object DataStore {
   lazy val sc: SparkContext = spark.sparkContext
 
   lazy val propertyData: Array[DataFrame] = Array(nodeData, vesselData)
+  lazy val allData: Array[DataFrame] = propertyData :+ triplesData
 
   lazy val spatialGrid: SpatialGrid = new SpatialGrid()
   lazy val temporalGrid: TemporalGrid = new TemporalGrid()
 
   lazy val triples: TriplesData = new TriplesData()
-  lazy val triplesData: DataFrame = triples.data
+  lazy val triplesData: DataFrame = getCached(triples.data)
 
   lazy val node: NodeProperties = new NodeProperties()
-  lazy val nodeData: DataFrame = node.data
+  lazy val nodeData: DataFrame = getCached(node.data)
 
   lazy val vessels: VesselProperties = new VesselProperties()
-  lazy val vesselData: DataFrame = vessels.data
+  lazy val vesselData: DataFrame = getCached(vessels.data)
 
   lazy val dictionaryRedis: DictionaryRedis = if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
     new DictionaryRedis()
@@ -40,6 +43,11 @@ object DataStore {
   else null
 
   var bConfig: Broadcast[String] = _
+
+  private def getCached(df: DataFrame): DataFrame = {
+    if (AppConfig.getOptionalBoolean(qfpEnableCachingDatasources).getOrElse(false)) df.cache
+    else df
+  }
 
   private def convertDecodedArrayToEncodedSet(arr: Array[String]): Set[Long] = arr.map(dictionaryRedis.getEncodedValue(_).get).toSet
 
@@ -84,10 +92,16 @@ object DataStore {
     if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
       dictionaryRedis.getDecodedValue(-1L)
       dictionaryRedis.getEncodedValue("a")
+
+      import spark.implicits._
+      val df = sc.parallelize(-1000 to -1).toDF("a")
+      println(PhysicalPlanner.decodeColumn(decodeColumnParams(df, "a", true)).show(100))
     }
     if (AppConfig.getInt(partitionsNumberAfterShuffle) > 0) {
       spark.sql("set spark.sql.shuffle.partitions=" + AppConfig.getInt(partitionsNumberAfterShuffle))
     }
     temporalGrid.getIntervalId(0)  //to initialize the temporal grid
+
+    allData.foreach(df => println(df.count))
   }
 }
