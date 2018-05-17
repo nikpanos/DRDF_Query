@@ -5,7 +5,7 @@ WHERE
 {
     ?ves a ?VesselType ;
     :has_vesselFixingDeviceType ?device ;
-    :has_vesselMMSI '244010219' ;
+    :has_vesselMMSI "244010219" ;
     :vesselName ?name .
     ?n :ofMovingObject ?ves ;
     :hasGeometry ?g ;

@@ -23,24 +23,6 @@ import java.util.Date;
  */
 public class PanosTest {
 
-    private static Long getRedisEncodedValue(String key) {
-        Option<Object> optionValue = DataStore.dictionaryRedis().getEncodedValue(key);
-        Long value = null;
-        if (optionValue.isDefined()) {
-            value = (Long) optionValue.get();
-        }
-        return value;
-    }
-
-    private static String getRedisDecodedValue(Long key) {
-        Option<String> optionValue = DataStore.dictionaryRedis().getDecodedValue(key);
-        String value = null;
-        if (optionValue.isDefined()) {
-            value = optionValue.get();
-        }
-        return value;
-    }
-
     public static void main(String args[]) {
         //AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");
 
@@ -50,13 +32,30 @@ public class PanosTest {
         //String decodedValue = getRedisDecodedValue(-5L);
         //System.out.println(decodedValue);
 
-        //BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
-        //        "SELECT ?p WHERE {?s <test> [] . ?s <test1> []}").getBop();
+        BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
+                "Prefix : <http://www.datacron-project.eu/datAcron#>\n" +
+                        "\n" +
+                        "SELECT *\n" +
+                        "WHERE\n" +
+                        "{\n" +
+                        "    ?ves a ?VesselType ;\n" +
+                        "    :has_vesselFixingDeviceType ?device ;\n" +
+                        "    :has_vesselMMSI \"244010219\" ;\n" +
+                        "    :vesselName ?name .\n" +
+                        "    ?n :ofMovingObject ?ves ;\n" +
+                        "    :hasGeometry ?g ;\n" +
+                        "    :hasTemporalFeature ?t ;\n" +
+                        "    :hasHeading ?heading ;\n" +
+                        "    :hasSpeed ?speed .\n" +
+                        "    ?g :hasWKT ?pos .\n" +
+                        "    ?t :TimeStart ?time .\n" +
+                        "    ?event :occurs ?n .\n" +
+                        "}").getBop();
         
-        /*System.out.println("NumberOfTrees: " + bop.length);
+        System.out.println("NumberOfTrees: " + bop.length);
         System.out.println("--------------------------");
         System.out.println(bop[0].toString());
-        Column[] cs = ((JoinOperator)bop[0]).getColumnJoinPredicate();
+        /*Column[] cs = ((JoinOperator)bop[0]).getColumnJoinPredicate();
         System.out.println(cs.length);
         System.out.println();
         System.out.println(cs[0].getColumnName());
@@ -65,7 +64,7 @@ public class PanosTest {
         System.out.println(cs[1].getColumnName());
         System.out.println(cs[1].getColumnTypes());
         System.out.println();
-        System.out.println();*/
+        System.out.println();
 
         /*for (Column c : bop[0].getArrayColumns()) {
             System.out.println();
@@ -75,9 +74,9 @@ public class PanosTest {
         }
         System.out.println(bop[0].toString());*/
 
-        Date d = new Date();
+        /*Date d = new Date();
         d.setTime(1451636000000L);
         SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss");
-        System.out.println(df.format(d));
+        System.out.println(df.format(d));*/
     }
 }

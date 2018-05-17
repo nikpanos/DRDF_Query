@@ -7,7 +7,7 @@ import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes}
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.{BaseOperator, FilterOf, JoinOperator, JoinOrOperator}
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
@@ -279,11 +279,20 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def processJoin(joinOp: JoinOperator) : Option[DataFrame] = executeJoin(joinOp, joinOp.getColumnJoinPredicate, None)
 
+  private def processSelect(selectOp: SelectOperator) : Option[DataFrame] = {
+    val dfO = recursivelyExecuteNode(selectOp.getBopChildren.get(0), None)
+    if (dfO.isDefined) {
+      projectResults(filterFinalResults(dfO), selectOp)
+    }
+    else None
+  }
+
   private def recursivelyExecuteNode(node: BaseOperator, df: Option[DataFrame]): Option[DataFrame] = {
     node match {
       case f: FilterOf => processFilterOf(f, df)
       case jo: JoinOrOperator => processJoinOr(jo, df)
       case j: JoinOperator => processJoin(j)
+      case s: SelectOperator => processSelect(s)
       case _ => None
     }
   }
@@ -307,54 +316,49 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     refineBySpatioTemporal(dfO)
   }
 
-  private def projectResults(dfO: Option[DataFrame], root: BaseOperator): Option[DataFrame] = {
+  private def projectResults(dfO: Option[DataFrame], s: SelectOperator): Option[DataFrame] = {
     if (dfO.isEmpty) {
       None
     }
     else {
       val df = dfO.get
-      val subjects = mutable.HashMap[String, String]()
-      val cols = root.getArrayColumns.filter(_.getColumnTypes != ColumnTypes.OBJECT).map(c => {
-        val pref = getPrefix(c.getColumnName)
-        val mPrefO = prefixMappings.get(pref)
+      val child: BaseOperator = s.getBopChildren.get(0)
+      val findColPred = (colName: String) => {
+        child.getArrayColumns.find(c => c.getColumnName.equals(colName)).get
+      }
 
-        val mPref = mPrefO.getOrElse("")
+      val vars = if (s.getVariables.size() == 0) {
+        child.getArrayColumns.filter(c => c.getQueryString.startsWith("?") && !c.getQueryString.startsWith("??")).map(_.getQueryString)
+      }
+      else s.getVariables.asScala.toArray
 
-        val colName = if (c.getColumnTypes == ColumnTypes.SUBJECT) {
-          val tmp = mPref + tripleSubLongField
-          subjects.put(tmp, c.getQueryString)
-          sanitize(tmp)
+      val cols = vars.map(v => {
+        val col = child.getArrayColumns.find(c => c.getQueryString.equals(v)).get
+        val pref = getPrefix(col.getColumnName)
+        val mPref = prefixMappings.getOrElse(pref, "")
+        //val mPref = mPrefO.getOrElse("")
+
+        col.getColumnTypes match {
+          case ColumnTypes.SUBJECT =>
+            val tmp = mPref + tripleSubLongField
+            df(sanitize(tmp)).as(col.getQueryString)
+          case ColumnTypes.OBJECT =>
+            val colP = findColPred(pref + "Predicate")
+            val enc = getEncodedStr(colP.getQueryString)
+            df(sanitize(mPref + enc)).as(col.getQueryString)
         }
-        else {
-          val enc = getEncodedStr(c.getQueryString)
-          sanitize(mPref + enc)
-        }
-        if (df.hasColumn(colName + tripleTranslateSuffix))
-          colName + tripleTranslateSuffix
-        else
-          colName
       })
-      val newDf = df.select(cols.head, cols.tail: _*)
+      cols.foreach(println)
+      val newDf = df.select(cols: _*)
 
       if (AppConfig.getOptionalBoolean(qfpEnableResultDecode).getOrElse(true)) {
-        val newDf1 = PhysicalPlanner.decodeColumns(decodeColumnsParams(newDf, newDf.columns.filter(!_.endsWith(tripleTranslateSuffix)), preserveColumnNames = true))
-        val renamedColumns = newDf1.columns.map(c => {
-          val res = subjects.get(c)
-          val newColName = if (res.isDefined) {
-            res.get
-          }
-          else {
-            getDecodedStr(getSuffix(c).toLong)
-          }
-          newDf1(sanitize(c)).as(s"$newColName")
-        })
-        Option(newDf1.select(renamedColumns: _*))
+        Option(PhysicalPlanner.decodeColumns(decodeColumnsParams(newDf, newDf.columns.filter(!_.endsWith(tripleTranslateSuffix)), preserveColumnNames = true)))
       }
       else Option(newDf)
     }
   }
 
   private def executeTree(root: BaseOperator): Option[DataFrame] = {
-    projectResults(filterFinalResults(recursivelyExecuteNode(root, None)), root)
+    recursivelyExecuteNode(root, None)
   }
 }
