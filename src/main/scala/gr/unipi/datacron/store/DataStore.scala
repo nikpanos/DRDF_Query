@@ -2,8 +2,6 @@ package gr.unipi.datacron.store
 
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.decodeColumnParams
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
@@ -45,7 +43,7 @@ object DataStore {
   var bConfig: Broadcast[String] = _
 
   private def getCached(df: DataFrame): DataFrame = {
-    if (AppConfig.getOptionalBoolean(qfpEnableCachingDatasources).getOrElse(false)) df.cache
+    if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) df.cache
     else df
   }
 
@@ -92,10 +90,6 @@ object DataStore {
     if (AppConfig.getString(qfpDicType).equals(qfpDicTypeRedis)) {
       dictionaryRedis.getDecodedValue(-1L)
       dictionaryRedis.getEncodedValue("a")
-
-      import spark.implicits._
-      val df = sc.parallelize(-1000 to -1).toDF("a")
-      println(PhysicalPlanner.decodeColumn(decodeColumnParams(df, "a", true)).show(100))
     }
     if (AppConfig.getInt(partitionsNumberAfterShuffle) > 0) {
       spark.sql("set spark.sql.shuffle.partitions=" + AppConfig.getInt(partitionsNumberAfterShuffle))

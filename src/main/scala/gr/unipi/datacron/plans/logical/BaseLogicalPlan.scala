@@ -15,12 +15,12 @@ abstract class BaseLogicalPlan() {
   private[logical] val encoder = SimpleEncoder()
   
   def executePlan: DataFrame = {
-    println("Query type: " + AppConfig.getString(Consts.qfpQueryType))
+    //println("Query type: " + AppConfig.getString(Consts.qfpQueryType))
     //println("Logical plan: " + AppConfig.getString(Consts.qfpLogicalPlans))
     doExecutePlan()
   }
 
   private[logical] def doExecutePlan(): DataFrame
 
-  def preparePlan: Unit = { }
+  def preparePlan(): Unit = { }
 }
