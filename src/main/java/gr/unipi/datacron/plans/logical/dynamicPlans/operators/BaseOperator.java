@@ -17,6 +17,7 @@ import java.util.List;
  */
 public abstract class BaseOperator {
 
+
     private final List<BaseOperator> bopChildren = new ArrayList<>();//list with base operators children
     private BaseOperator parent;
     private long outputSize;

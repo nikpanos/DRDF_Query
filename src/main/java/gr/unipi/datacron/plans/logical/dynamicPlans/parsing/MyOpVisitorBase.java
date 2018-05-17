@@ -10,7 +10,6 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithValue;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -20,9 +19,13 @@ import org.apache.jena.sparql.algebra.OpVisitorBase;
 import org.apache.jena.sparql.algebra.OpWalker;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpFilter;
+import org.apache.jena.sparql.algebra.op.OpProject;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static gr.unipi.datacron.plans.logical.dynamicPlans.operators.SelectOperator.newSelectOperator;
 
 /**
  *
@@ -38,6 +41,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
     }
 
     private BaseOperator[] bop;
+    private List<String> selectVariables = new ArrayList<>();
+
 
     private MyOpVisitorBase(String sparql) {
         getTriples(sparql);
@@ -48,10 +53,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
     }
 
     @Override
-     public void visit(final OpFilter opFilter){
-        System.out.println("OPFILTER: "+opFilter.toString());
-        opFilter.getExprs().getList().forEach(e -> System.out.println(e) );
-
+    public void visit(final OpProject opProject){
+        opProject.getVars().forEach(e -> selectVariables.add(e.toString()));
     }
 
     @Override
@@ -205,7 +208,12 @@ public class MyOpVisitorBase extends OpVisitorBase {
             bopList.add(choosenBop);
         }
 
+
+
         bop = bopList.stream().toArray(BaseOperator[]::new);
+        for(int k=0;k<bop.length;k++){
+            bop[k] = newSelectOperator(selectVariables, bop[k]);
+        }
 
     }
 
