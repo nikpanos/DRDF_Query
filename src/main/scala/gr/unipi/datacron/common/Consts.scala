@@ -65,8 +65,8 @@ object Consts {
 
   final val qfpEnableFilterByEncodedInfo = "query.enableFilterByEncodedInfo"
   final val qfpEnableMultipleFilterJoinOr = "query.enableMultipleFilterJoinOr"
-  final val qfpEnableCachingDatasources = "query.enableCachingDatasources"
   final val qfpEnableResultDecode = "query.enableResultDecode"
+  final val qfpWarmUpEnabled = "query.warmUpEnabled"
 
   final val qfpQueryOutputDevices = "output.outputDevices"
   final val qfpQueryOutputFolderPath = "output.dirOutput.path"
