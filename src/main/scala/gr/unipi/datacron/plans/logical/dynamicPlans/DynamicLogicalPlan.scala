@@ -352,7 +352,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       val newDf = df.select(cols: _*)
 
       if (AppConfig.getOptionalBoolean(qfpEnableResultDecode).getOrElse(true)) {
-        Option(PhysicalPlanner.decodeColumns(decodeColumnsParams(newDf, newDf.columns.filter(!_.endsWith(tripleTranslateSuffix)), preserveColumnNames = true)))
+        Option(PhysicalPlanner.decodeColumns(decodeColumnsParams(newDf, newDf.columns, preserveColumnNames = true)))
       }
       else Option(newDf)
     }
