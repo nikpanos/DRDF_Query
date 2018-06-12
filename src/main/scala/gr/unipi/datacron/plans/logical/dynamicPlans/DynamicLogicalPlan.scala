@@ -36,7 +36,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
     println(sparqlQuery)
     logicalPlan = MyOpVisitorBase.newMyOpVisitorBase(sparqlQuery).getBop()(0)
-    //println(logicalPlan)
+    println(logicalPlan)
   }
 
   override private[logical] def doExecutePlan(): DataFrame = {
@@ -348,7 +348,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
             df(sanitize(mPref + enc)).as(col.getQueryString)
         }
       })
-      cols.foreach(println)
+      //cols.foreach(println)
       val newDf = df.select(cols: _*)
 
       if (AppConfig.getOptionalBoolean(qfpEnableResultDecode).getOrElse(true)) {
