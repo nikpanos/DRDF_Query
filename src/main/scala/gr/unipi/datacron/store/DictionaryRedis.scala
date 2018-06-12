@@ -21,9 +21,8 @@ class DictionaryRedis() {
     val hostsAndPorts = hosts.toArray.map(x => {
       val y = x.asInstanceOf[ConfigObject]
       val host = y.get(qfpDicRedisAddress).unwrapped().asInstanceOf[String]
-      val port = y.get(qfpDicRedisPort).unwrapped().asInstanceOf[Int] + dbIndex
+      val port = y.get(qfpDicRedisPort).unwrapped().asInstanceOf[Int] + (2 * dbIndex)
       new HostAndPort(host, port)
-      //clusterNodes.add(new HostAndPort(host, port))
     }).toSet.asJava
     new MyRedisCluster(hostsAndPorts)
   }
@@ -31,10 +30,15 @@ class DictionaryRedis() {
   protected val staticIdToUri: MyRedisCluster = getClusterConnection(qfpDicRedisIdToUriHosts, 0)
   protected val staticUriToId: MyRedisCluster = getClusterConnection(qfpDicRedisUriToIdHosts, 0)
 
-  protected val dynamicIdToUri: MyRedisCluster = getClusterConnection(qfpDicRedisIdToUriHosts, 0)
-  protected val dynamicUriToId: MyRedisCluster = getClusterConnection(qfpDicRedisUriToIdHosts, 0)
+  protected val dynamicIdToUri: MyRedisCluster = getClusterConnection(qfpDicRedisIdToUriHosts, AppConfig.getInt(qfpDicRedisDynamicDatabaseID) + 1)
+  protected val dynamicUriToId: MyRedisCluster = getClusterConnection(qfpDicRedisUriToIdHosts, AppConfig.getInt(qfpDicRedisDynamicDatabaseID) + 1)
 
-  def getDecodedValue(key: Long): Option[String] = Try(staticIdToUri.getNow(key.toString)).toOption
+  def getDecodedValue(key: Long): Option[String] = if (key < 0) {
+    Try(staticIdToUri.getNow(key.toString)).toOption
+  }
+  else {
+    Try(dynamicIdToUri.getNow(key.toString)).toOption
+  }
 
   def getEncodedValue(key: String): Option[Long] = Try(staticUriToId.getNow(key).toLong).toOption
 

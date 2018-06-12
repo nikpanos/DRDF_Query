@@ -42,6 +42,8 @@ object Consts {
   final val qfpDicRedisIdToUriHosts = "datasets.dictionary.idToUri.hosts"
   final val qfpDicRedisUriToIdHosts = "datasets.dictionary.uriToId.hosts"
 
+  final val qfpDicRedisDynamicDatabaseID = "datasets.dictionary.dynamicDatabaseID"
+
   final val qfpStatRedisHost = "datasets.statistics.host"
   final val qfpStatRedisPort = "datasets.statistics.port"
 
