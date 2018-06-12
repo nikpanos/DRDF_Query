@@ -40,6 +40,8 @@ object DataStore {
   }
   else null
 
+  lazy val statisticsRedis: StatisticsRedis = new StatisticsRedis()
+
   var bConfig: Broadcast[String] = _
 
   private def getCached(df: DataFrame): DataFrame = {

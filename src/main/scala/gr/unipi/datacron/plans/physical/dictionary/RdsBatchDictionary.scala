@@ -39,7 +39,7 @@ case class RdsBatchDictionary() extends BaseRdsDictionary {
 
     implicit val encoder: ExpressionEncoder[Row] = RowEncoder.apply(structType)
 
-    val func: Iterator[Row] => Iterator[Row] = (iter: Iterator[Row]) => {
+    /*val func: Iterator[Row] => Iterator[Row] = (iter: Iterator[Row]) => {
       if (!AppConfig.isAssigned) {
         AppConfig.setConfig(bCnf.value)
       }
@@ -59,6 +59,7 @@ case class RdsBatchDictionary() extends BaseRdsDictionary {
       res
     }
 
-    df.mapPartitions(func)
+    df.mapPartitions(func)*/
+    df
   }
 }
