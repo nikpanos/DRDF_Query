@@ -20,6 +20,8 @@ import org.apache.jena.sparql.algebra.OpWalker;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpProject;
+import gr.unipi.datacron.store.DataStore;
+import scala.Option;
 
 
 import java.util.*;
@@ -52,6 +54,29 @@ public class MyOpVisitorBase extends OpVisitorBase {
         OpWalker.walk(op, this);
     }
 
+    private static Long getRedisEncodedValue(String key) {
+        Option<Object> optionValue = DataStore.dictionaryRedis().getEncodedValue(key);
+        Long value = null;
+        if (optionValue.isDefined()) {
+            value = (Long) optionValue.get();
+        }
+        return value;
+    }
+
+
+    private Long getStatisticsValue(String key) {
+    return Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
+}
+
+    private static String getRedisDecodedValue(Long key) {
+        Option<String> optionValue = DataStore.dictionaryRedis().getDecodedValue(key);
+        String value = null;
+        if (optionValue.isDefined()) {
+            value = optionValue.get();
+        }
+        return value;
+    }
+
     @Override
     public void visit(final OpProject opProject){
         opProject.getVars().forEach(e -> selectVariables.add(e.toString()));
@@ -75,6 +100,57 @@ public class MyOpVisitorBase extends OpVisitorBase {
             String predicate =  triple.getPredicate().toString();
             String object =  (triple.getObject().toString().substring(0, 1).equals("\"")) || (triple.getObject().toString().substring(0, 1).equals("'")) ? (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("\"")) || (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("'")) ? (triple.getObject().toString().substring(1, (triple.getObject().toString().length() - 1))) : triple.getObject().toString() : triple.getObject().toString();
 
+            System.out.println("sub: "+subject);
+            System.out.println("pred: "+predicate);
+            System.out.println("obj: "+object);
+
+            boolean subIsValue = false;
+            boolean predIsValue = false;
+            boolean objIsValue = false;
+
+           if(!subject.substring(0,1).equals("?")){
+               subject = getRedisEncodedValue(subject).toString();
+               subIsValue = true;
+           }
+
+            if(!predicate.substring(0,1).equals("?")){
+                predicate=getRedisEncodedValue(predicate).toString();
+                predIsValue = true;
+
+            }
+
+            if(!object.substring(0,1).equals("?")){
+                object=getRedisEncodedValue(object).toString();
+                objIsValue = true;
+            }
+
+            Long outputSize;
+            Long numberOfCellsPerAxis = 1000L;
+
+            if(subIsValue && predIsValue){
+                if(Integer.parseInt(subject)<0)
+                {
+                   outputSize = (((Long.parseLong(subject) - getStatisticsValue("minSub")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegSub") + 1L) - getStatisticsValue("minSub"))) + (((Long.parseLong(predicate) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+                }
+                else{
+                    outputSize = getStatisticsValue("spp.1.0");
+                }
+            }
+            else if (predIsValue && objIsValue){
+                if(Integer.parseInt(object)<0)
+                {
+                    outputSize = (((Long.parseLong(object) - getStatisticsValue("minObj")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegObj") + 1L) - getStatisticsValue("minObj"))) + (((Long.parseLong(predicate) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+                }
+                else{
+                    outputSize = getStatisticsValue("opp.1.0");
+                }
+            }
+
+            else {
+                   outputSize = (((Long.parseLong(predicate) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /((getStatisticsValue("maxPred") + 1L) - getStatisticsValue("minPred"))));
+            }
+
+            System.out.println("outputsize "+outputSize);
 
 //            String subject = (triple.getSubject().toString().substring(0, 1).equals("?")) ? triple.getSubject().toString() : triple.getSubject().toString().substring(1, triple.getSubject().toString().length() - 1);
 //            String predicate = (triple.getPredicate().toString().substring(0, 1).equals("?")) ? triple.getPredicate().toString() : triple.getPredicate().toString().substring(1, triple.getPredicate().toString().length() - 1);
@@ -96,14 +172,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
                 }
             }
 
-            if(subject.equals("?event")){
-                listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),3));
-
-            }
-            else{
-                listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),2));
-
-            }
+                listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),outputSize));
 
         });
 
@@ -214,6 +283,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
         for(int k=0;k<bop.length;k++){
             bop[k] = newSelectOperator(selectVariables, bop[k]);
         }
+        System.out.println("SIZE:"+bop[0].getBopChildren().get(0).toString());
+
 
     }
 

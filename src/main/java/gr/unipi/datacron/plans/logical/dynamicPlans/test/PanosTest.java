@@ -24,7 +24,7 @@ import java.util.Date;
 public class PanosTest {
 
     public static void main(String args[]) {
-        //AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");
+        AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");
 
         //Long encodedValue = getRedisEncodedValue("a");
         //System.out.println(encodedValue);
