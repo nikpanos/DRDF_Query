@@ -8,9 +8,6 @@ import org.apache.spark.sql.DataFrame
 
 abstract class BaseLogicalPlan() {
   private[logical] val queryName: String = AppConfig.getString(Consts.qfpQueryName)
-  private[logical] val nTotalBits: Int = AppConfig.getInt(Consts.qfpTotalBits)
-  private[logical] val nSpatialBits: Int = AppConfig.getInt(Consts.qfpSpatialBits)
-  private[logical] val nIDsBits: Int = AppConfig.getInt(Consts.qfpIDsBits)
 
   private[logical] val encoder = SimpleEncoder()
   

@@ -1,6 +1,8 @@
 package gr.unipi.datacron.encoding
 
 import gr.unipi.datacron.common._
+import gr.unipi.datacron.store.DataStore
+import gr.unipi.datacron.common.Consts._
 
 class SimpleEncoder private (val bitsId: Long, val bitsSpatial: Long, val bitsTotal: Long) extends Serializable {
   
@@ -27,7 +29,7 @@ class SimpleEncoder private (val bitsId: Long, val bitsSpatial: Long, val bitsTo
 
 object SimpleEncoder {
   def apply(): SimpleEncoder = new SimpleEncoder(
-    AppConfig.getLong(Consts.qfpIDsBits),
-    AppConfig.getLong(Consts.qfpSpatialBits),
-    AppConfig.getLong(Consts.qfpTotalBits))
+    DataStore.dictionaryRedis.getDynamicSetting(redisKeyEncodingBitsId).get.toLong,  //AppConfig.getLong(Consts.qfpIDsBits),
+    DataStore.dictionaryRedis.getDynamicSetting(redisKeyEncodingBitsSpatial).get.toLong,  //AppConfig.getLong(Consts.qfpSpatialBits),
+    DataStore.dictionaryRedis.getDynamicSetting(redisKeyEncodingBitsTotal).get.toLong)  //AppConfig.getLong(Consts.qfpTotalBits))
 }

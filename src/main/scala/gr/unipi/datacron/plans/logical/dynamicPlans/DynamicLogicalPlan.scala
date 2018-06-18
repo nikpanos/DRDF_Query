@@ -25,7 +25,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private var logicalPlan: BaseOperator = _
 
-  override def preparePlan: Unit = {
+  override def preparePlan(): Unit = {
     val q = AppConfig.getString(sparqlQuerySource)
     val sparqlQuery = if (q.startsWith("file://")) {
       val filename = q.substring(7)
@@ -162,6 +162,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       throw new Exception("A predicate filter should be provided!")
     }
 
+    //filter.getFilters.foreach(println)
+
     val dfs = guessDataFrame(dfO, filter)
 
     val encodedFilterPred = getEncodedStr(pred.get.getValue)
@@ -203,6 +205,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
         df = PhysicalPlanner.renameColumns(renameColumnsParams(df, Map((tripleObjLongField, encodedFilterPred))))
       }
 
+      //df.show()
       Option(df)
     }
   }

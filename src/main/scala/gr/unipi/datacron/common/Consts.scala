@@ -19,14 +19,6 @@ object Consts {
   final val qfpJoinTripleP = "query.rdf_predicate.join.condition.p"
   final val qfpJoinTripleO = "query.rdf_predicate.join.condition.o"
 
-  final val qfpTotalBits = "universe.nTotalBits"
-  final val qfpSpatialBits = "universe.nSpatialBits"
-  final val qfpIDsBits = "universe.nIDsBits"
-  final val qfpUniverseLatLower = "universe.lat_lower"
-  final val qfpUniverseLonLower = "universe.lon_lower"
-  final val qfpUniverseLatUpper = "universe.lat_upper"
-  final val qfpUniverseLonUpper = "universe.lon_upper"
-
   final val qfpDataPropertyEnabled = "datasets.property.enabled"
 
   final val qfpDicPath = "datasets.dictionary.path"
@@ -175,5 +167,14 @@ object Consts {
   final val rdfType = rdfOntologyNamespace + "type"
   final val nodeTypes = Array("Node").map(datacronOntologyNamespace + _)
 
+  final val redisKeyEncodingLatLower = "settings.min_lat"
+  final val redisKeyEncodingLonLower = "settings.min_lon"
+  final val redisKeyEncodingLatUpper = "settings.max_lat"
+  final val redisKeyEncodingLonUpper = "settings.max_lon"
+  final val redisKeyEncodingAltLower = "settings.min_alt"
+  final val redisKeyEncodingAltUpper = "settings.max_alt"
+  final val redisKeyEncodingBitsTotal = "settings.bits_total"
+  final val redisKeyEncodingBitsSpatial = "settings.bits_spatial"
+  final val redisKeyEncodingBitsId = "settings.bits_id"
 }
 

@@ -40,6 +40,8 @@ class DictionaryRedis() {
     Try(dynamicIdToUri.getNow(key.toString)).toOption
   }
 
+  def getDynamicSetting(key: String): Option[String] = Try(dynamicIdToUri.getNow(key)).toOption
+
   def getEncodedValue(key: String): Option[Long] = Try(staticUriToId.getNow(key).toLong).toOption
 
 
