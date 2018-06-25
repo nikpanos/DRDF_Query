@@ -10,6 +10,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithValue;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
+import gr.unipi.datacron.plans.logical.dynamicPlans.test.PanosTest;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -150,7 +151,6 @@ public class MyOpVisitorBase extends OpVisitorBase {
             //form the list with the correct form of Subject, Predicate, Object
             //form the list with the correct form of Subject, Predicate, Object
 
-
             String subject = (triple.getSubject().toString().substring(0, 1).equals("\"")) || (triple.getSubject().toString().substring(0, 1).equals("'")) ? (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("\"")) || (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("'"))  ? (triple.getSubject().toString().substring(1, (triple.getSubject().toString().length() - 1))) : triple.getSubject().toString() : triple.getSubject().toString();
             String predicate =  triple.getPredicate().toString();
             String object =  (triple.getObject().toString().substring(0, 1).equals("\"")) || (triple.getObject().toString().substring(0, 1).equals("'")) ? (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("\"")) || (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("'")) ? (triple.getObject().toString().substring(1, (triple.getObject().toString().length() - 1))) : triple.getObject().toString() : triple.getObject().toString();
@@ -249,7 +249,16 @@ public class MyOpVisitorBase extends OpVisitorBase {
     private void formBaseOperatorArray(List<BaseOperator> l) {
 
         //sort the list by the value of outputSize
-        l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
+
+        if(PanosTest.getOptimizationFlag()==0){
+            l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
+        }
+        else if(PanosTest.getOptimizationFlag()==2)
+        {
+            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
+        }
+
+
         Set<Integer> excludedFromList = new HashSet<>();
 
         List<BaseOperator> bopList = new ArrayList<>();

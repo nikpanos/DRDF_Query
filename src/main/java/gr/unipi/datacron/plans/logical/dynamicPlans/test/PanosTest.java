@@ -24,7 +24,7 @@ import java.util.Date;
  */
 public class PanosTest {
 
-    public int getOptimizationFlash() {
+    public static int getOptimizationFlag() {
         return AppConfig.getInt(Consts.qfpLogicalOptimizationFlag());
     }
 
