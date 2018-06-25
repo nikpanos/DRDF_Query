@@ -6,6 +6,7 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.common.AppConfig;
+import gr.unipi.datacron.common.Consts;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.FilterOf;
@@ -22,6 +23,10 @@ import java.util.Date;
  * @author nicholaskoutroumanis
  */
 public class PanosTest {
+
+    public int getOptimizationFlash() {
+        return AppConfig.getInt(Consts.qfpLogicalOptimizationFlag());
+    }
 
     public static void main(String args[]) {
         AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");

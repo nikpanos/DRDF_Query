@@ -10,12 +10,17 @@ import gr.unipi.datacron.store.DataStore.spark
 abstract class BaseQuery() {
   DataStore.init()
 
-  private def executeWarmUp(plan: Option[BaseLogicalPlan]): Long = {
-    val start = System.currentTimeMillis()
+  private def executeWarmUp(plan: Option[BaseLogicalPlan]): (Long, Long) = {
+    val start = System.currentTimeMillis
+    plan.get.preparePlan()
+    val startPhysical = System.currentTimeMillis
     val result = plan.get.executePlan
     println(result.count)
     result.show()
-    System.currentTimeMillis() - start
+    val endTime = System.currentTimeMillis
+    val logicalTime = startPhysical - start
+    val physicalTime = endTime - startPhysical
+    (logicalTime, physicalTime)
   }
 
   def execute(): Unit = {
@@ -27,25 +32,32 @@ abstract class BaseQuery() {
         DataStore.deleteHdfsDirectory(AppConfig.getString(qfpQueryOutputFolderPath))
       }
 
-      val startPrepare = System.currentTimeMillis()
-      plan.get.preparePlan()
-      val logicalPlanTime = System.currentTimeMillis() - startPrepare
+
+      //plan.get.preparePlan()
+
 
       if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
         println("Warming up...")
-        (1 to 10).map(i => (i, executeWarmUp(plan))).foreach(x => println(x._1 + "th warm up time (ms): " + x._2))
+        (1 to 10).map(i => (i, executeWarmUp(plan))).foreach(x => println(x._1 + "th warm up time (ms): " + x._2._1 + " logical, " + x._2._2 + " physical."))
       }
 
+      plan.get.doAfterPrepare()
 
       println("Starting query execution")
-      val startTime = System.currentTimeMillis()
+      val startTime = System.currentTimeMillis
+      plan.get.preparePlan()
+      val startPhysicalTime = System.currentTimeMillis
       val result = plan.get.executePlan
       processOutput(result)
-      val queryTime = System.currentTimeMillis() - startTime
+      val endTime = System.currentTimeMillis
+
+      val logicalTime = startPhysicalTime - startTime
+      val physicalTime = endTime - startPhysicalTime
+      val totalTime = endTime - startTime
       if (!AppConfig.getStringList(qfpQueryOutputDevices).contains(outputDeviceWeb)) {
-        println("Logical plan build time (ms): " + logicalPlanTime)
-        println("Query execution time (ms): " + queryTime)
-        println("Total time (ms): " + (queryTime + logicalPlanTime))
+        println("Logical plan build time (ms): " + logicalTime)
+        println("Query execution time (ms): " + physicalTime)
+        println("Total time (ms): " + totalTime)
       }
     }
     else {

@@ -20,4 +20,6 @@ abstract class BaseLogicalPlan() {
   private[logical] def doExecutePlan(): DataFrame
 
   def preparePlan(): Unit = { }
+
+  def doAfterPrepare(): Unit = { }
 }

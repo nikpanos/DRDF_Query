@@ -59,6 +59,7 @@ object Consts {
   final val qfpJoinTriples_trait = "query.plans.physical.joinTriples"
 
   final val qfpLogicalPlans = "query.plans.logical"
+  final val qfpLogicalOptimizationFlag = "query.plans.logical.optimizationFlag"
 
   final val qfpEnableFilterByEncodedInfo = "query.enableFilterByEncodedInfo"
   final val qfpEnableMultipleFilterJoinOr = "query.enableMultipleFilterJoinOr"

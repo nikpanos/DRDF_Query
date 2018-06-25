@@ -288,7 +288,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
         for(int k=0;k<bop.length;k++){
             bop[k] = newSelectOperator(selectVariables, bop[k]);
         }
-        System.out.println("SIZE:"+bop[0].getBopChildren().get(0).toString());
+        //System.out.println("SIZE:"+bop[0].getBopChildren().get(0).toString());
 
 
     }
