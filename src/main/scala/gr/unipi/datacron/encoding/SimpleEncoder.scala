@@ -1,6 +1,5 @@
 package gr.unipi.datacron.encoding
 
-import gr.unipi.datacron.common._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.Consts._
 

@@ -39,9 +39,8 @@ abstract class BaseQuery() {
       if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
         println("Warming up...")
         (1 to 10).map(i => (i, executeWarmUp(plan))).foreach(x => println(x._1 + "th warm up time (ms): " + x._2._1 + " logical, " + x._2._2 + " physical."))
+        plan.get.doAfterPrepare()
       }
-
-      plan.get.doAfterPrepare()
 
       println("Starting query execution")
       val startTime = System.currentTimeMillis

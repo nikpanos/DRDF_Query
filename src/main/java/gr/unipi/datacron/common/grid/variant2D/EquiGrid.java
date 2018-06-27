@@ -1,4 +1,4 @@
-package gr.unipi.datacron.common.grid;
+package gr.unipi.datacron.common.grid.variant2D;
 
 import java.util.HashMap;
 import scala.Tuple2;

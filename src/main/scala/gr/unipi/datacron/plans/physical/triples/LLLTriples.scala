@@ -11,6 +11,8 @@ import org.apache.spark.sql.functions._
 case class LLLTriples() extends BasePhysicalPlan with TTriples {
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
     val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
+    println(intervalIds)
+    println(params.constraints.low)
     val spatialIds = DataStore.spatialGrid.getSpatialIds(params.constraints)
 
     val result = params.df
@@ -51,7 +53,7 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
     val lower = params.range.low.time / 1000L
     val upper = params.range.high.time / 1000L
 
-    val dateFormat = "YYYY-MM-dd'T'HH:mm:ss"
+    val dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
 
     val filterBy = udf((pruneKey: Int, decodedSpatial: String) => {
       val sptResult = ((pruneKey >> 1) & 1) != 1

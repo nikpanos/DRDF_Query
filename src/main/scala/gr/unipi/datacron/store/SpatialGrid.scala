@@ -2,7 +2,7 @@ package gr.unipi.datacron.store
 
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.SpatioTemporalRange
-import gr.unipi.datacron.common.grid.EquiGrid
+import gr.unipi.datacron.common.grid.variant2D.EquiGrid
 
 class SpatialGrid() {
   val spatialGrid = new EquiGrid(DataStore.dictionaryRedis.getDynamicSetting(redisKeyEncodingBitsSpatial).get.toInt,

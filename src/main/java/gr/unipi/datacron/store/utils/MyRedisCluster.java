@@ -89,6 +89,18 @@ public class MyRedisCluster implements AutoCloseable {
         }
     }
 
+    public String findInSetLowerNow(String key, long timestamp) {
+        try (Jedis jedis = getJedis(key)) {
+            return jedis.zrevrangeByScore(key, timestamp + "", "-inf", 0, 1).iterator().next();
+        }
+    }
+
+    public String findInSetUpperNow(String key, long timestamp) {
+        try (Jedis jedis = getJedis(key)) {
+            return jedis.zrangeByScore(key, timestamp + "", "+inf", 0, 1).iterator().next();
+        }
+    }
+
     public Response<String> getLater(String key) {
         return pipes.get(getShardName(key)).get(key);
     }

@@ -177,5 +177,8 @@ object Consts {
   final val redisKeyEncodingBitsTotal = "settings.bits_total"
   final val redisKeyEncodingBitsSpatial = "settings.bits_spatial"
   final val redisKeyEncodingBitsId = "settings.bits_id"
+  final val redisKeyTimestamps = "settings.timestamps"
+  final val redisKeyDimensions = "settings.dimensions"
+  final val redisKeyCurveType = "settings.curveTypeRedisKey"
 }
 

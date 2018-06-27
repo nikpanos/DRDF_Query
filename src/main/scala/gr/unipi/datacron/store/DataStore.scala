@@ -96,7 +96,7 @@ object DataStore {
     if (AppConfig.getInt(partitionsNumberAfterShuffle) > 0) {
       spark.sql("set spark.sql.shuffle.partitions=" + AppConfig.getInt(partitionsNumberAfterShuffle))
     }
-    temporalGrid.getIntervalId(0)  //to initialize the temporal grid
+    //temporalGrid.getIntervalId(0)  //to initialize the temporal grid
 
     if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
       allData.foreach(df => println(df.count))

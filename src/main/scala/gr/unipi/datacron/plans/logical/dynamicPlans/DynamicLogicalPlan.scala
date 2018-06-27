@@ -21,7 +21,7 @@ import scala.io.Source
 import scala.util.Try
 
 case class DynamicLogicalPlan() extends BaseLogicalPlan() {
-  private val dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss")
+  private val dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 
   private var logicalPlan: BaseOperator = _
 
