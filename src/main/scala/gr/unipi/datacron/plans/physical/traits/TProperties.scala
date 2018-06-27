@@ -1,6 +1,7 @@
 package gr.unipi.datacron.plans.physical.traits
 
 import gr.unipi.datacron.common.BaseOperatorParams
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator
 import org.apache.spark.sql.DataFrame
 
 trait TProperties {
@@ -10,6 +11,6 @@ trait TProperties {
 }
 
 
-case class addTemporaryColumnForRefinementParams(df: DataFrame, predicates: Array[Long], override val operationName: Option[String] = None) extends BaseOperatorParams
-case class addSpatialAndTemporalColumnsByTemporaryColumnParams(df: DataFrame, spatialColumn: Int, temporalColumn: Int, override val operationName: Option[String] = None) extends BaseOperatorParams
-case class filterNullPropertiesParams(df: DataFrame, columnNames: Array[String], override val operationName: Option[String] = None) extends BaseOperatorParams
+case class addTemporaryColumnForRefinementParams(df: DataFrame, predicates: Array[Long], override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+case class addSpatialAndTemporalColumnsByTemporaryColumnParams(df: DataFrame, spatialColumn: Int, temporalColumn: Int, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+case class filterNullPropertiesParams(df: DataFrame, columnNames: Array[String], override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams

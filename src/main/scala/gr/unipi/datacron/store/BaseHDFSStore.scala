@@ -1,6 +1,7 @@
 package gr.unipi.datacron.store
 
 import gr.unipi.datacron.common.{BaseOperatorParams, Benchmarks, Utils}
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator
 import org.apache.spark.sql.DataFrame
 
 abstract private[store] class BaseHDFSStore() {
@@ -13,7 +14,7 @@ abstract private[store] class BaseHDFSStore() {
   protected def readDataset(): DataFrame
 
   private[store] val data: DataFrame = Benchmarks.doBenchmark[DataFrame](readDataset, new BaseOperatorParams() {
-    override def operationName: Option[String] = Some("Load " + datasetName + "dataset")
+    override def logicalOperator: Option[BaseOperator] = None
   })
 
   println(datasetName + " dataset path: " + dataPath)

@@ -7,13 +7,13 @@ import gr.unipi.datacron.plans.physical.traits._
 import org.apache.spark.sql.DataFrame
 
 private[logical] case class PropertiesRefinement2() extends BaseRefinement {
-  val encodedUriSpatialShortcut: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(tripleMBRField, Some("Find encoded " + tripleMBRField))).get
-  val encodedUriTemporalShortcut: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(tripleTimeStartField, Some("Find encoded " + tripleTimeStartField))).get
+  val encodedUriSpatialShortcut: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(tripleMBRField, None)).get
+  val encodedUriTemporalShortcut: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(tripleTimeStartField, None)).get
 
   def refineResults(dfFilteredTriples: DataFrame, constraints: SpatioTemporalRange, qPredEncoded: Long, qObjEncoded: Long): DataFrame = {
-    val translatedExtendedTriples = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfFilteredTriples, Array(encodedUriSpatialShortcut.toString, encodedUriTemporalShortcut.toString), false, Some("Add decoded spatial and temporal columns")))
+    val translatedExtendedTriples = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfFilteredTriples, Array(encodedUriSpatialShortcut.toString, encodedUriTemporalShortcut.toString), false, None))
 
-    val result = PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(translatedExtendedTriples, constraints, encodedUriSpatialShortcut.toString + tripleTranslateSuffix, encodedUriTemporalShortcut.toString + tripleTranslateSuffix, Some("Filter by spatiotemporal columns")))
+    val result = PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(translatedExtendedTriples, constraints, encodedUriSpatialShortcut.toString + tripleTranslateSuffix, encodedUriTemporalShortcut.toString + tripleTranslateSuffix, None))
 
     //val result = translatedExtendedTriples
 

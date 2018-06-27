@@ -98,7 +98,7 @@ public class JoinOperator extends BaseOpW2Child {
     @Override
     protected String toString(String margin){
         StringBuilder s = new StringBuilder();
-        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append(" JOIN ON COLUMNS:");
+        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append(" RealOutputSize: "+this.getRealOutputSize()).append(" JOIN ON COLUMNS:");
         for(Column c:getColumnJoinPredicate()){
             s.append("ColumnName: ").append(c.getColumnName()).append(" Variable: ").append(c.getQueryString()).append(" ");
         }

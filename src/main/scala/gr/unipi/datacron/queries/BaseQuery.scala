@@ -1,6 +1,6 @@
 package gr.unipi.datacron.queries
 
-import gr.unipi.datacron.common.{AppConfig, Utils}
+import gr.unipi.datacron.common.{AppConfig, Benchmarks, Utils}
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 import gr.unipi.datacron.common.Consts._
@@ -39,7 +39,7 @@ abstract class BaseQuery() {
       if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
         println("Warming up...")
         (1 to 10).map(i => (i, executeWarmUp(plan))).foreach(x => println(x._1 + "th warm up time (ms): " + x._2._1 + " logical, " + x._2._2 + " physical."))
-        plan.get.doAfterPrepare()
+        //plan.get.doAfterPrepare()
       }
 
       println("Starting query execution")
@@ -57,6 +57,14 @@ abstract class BaseQuery() {
         println("Logical plan build time (ms): " + logicalTime)
         println("Query execution time (ms): " + physicalTime)
         println("Total time (ms): " + totalTime)
+      }
+
+      if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
+        Benchmarks.isBenchmarkingEnabled = true
+        println("Calculating sizes...")
+        executeWarmUp(plan)
+        plan.get.doAfterPrepare()
+        Benchmarks.isBenchmarkingEnabled = false
       }
     }
     else {

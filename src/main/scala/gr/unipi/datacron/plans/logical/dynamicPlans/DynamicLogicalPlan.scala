@@ -48,10 +48,10 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
     SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
 
-  private def filterBySpatioTemporalInfo(dfO: Option[DataFrame]): Option[DataFrame] = {
+  private def filterBySpatioTemporalInfo(dfO: Option[DataFrame], logicalOperator: BaseOperator): Option[DataFrame] = {
     if (dfO.isDefined && constraints.isDefined && AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true) && dfO.get.hasSpatialAndTemporalShortcutCols) {
       println("Filtering by spatio-temporal info")
-      Option(PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(dfO.get, constraints.get, encoder)))
+      Option(PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(dfO.get, constraints.get, encoder, Option(logicalOperator))))
     }
     else {
       dfO
@@ -93,7 +93,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
         filter.getFilters.filter(column => {
           column.getColumn.getColumnTypes == PREDICATE
         }).map(column => getEncodedStr(column.getValue))
-      case _ => throw new Exception("Only support JoinOr and FilterOf under JoinOr")
+      case _ => throw new Exception("Only support JoinOr and FilterOfLogicalOperator under JoinOr")
     }
   }
 
@@ -176,7 +176,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       Option(dfs.tail.foldLeft(dfHead)((df1, df2) => {
         var df = processFilterOf(filter, Option(df2)).get
         df = PhysicalPlanner.selectColumns(selectColumnsParams(df, Array(tripleSubLongField, encodedFilterPred)))
-        PhysicalPlanner.unionDataframes(unionDataframesParams(df1, df))
+        PhysicalPlanner.unionDataframes(unionDataframesParams(df1, df, Option(filter)))
       }))
     }
     else {
@@ -184,23 +184,23 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
       if (sub.isDefined) {
         val encodedFilter = getEncodedLong(sub.get.getValue)
-        df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, tripleSubLongField, encodedFilter))
+        df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, tripleSubLongField, encodedFilter, Option(filter)))
       }
 
       if (df.isPropertyTable) {
         if (obj.isDefined) {
           val encodedFilterObj = getEncodedLong(obj.get.getValue)
-          df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, encodedFilterPred, encodedFilterObj))
+          df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, encodedFilterPred, encodedFilterObj, Option(filter)))
         }
         else {
-          df = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(df, Array(encodedFilterPred)))
+          df = PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(df, Array(encodedFilterPred), Option(filter)))
         }
       }
       else {
-        df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, triplePredLongField, encodedFilterPred))
+        df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, triplePredLongField, encodedFilterPred, Option(filter)))
         if (obj.isDefined) {
           val encodedFilterObj = getEncodedLong(obj.get.getValue)
-          df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, tripleObjLongField, encodedFilterObj))
+          df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, tripleObjLongField, encodedFilterObj, Option(filter)))
         }
         df = PhysicalPlanner.dropColumns(dropColumnsParams(df, Array(triplePredLongField)))
         df = PhysicalPlanner.renameColumns(renameColumnsParams(df, Map((tripleObjLongField, encodedFilterPred))))
@@ -225,12 +225,13 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
         val result = joinOr.getBopChildren.asScala.foldLeft(dfO)((dfTmp: Option[DataFrame], child: BaseOperator) => {
           recursivelyExecuteNode(child, dfTmp)
         })
-        filterBySpatioTemporalInfo(result)
+        joinOr.setRealOutputSize(joinOr.getBopChildren.asScala.last.getRealOutputSize)
+        filterBySpatioTemporalInfo(result, joinOr)
       }
       else {
         val df = if (AppConfig.getBoolean(qfpEnableMultipleFilterJoinOr)) {
           val filters = getPredicateList(joinOr).map((triplePredLongField, _))
-          Option(PhysicalPlanner.filterByMultipleOr(filterByMultipleOrParams(dfO.get, filters)).cache)
+          Option(PhysicalPlanner.filterByMultipleOr(filterByMultipleOrParams(dfO.get, filters, Option(joinOr))).cache)
         } else {
           dfO
         }
@@ -277,7 +278,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
     Option(children.tail.foldLeft(dfAndCol1)((dfAndCol1: (DataFrame, String), child: (BaseOperator, Int)) => {
       val dfAndCol2 = getDfAndColNameForJoin(child._1, joinCols(child._2), df)
-      (PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2)), dfAndCol1._2)
+      (PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, Option(joinOp))), dfAndCol1._2)
     })._1)
   }
 

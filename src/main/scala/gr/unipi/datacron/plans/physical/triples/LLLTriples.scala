@@ -11,16 +11,16 @@ import org.apache.spark.sql.functions._
 case class LLLTriples() extends BasePhysicalPlan with TTriples {
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
     val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
-    println(intervalIds)
-    println(params.constraints.low)
+    //println(intervalIds)
+    //println(params.constraints.low)
     val spatialIds = DataStore.spatialGrid.getSpatialIds(params.constraints)
-
+    val encoder = params.encoder
     val result = params.df
 
     val getPruneKey = udf((sub: Long) => {
       var key = -1
       if (sub >= 0) {
-        val components = params.encoder.decodeComponentsFromKey(sub)
+        val components = encoder.decodeComponentsFromKey(sub)
 
         if ((components._1 >= intervalIds._1) && (components._1 <= intervalIds._2)) {
           //not pruned by temporal
@@ -42,8 +42,8 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
       key
     })
 
-    val lowerId = params.encoder.encodeKeyFromComponents(intervalIds._1, 0, 0)
-    val higherId = params.encoder.encodeKeyFromComponents(intervalIds._2 + 1, 0, 0)
+    val lowerId = encoder.encodeKeyFromComponents(intervalIds._1, 0, 0)
+    val higherId = encoder.encodeKeyFromComponents(intervalIds._2 + 1, 0, 0)
 
     result.filter(col(tripleSubLongField) >= lowerId).filter(col(tripleSubLongField) < higherId).
       withColumn(triplePruneSubKeyField, getPruneKey(col(tripleSubLongField))).filter(col(triplePruneSubKeyField) > -1)

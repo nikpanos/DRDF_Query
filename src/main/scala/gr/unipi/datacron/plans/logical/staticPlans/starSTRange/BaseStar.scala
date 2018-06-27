@@ -24,7 +24,7 @@ abstract private[starSTRange] class BaseStar() extends StaticLogicalPlan() {
 
   private[starSTRange] def encodePredicate(pred: Option[String]): Option[Long] = {
     if (pred.isDefined) {
-      checkAndReturn(PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(pred.get, Some("Find encoded predicate: " + pred.get))), pred.get)
+      checkAndReturn(PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(pred.get, None)), pred.get)
     }
     else {
       None

@@ -1,50 +1,20 @@
 package gr.unipi.datacron.common
 
-import gr.unipi.datacron.common.Consts.qfpBenchmarkEnabled
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
-
-import scala.collection.mutable.ListBuffer
+import org.apache.spark.sql.DataFrame
 
 object Benchmarks {
-  private val benchmarkList: ListBuffer[BenchmarkInfo] = new ListBuffer[BenchmarkInfo]()
 
-  def addBenchmark(info: BenchmarkInfo): Unit = benchmarkList += info
+  var isBenchmarkingEnabled = false
 
-  def doBenchmark[T <: AnyRef](foo: () => T, params: BaseOperatorParams): T = {
-    if (params.operationName.isEmpty || !AppConfig.getBoolean(qfpBenchmarkEnabled)) {
+  def doBenchmark[T <: DataFrame](foo: () => T, params: BaseOperatorParams): T = {
+    if (params.logicalOperator.isEmpty || !isBenchmarkingEnabled) {
       foo()
     }
     else {
-      val startTime = System.currentTimeMillis
-      var result = foo()
-
-      val resultCount = result match {
-        case result: Dataset[Row @unchecked] =>
-          //result.cache
-          result.count
-        case result: Array[String] =>
-          result.length.toLong
-        case _ => 1L
-      }
-      val endTime = System.currentTimeMillis
-      Benchmarks.addBenchmark(BenchmarkInfo(params.operationName.get, endTime - startTime, resultCount))
+      val result = foo()
+      val resultCount = result.count()
+      params.logicalOperator.get.setRealOutputSize(resultCount)
       result
-    }
-  }
-
-  def printAll(): Unit = {
-    if (benchmarkList.nonEmpty) {
-      println("-------------------------------------------------------------------------------------------------------")
-      println("                                        BENCHMARK INFO                                                 ")
-      var sumTime = 0L
-      println("Action,Time (ms),Tuples")
-      benchmarkList.foreach(b => {
-        b.printString()
-        sumTime += b.time
-      })
-      println()
-      println("Summary," + sumTime)
-      println("-------------------------------------------------------------------------------------------------------")
     }
   }
 }

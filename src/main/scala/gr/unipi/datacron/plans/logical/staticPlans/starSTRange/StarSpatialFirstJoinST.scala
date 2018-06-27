@@ -13,7 +13,7 @@ case class StarSpatialFirstJoinST() extends BaseStar() {
 
     val refinement = TriplesRefinement()
 
-    val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(DataStore.triplesData, constraints, encoder, Some("Filter by encoded spatiotemporal info")))
+    val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(DataStore.triplesData, constraints, encoder, None))
 
     /*val extendedTriples = refinement.addSpatialAndTemporalColumns(filteredByIdInfo, filteredByIdInfo)
 

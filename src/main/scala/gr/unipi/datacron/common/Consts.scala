@@ -51,7 +51,7 @@ object Consts {
   final val qfpNamenode = "execution.namenode"
   final val qfpHdfsPrefix = "execution.hdfs_dir_prefix"
   final val qfpVerboseLogging = "execution.verbose_logging"
-  final val qfpBenchmarkEnabled = "execution.benchmark_enabled"
+  //final val qfpBenchmarkEnabled = "execution.benchmark_enabled"
   final val qfpWebExecution = "execution.web"
 
   final val qfpDictionaryTrait = "query.plans.physical.dictionary"

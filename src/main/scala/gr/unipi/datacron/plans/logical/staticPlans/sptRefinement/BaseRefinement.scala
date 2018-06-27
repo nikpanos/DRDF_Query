@@ -11,9 +11,9 @@ import org.apache.spark.sql.types.TimestampType
 private[sptRefinement] class BaseRefinement() {
 
   def decodeDatesAndRefineResult(dfTriples: DataFrame, constraints: SpatioTemporalRange): DataFrame = {
-    val translatedExtendedTriples = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfTriples, Array(tripleMBRField, tripleTimeStartField), false, Some("Add decoded spatial and temporal columns")))
+    val translatedExtendedTriples = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfTriples, Array(tripleMBRField, tripleTimeStartField), false, None))
 
-    val result = PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(translatedExtendedTriples, constraints, tripleMBRField + tripleTranslateSuffix, tripleTimeStartField + tripleTranslateSuffix, Some("Filter by spatiotemporal columns")))
+    val result = PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(translatedExtendedTriples, constraints, tripleMBRField + tripleTranslateSuffix, tripleTimeStartField + tripleTranslateSuffix, None))
 
     //val result = translatedExtendedTriples
 

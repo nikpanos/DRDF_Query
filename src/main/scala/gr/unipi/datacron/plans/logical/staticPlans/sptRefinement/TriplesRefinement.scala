@@ -10,11 +10,11 @@ import org.apache.spark.sql.DataFrame
 
 private[logical] case class TriplesRefinement() extends BaseRefinement {
 
-  val encodedUriMBR: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(uriMBR, Some("Find encoded " + uriMBR))).get
-  val encodedUriTime: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(uriTimeStart, Some("Find encoded " + uriTimeStart))).get
+  val encodedUriMBR: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(uriMBR, None)).get
+  val encodedUriTime: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(uriTimeStart, None)).get
 
-  val encodedUriTemporalFeature: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(uriHasTemporalFeature, Some("Find encoded " + uriHasTemporalFeature))).get
-  val encodedUriGeometry: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(uriHasGeometry, Some("Find encoded " + uriHasGeometry))).get
+  val encodedUriTemporalFeature: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(uriHasTemporalFeature, None)).get
+  val encodedUriGeometry: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(uriHasGeometry, None)).get
 
   def addSpatialAndTemporalColumns(dfDestination: DataFrame, dfSource: DataFrame): DataFrame = {
     val predicates = Map((encodedUriGeometry, tripleGeometryField), (encodedUriTemporalFeature, tripleTemporalField))

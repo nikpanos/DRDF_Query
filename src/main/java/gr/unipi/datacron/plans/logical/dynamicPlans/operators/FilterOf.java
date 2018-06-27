@@ -97,7 +97,7 @@ public class FilterOf extends BaseOpW1Child {
     @Override
     protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
-        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append("\n");
+        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append(" RealOutputSize: "+this.getRealOutputSize()).append("\n");
         for (Column c : this.getArrayColumns()) {
             if (c instanceof ColumnWithVariable) {
                 s.append(margin).append("ColumnName:").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
