@@ -16,7 +16,7 @@ trait TTriples {
 case class filterByColumnParams(df: DataFrame, columnName: String, value: Any, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
 case class filterBySubSpatioTemporalInfoParams(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder,
                                                override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
-case class filterBySpatioTemporalRangeParams(df: DataFrame, range: SpatioTemporalRange, spatialColumn: String, temporalColumn: String,
+case class filterBySpatioTemporalRangeParams(df: DataFrame, range: SpatioTemporalRange, spatialColumn: String, temporalColumn: String, altitudeColumn: String,
                                              override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
 case class filterByMultipleOrParams(df: DataFrame, colNamesAndValues: Array[(String, String)],
                                     override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
