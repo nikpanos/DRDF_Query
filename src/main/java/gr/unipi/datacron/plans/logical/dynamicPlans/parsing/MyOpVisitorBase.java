@@ -120,7 +120,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
         if(subIsValue && predIsValue){
             if(Integer.parseInt(subjectEnc)<0)
             {
-                outputSize = (((Long.parseLong(subjectEnc) - getStatisticsValue("minSub")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegSub") /*+ 1L*/) - getStatisticsValue("minSub"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+                Long groupId = (((Long.parseLong(subjectEnc) - getStatisticsValue("minSub")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegSub") + 1L) - getStatisticsValue("minSub"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+                outputSize = getStatisticsValue("spn."+ numberOfCellsPerAxis+"."+ groupId);
             }
             else{
                 outputSize = getStatisticsValue("spp.1.0");
@@ -129,7 +130,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
         else if (predIsValue && objIsValue){
             if(Integer.parseInt(objectEnc)<0)
             {
-                outputSize = (((Long.parseLong(objectEnc) - getStatisticsValue("minObj")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegObj") /*+ 1L*/) - getStatisticsValue("minObj"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+                Long groupId = (((Long.parseLong(objectEnc) - getStatisticsValue("minObj")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegObj") + 1L) - getStatisticsValue("minObj"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+                outputSize = getStatisticsValue("opn."+ numberOfCellsPerAxis+"."+ groupId);
             }
             else{
                 outputSize = getStatisticsValue("opp.1.0");
@@ -137,7 +139,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
         }
 
         else {
-            outputSize = (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /((getStatisticsValue("maxPred") /*+ 1L*/) - getStatisticsValue("minPred"))));
+            Long groupId = (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /((getStatisticsValue("maxPred") + 1L) - getStatisticsValue("minPred"))));
+            outputSize = getStatisticsValue("p."+ numberOfCellsPerAxis+"."+ groupId);
         }
 
         return outputSize;
