@@ -7,8 +7,10 @@ object Consts {
 
   final val qfpLatLower = "query.predicates.lat_lower"
   final val qfpLonLower = "query.predicates.lon_lower"
+  final val qfpAltLower = "query.predicates.alt_lower"
   final val qfpLatUpper = "query.predicates.lat_upper"
   final val qfpLonUpper = "query.predicates.lon_upper"
+  final val qfpAltUpper = "query.predicates.alt_upper"
   final val qfpTimeLower = "query.predicates.time_lower"
   final val qfpTimeUpper = "query.predicates.time_upper"
 

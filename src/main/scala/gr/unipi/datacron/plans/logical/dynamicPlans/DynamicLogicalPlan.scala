@@ -45,8 +45,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   }
 
   private[dynamicPlans] val constraints = Try(SpatioTemporalRange(
-    SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
-    SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
+    SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), AppConfig.getOptionalDouble(qfpAltLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
+    SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), AppConfig.getOptionalDouble(qfpAltUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
 
   private def filterBySpatioTemporalInfo(dfO: Option[DataFrame], logicalOperator: BaseOperator): Option[DataFrame] = {
     if (dfO.isDefined && constraints.isDefined && AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true) && dfO.get.hasSpatialAndTemporalShortcutCols) {
@@ -217,7 +217,9 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     if (dfs.length > 1) {
       val (incl, excl) = getIncludingAndExcludingCols(dfs(0), joinOr)
       val join = convertJoinOr(joinOr, incl, excl)
-      recursivelyExecuteNode(join, None)
+      val res = recursivelyExecuteNode(join, None)
+      joinOr.setRealOutputSize(join.getRealOutputSize)
+      res
     }
     else {
       val dfO = Option(dfs(0))

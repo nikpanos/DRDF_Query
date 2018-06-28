@@ -1,40 +1,23 @@
 package gr.unipi.datacron
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
-import com.redis.cluster._
-
-import scala.io.Source
+import gr.unipi.datacron.common.{SpatioTemporalInfo, SpatioTemporalRange}
+import gr.unipi.datacron.common.grid.variant3D.{EquiGrid, SpatioTemporalObj}
 
 object MyTest {
 
-  /*private val timeIntervals: Array[Long] = Source.fromFile("C:\\Users\\nikp\\Desktop\\timeintervalsSimple32_8_8.txt").getLines().toArray.map(_.toLong)
+  def main(args : Array[String]): Unit = {
+    val spatialGrid = new EquiGrid(9, Array(30d, -12d, 0d), Array(52d, 37d, 120000d), 3, 2)
 
-  def getIntervalId(x: Long): Int = {
-    val result = java.util.Arrays.binarySearch(timeIntervals, x)
-    if (result > 0) {
-      result - 1
+    def getSpatialIds(sptLow: SpatioTemporalObj, sptHigh: SpatioTemporalObj): Map[Long, Boolean] = {
+      //val lo = new SpatioTemporalObj(java.lang.Double.valueOf(c.low.longitude), java.lang.Double.valueOf(c.low.latitude), 0d, 0L )
+      //val hi = new SpatioTemporalObj(java.lang.Double.valueOf(c.high.longitude), java.lang.Double.valueOf(c.high.latitude), 0d, 0L)
+      import scala.collection.JavaConverters._
+
+      spatialGrid.getGridCells(sptLow, sptHigh).asScala.map(x => {(x._1.longValue(), x._2.booleanValue())}).toMap
     }
-    else {
-      math.abs(result) - 2
-    }
-  }
 
-  def getIntervalIds(l: Long, u: Long): (Int, Int) = (getIntervalId(l), getIntervalId(u) + 1)*/
-
-  def main(args : Array[String]) {
-    val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-    /*val lowerTime = format.parse("2016-01-09T00:00:50").getTime
-    val upperTime = format.parse("2016-01-02T00:02:58").getTime
-    println(lowerTime)
-
-    println(getIntervalIds(lowerTime, upperTime))*/
-
-    val d = format.parse("2016-01-09T00:00:50").getTime
-    println(d)
-    val d1 = new Date
-    d1.setTime(d)
-    println(format.format(d1))
+    val sptLow = new SpatioTemporalObj(-1d, 40d, 10d, 0L)
+    val sptHigh = new SpatioTemporalObj(10d, 42d, 32000d, 0L)
+    println(getSpatialIds(sptLow, sptHigh))
   }
 }
