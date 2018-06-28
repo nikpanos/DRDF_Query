@@ -5,6 +5,7 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.parsing;
 
+import gr.unipi.datacron.common.AppConfig;
 import gr.unipi.datacron.common.Consts;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
@@ -45,6 +46,9 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     private BaseOperator[] bop;
     private List<String> selectVariables = new ArrayList<>();
+    private static int getOptimizationFlag() {
+        return AppConfig.getInt(Consts.qfpLogicalOptimizationFlag());
+    }
 
 
     private MyOpVisitorBase(String sparql) {
@@ -116,7 +120,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
         if(subIsValue && predIsValue){
             if(Integer.parseInt(subjectEnc)<0)
             {
-                outputSize = (((Long.parseLong(subjectEnc) - getStatisticsValue("minSub")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegSub") + 1L) - getStatisticsValue("minSub"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+                outputSize = (((Long.parseLong(subjectEnc) - getStatisticsValue("minSub")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegSub") /*+ 1L*/) - getStatisticsValue("minSub"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
             }
             else{
                 outputSize = getStatisticsValue("spp.1.0");
@@ -125,7 +129,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
         else if (predIsValue && objIsValue){
             if(Integer.parseInt(objectEnc)<0)
             {
-                outputSize = (((Long.parseLong(objectEnc) - getStatisticsValue("minObj")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegObj") + 1L) - getStatisticsValue("minObj"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+                outputSize = (((Long.parseLong(objectEnc) - getStatisticsValue("minObj")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegObj") /*+ 1L*/) - getStatisticsValue("minObj"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
             }
             else{
                 outputSize = getStatisticsValue("opp.1.0");
@@ -133,7 +137,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
         }
 
         else {
-            outputSize = (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /((getStatisticsValue("maxPred") + 1L) - getStatisticsValue("minPred"))));
+            outputSize = (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /((getStatisticsValue("maxPred") /*+ 1L*/) - getStatisticsValue("minPred"))));
         }
 
         return outputSize;
@@ -250,10 +254,10 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
         //sort the list by the value of outputSize
 
-        if(PanosTest.getOptimizationFlag()==0){
+        if(getOptimizationFlag()==0){
             l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
         }
-        else if(PanosTest.getOptimizationFlag()==2)
+        else if(getOptimizationFlag()==2)
         {
             l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
         }

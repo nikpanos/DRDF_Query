@@ -24,9 +24,7 @@ import java.util.Date;
  */
 public class PanosTest {
 
-    public static int getOptimizationFlag() {
-        return AppConfig.getInt(Consts.qfpLogicalOptimizationFlag());
-    }
+
 
     public static void main(String args[]) {
         AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");
