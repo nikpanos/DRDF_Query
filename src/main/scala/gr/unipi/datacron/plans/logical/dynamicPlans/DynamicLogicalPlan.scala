@@ -311,7 +311,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       val spatialShortcutCol_trans = spatialShortcutCol.map(_ + tripleTranslateSuffix)
       val df = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfO.get, spatialShortcutCol))
 
-      Option(PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(df, constraints.get, spatialShortcutCol_trans(0), spatialShortcutCol_trans(1))))
+      Option(PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(df, constraints.get, spatialShortcutCol_trans)))
     }
     else {
       dfO

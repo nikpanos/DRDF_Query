@@ -52,13 +52,17 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
   }
 
   override def filterBySpatioTemporalRange(params: filterBySpatioTemporalRangeParams): DataFrame = {
+    val wktColumn = params.spatioTemporalColums(0)
+    val timeColumn = params.spatioTemporalColums(1)
+    val altitudeColumn = if (params.spatioTemporalColums.length > 2) Some(params.spatioTemporalColums(2)) else None
+
     val lowerCorner = params.range.low
-    val upperCorner = params.range.low
+    val upperCorner = params.range.high
 
     val dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
     val formatter = new SimpleDateFormat(dateFormat)
 
-    val filterBy = (pruneKey: Int, decodedSpatial: String, decodedTemporal: String, decodedAltitude: Option[String]) => {
+    val filterBy = (pruneKey: Int, decodedSpatial: String, decodedAltitude: Option[String], decodedTemporal: String) => {
       var tmpResult = ((pruneKey >> 0) & 1) != 1
       var sptResult = ((pruneKey >> 1) & 1) != 1
 
@@ -69,10 +73,9 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
 
       if (tmpResult && !sptResult) {
         //refine spatial
-        val decodedObject = decodedSpatial.substring(7, decodedSpatial.length - 1)
-        val lonlat = decodedObject.split(lonLatSeparator)
-        val lon = lonlat(0).toDouble
-        val lat = lonlat(1).toDouble
+        val pos = decodedSpatial.lastIndexOf(lonLatSeparator)
+        val lon = decodedSpatial.substring(7, pos).toDouble
+        val lat = decodedSpatial.substring(pos + 1, decodedSpatial.length - 1).toDouble
         if (decodedAltitude.isDefined) {
           val alt = decodedAltitude.get.toDouble
           sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
@@ -88,27 +91,83 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
       tmpResult && sptResult
     }
 
-    val filterBy3D = udf((pruneKey: Int, decodedSpatial: String, decodedTemporal: String, decodedAltitude: String) => {
-      filterBy(pruneKey, decodedSpatial, decodedTemporal, Some(decodedAltitude))
+    val filterBy3D = udf((pruneKey: Int, decodedSpatial: String, decodedAltitude: String, decodedTemporal: String) => {
+      filterBy(pruneKey, decodedSpatial, Some(decodedAltitude), decodedTemporal)
     })
 
     val filterBy2D = udf((pruneKey: Int, decodedSpatial: String, decodedTemporal: String) => {
-      filterBy(pruneKey, decodedSpatial, decodedTemporal, None)
+      filterBy(pruneKey, decodedSpatial, None, decodedTemporal)
     })
 
     val pruneKey = params.df.findColumnNameWithPrefix(triplePruneSubKeyField).get
 
-    if (params.range.low.altitude.isDefined) {
+    if (altitudeColumn.isDefined) {
       params.df
         //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-        .filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(params.spatialColumn)), col(sanitize(params.temporalColumn)), col(sanitize(params.altitudeColumn))))
+        .filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get)), col(sanitize(timeColumn))))
     }
     else {
       params.df
         //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-        .filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(params.spatialColumn)), col(sanitize(params.temporalColumn))))
+        .filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(timeColumn))))
     }
   }
+
+  /*override def filterBySpatioTemporalRange(params: filterBySpatioTemporalRangeParams): DataFrame = {
+    val wktColumn = params.spatioTemporalColums(0)
+    val timeColumn = params.spatioTemporalColums(1)
+    val altitudeColumn = if (params.spatioTemporalColums.length > 2) Some(params.spatioTemporalColums(2)) else None
+
+    val lowerCorner = params.range.low
+    val upperCorner = params.range.high
+
+    val dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+    val formatter = new SimpleDateFormat(dateFormat)
+
+    val filterBy = (pruneKey: Int, decodedSpatial: String, decodedAltitude: Option[String]) => {
+      var sptResult = ((pruneKey >> 1) & 1) != 1
+
+      if (!sptResult) {
+        //refine spatial
+        val decodedObject = decodedSpatial.substring(7, decodedSpatial.length - 1)
+        val lonlat = decodedObject.split(lonLatSeparator)
+        val lon = lonlat(0).toDouble
+        val lat = lonlat(1).toDouble
+        if (decodedAltitude.isDefined) {
+          val alt = decodedAltitude.get.toDouble
+          sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
+            (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude) &&
+            (alt >= lowerCorner.altitude.get) && (alt <= upperCorner.altitude.get)
+        }
+        else {
+          sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
+            (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude)
+        }
+      }
+
+      sptResult
+    }
+
+    val filterBy3D = udf((pruneKey: Int, decodedSpatial: String, decodedAltitude: String) => {
+      filterBy(pruneKey, decodedSpatial, Some(decodedAltitude))
+    })
+
+    val filterBy2D = udf((pruneKey: Int, decodedSpatial: String) => {
+      filterBy(pruneKey, decodedSpatial, None)
+    })
+
+    val pruneKey = params.df.findColumnNameWithPrefix(triplePruneSubKeyField).get
+
+    val df1 = params.df
+      .filter(unix_timestamp(params.df(sanitize(timeColumn)), dateFormat).between(lowerCorner.time / 1000, upperCorner.time / 1000))
+
+    if (altitudeColumn.isDefined) {
+      df1.filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get))))
+    }
+    else {
+      df1.filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(wktColumn))))
+    }
+  }*/
 
   override def filterByColumn(params: filterByColumnParams): DataFrame = {
     params.df.filter(col(params.columnName) === params.value)

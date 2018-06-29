@@ -11,9 +11,9 @@ private[logical] case class PropertiesRefinement2() extends BaseRefinement {
   val encodedUriTemporalShortcut: Long = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(tripleTimeStartField, None)).get
 
   def refineResults(dfFilteredTriples: DataFrame, constraints: SpatioTemporalRange, qPredEncoded: Long, qObjEncoded: Long): DataFrame = {
-    val translatedExtendedTriples = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfFilteredTriples, Array(encodedUriSpatialShortcut.toString, encodedUriTemporalShortcut.toString), false, None))
+    //val translatedExtendedTriples = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfFilteredTriples, Array(encodedUriSpatialShortcut.toString, encodedUriTemporalShortcut.toString), false, None))
 
-    val result = PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(translatedExtendedTriples, constraints, encodedUriSpatialShortcut.toString + tripleTranslateSuffix, encodedUriTemporalShortcut.toString + tripleTranslateSuffix, None))
+    //val result = PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(translatedExtendedTriples, constraints, encodedUriSpatialShortcut.toString + tripleTranslateSuffix, encodedUriTemporalShortcut.toString + tripleTranslateSuffix, None))
 
     //val result = translatedExtendedTriples
 
@@ -22,6 +22,6 @@ private[logical] case class PropertiesRefinement2() extends BaseRefinement {
     val outTranslated = PhysicalPlanner.decodeColumns(decodeColumnsParams(outPrepared, Array(tripleSubLongField, qPredEncoded.toString), false, Some("Final decode of columns")))
     val outColumns = outTranslated.columns.filter(_.endsWith(tripleTranslateSuffix))
     outTranslated.select(outColumns.head, outColumns.tail: _*)*/
-    result
+    dfFilteredTriples
   }
 }

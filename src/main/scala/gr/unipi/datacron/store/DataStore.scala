@@ -79,7 +79,12 @@ object DataStore {
     }
   }
 
-  lazy val spatialAndTemporalShortcutCols: Array[String] = Array(tripleMBRField, tripleTimeStartField).map(dictionaryRedis.getEncodedValue(_).get.toString)
+  lazy val spatialAndTemporalShortcutCols: Array[String] = if (dictionaryRedis.getDynamicSetting(redisKeyDimensions).get.toInt == 2) {
+    Array(tripleMBRField, tripleTimeStartField).map(dictionaryRedis.getEncodedValue(_).get.toString)
+  }
+  else {
+    Array(tripleMBRField, tripleTimeStartField, tripleAltitudeField).map(dictionaryRedis.getEncodedValue(_).get.toString)
+  }
 
   def init(): Unit = {
     //Force initialization of spark context here in order to omit the initialization overhead

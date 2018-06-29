@@ -121,7 +121,7 @@ object Consts {
   //field separators
   final val tripleFieldsSeparator = " "
   final val dicFieldsSeparator = "\t"
-  final val lonLatSeparator = " "
+  final val lonLatSeparator = ' '
   
   //RDF URIs
   final val uriMBR = ":hasWKT"
@@ -146,6 +146,7 @@ object Consts {
   final val tripleTranslateSuffix = "_trans"
   final val tripleMBRField = datacronOntologyNamespace + "shortcutSpatial"
   final val tripleTimeStartField = datacronOntologyNamespace + "shortcutTemporal"
+  final val tripleAltitudeField = datacronOntologyNamespace + "hasAltitude"
   final val tripleJoinKey = "join_key"
   final val tripleGeometryField = "geometryWKT"
   final val tripleTemporalField = "temporalFeature"
