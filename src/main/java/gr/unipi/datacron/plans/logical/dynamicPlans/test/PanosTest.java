@@ -37,23 +37,21 @@ public class PanosTest {
 
         BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
                 "Prefix : <http://www.datacron-project.eu/datAcron#>\n" +
-                        "\n" +
                         "SELECT *\n" +
                         "WHERE\n" +
                         "{\n" +
                         "    ?ves a ?VesselType ;\n" +
                         "    :has_vesselFixingDeviceType ?device ;\n" +
-                        "    :has_vesselMMSI \"244010219\" ;\n" +
                         "    :vesselName ?name .\n" +
                         "    ?n :ofMovingObject ?ves ;\n" +
                         "    :hasGeometry ?g ;\n" +
                         "    :hasTemporalFeature ?t ;\n" +
                         "    :hasHeading ?heading ;\n" +
                         "    :hasSpeed ?speed .\n" +
-                        "    ?g :hasWKT ?pos .\n" +
-                        "    ?t :TimeStart ?time .\n" +
                         "    ?event :occurs ?n .\n" +
-                        "}").getBop();
+                        "    ?n :hasWeatherCondition ?w.\n" +
+                        "    ?w :windDirectionMin \"77.13083\"\n" +
+                        "}\n").getBop();
         
         System.out.println("NumberOfTrees: " + bop.length);
         System.out.println("--------------------------");

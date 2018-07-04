@@ -73,12 +73,13 @@ public class MyOpVisitorBase extends OpVisitorBase {
             value = (Long) optionValue.get();
         }
         return value;
+        //return -1L;
     }
 
 
     private Long getStatisticsValue(String key) {
-    return Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
-}
+        return Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
+    }
 
     private static String getRedisDecodedValue(Long key) {
         Option<String> optionValue = DataStore.dictionaryRedis().getDecodedValue(key);
@@ -195,7 +196,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
         });
 
-        formBaseOperatorArray(formStarQueriesAndRemainingTriplets(checkForShortcuts(listOfFilters)));
+        formBaseOperatorArray1(formStarQueriesAndRemainingTriplets(checkForShortcuts(listOfFilters)));
     }
 
     private void getTriples(String q) {
@@ -260,7 +261,14 @@ public class MyOpVisitorBase extends OpVisitorBase {
         return starQueryTreeList;
     }
 
-    private void formBaseOperatorArray(List<BaseOperator> l) {
+    private void formBaseOperatorArray1(List<BaseOperator> l) {
+        bop.addAll(formBaseOperatorArray(l));
+        for(int i = 0; i < bop.size(); i++) {
+            bop.set(i,newSelectOperator(selectVariables, bop.get(i)));
+        }
+    }
+
+    private List<BaseOperator> formBaseOperatorArray(List<BaseOperator> l) {
 
         System.out.println("TEXT");
         if(getOptimizationFlag()==0){
@@ -271,7 +279,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
 //            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
 //        }
 
-        for (int i = 0; i < l.size(); i++) {
+        int i = 0;
+        while (i < l.size()) {
 
             BaseOperator choosenBop = l.get(i);
 
@@ -284,22 +293,26 @@ public class MyOpVisitorBase extends OpVisitorBase {
                     l.set(i, JoinOperator.newJoinOperator(choosenBop, l.get(k)));
                     l.remove(k);
 
-                    formBaseOperatorArray(l);
-
+                    //formBaseOperatorArray(l);
+                    i = l.size();
+                    break;
                 }
-                    k++;
+                k++;
 
             }
-
-            bop.add(l.get(i));
-            l.remove(i);
-            formBaseOperatorArray(l);
+            i++;
+        }
+        if (l.size() == 1) {
+            return l;
+        }
+        else {
+            return formBaseOperatorArray(l);
         }
 
-        for(int i=0;i<bop.size();i++)
+        /*for(int i=0;i<bop.size();i++)
         {
             bop.set(i,newSelectOperator(selectVariables, bop.get(i)));
-        }
+        }*/
 
 //        //sort the list by the value of outputSize
 //
