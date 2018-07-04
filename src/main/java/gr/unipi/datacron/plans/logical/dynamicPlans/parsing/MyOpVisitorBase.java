@@ -196,7 +196,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
         });
 
-        formBaseOperatorArray1(formStarQueriesAndRemainingTriplets(checkForShortcuts(listOfFilters)));
+        formSelectOperators(formStarQueriesAndRemainingTriplets(checkForShortcuts(listOfFilters)));
     }
 
     private void getTriples(String q) {
@@ -261,7 +261,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
         return starQueryTreeList;
     }
 
-    private void formBaseOperatorArray1(List<BaseOperator> l) {
+    private void formSelectOperators(List<BaseOperator> l) {
         bop.addAll(formBaseOperatorArray(l));
         for(int i = 0; i < bop.size(); i++) {
             bop.set(i,newSelectOperator(selectVariables, bop.get(i)));
@@ -274,10 +274,6 @@ public class MyOpVisitorBase extends OpVisitorBase {
         if(getOptimizationFlag()==0){
             l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
         }
-//        else if(getOptimizationFlag()==2)
-//        {
-//            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
-//        }
 
         int i = 0;
         while (i < l.size()) {
