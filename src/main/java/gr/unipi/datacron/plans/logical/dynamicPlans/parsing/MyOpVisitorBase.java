@@ -270,7 +270,6 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     private List<BaseOperator> formBaseOperatorArray(List<BaseOperator> l) {
 
-        System.out.println("TEXT");
         if(getOptimizationFlag()==0){
             l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
         }
