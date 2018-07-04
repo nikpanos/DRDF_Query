@@ -40,11 +40,16 @@ public class MyOpVisitorBase extends OpVisitorBase {
     /**
      * @return the bop
      */
+//    public BaseOperator[] getBop() {
+//        return bop;
+//    }
+
     public BaseOperator[] getBop() {
-        return bop;
+        return bop.stream().toArray(BaseOperator[]::new);
     }
 
-    private BaseOperator[] bop;
+    private List<BaseOperator> bop = new ArrayList<>();
+    //private BaseOperator[] bop;
     private List<String> selectVariables = new ArrayList<>();
     private static int getOptimizationFlag() {
         return AppConfig.getInt(Consts.qfpLogicalOptimizationFlag());
@@ -255,58 +260,93 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     private void formBaseOperatorArray(List<BaseOperator> l) {
 
-        //sort the list by the value of outputSize
-
         if(getOptimizationFlag()==0){
             l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
         }
-        else if(getOptimizationFlag()==2)
-        {
-            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
-        }
-
-
-        Set<Integer> excludedFromList = new HashSet<>();
-
-        List<BaseOperator> bopList = new ArrayList<>();
+//        else if(getOptimizationFlag()==2)
+//        {
+//            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
+//        }
 
         for (int i = 0; i < l.size(); i++) {
 
-            if (excludedFromList.contains(i)) {
-                continue;
-            }
-
-            BaseOperator choosenBop = l.get(i);
+            BaseOperator choosenBop = l.get(0);
 
             int k = i + 1;
+
             while (k < l.size()) {
 
-                if (excludedFromList.contains(k)) {
-                    k++;
-                    continue;
-                }
-
                 if (choosenBop.hasCommonVariable(l.get(k))) {
-                    choosenBop = JoinOperator.newJoinOperator(choosenBop, l.get(k));
-                    excludedFromList.add(k);
-                    k = i + 1;
-                } else {
-                    k++;
+
+                    l.set(0, JoinOperator.newJoinOperator(choosenBop, l.get(k)));
+                    l.remove(k);
+
+                    formBaseOperatorArray(l);
+
                 }
+                    k++;
+
             }
-            excludedFromList.add(i);
-            bopList.add(choosenBop);
+
+            bop.add(l.get(0));
+            l.remove(0);
+            formBaseOperatorArray(l);
         }
 
-
-
-        bop = bopList.stream().toArray(BaseOperator[]::new);
-        for(int k=0;k<bop.length;k++){
-            bop[k] = newSelectOperator(selectVariables, bop[k]);
+        for(int i=0;i<bop.size();i++)
+        {
+            bop.set(i,newSelectOperator(selectVariables, bop.get(i)));
         }
-        //System.out.println("SIZE:"+bop[0].getBopChildren().get(0).toString());
 
-
+//        //sort the list by the value of outputSize
+//
+//        if(getOptimizationFlag()==0){
+//            l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
+//        }
+//        else if(getOptimizationFlag()==2)
+//        {
+//            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
+//        }
+//
+//
+//        Set<Integer> excludedFromList = new HashSet<>();
+//
+//        List<BaseOperator> bopList = new ArrayList<>();
+//
+//        for (int i = 0; i < l.size(); i++) {
+//
+//            if (excludedFromList.contains(i)) {
+//                continue;
+//            }
+//
+//            BaseOperator choosenBop = l.get(i);
+//
+//            int k = i + 1;
+//            while (k < l.size()) {
+//
+//                if (excludedFromList.contains(k)) {
+//                    k++;
+//                    continue;
+//                }
+//
+//                if (choosenBop.hasCommonVariable(l.get(k))) {
+//                    choosenBop = JoinOperator.newJoinOperator(choosenBop, l.get(k));
+//                    excludedFromList.add(k);
+//                    k = i + 1;
+//                } else {
+//                    k++;
+//                }
+//            }
+//            excludedFromList.add(i);
+//            bopList.add(choosenBop);
+//        }
+//
+//
+//
+//        bop = bopList.stream().toArray(BaseOperator[]::new);
+//        for(int k=0;k<bop.length;k++){
+//            bop[k] = newSelectOperator(selectVariables, bop[k]);
+//        }
     }
 
     private List<FilterOf> checkForShortcuts(List<FilterOf> l) {
