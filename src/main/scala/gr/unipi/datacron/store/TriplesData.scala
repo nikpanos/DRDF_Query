@@ -13,7 +13,7 @@ private[store] class TriplesData() extends BaseHDFSStore {
   protected def datasetName: String = "Leftover Triples"
 
   protected def readDataset(): DataFrame = AppConfig.getString(qfpParseTriples) match {
-    case Consts.parseParquet => DataStore.spark.read.parquet(dataPath)
+    case Consts.parseParquet => DataStore.spark.read.parquet(dataPath).union(DataStore.spark.read.parquet(Utils.resolveHdfsPath(qfpNodeLeftoversPath)))
     case Consts.parseString => DataStore.spark.read.text(dataPath).toDF(tripleSpoStrField)
     case Consts.parseLong => DataStore.spark.read.text(dataPath).map(s => {
       val tokenizer = TriplesTokenizer(s.getString(0))

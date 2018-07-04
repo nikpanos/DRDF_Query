@@ -6,7 +6,7 @@ import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.store.DataStore.spark
 import org.apache.spark.sql.DataFrame
 object TextToParquet {
-  def processDataframe(df: DataFrame, dfName: String, outputPath: String, sortingColumns: Option[Array[String]]) = {
+  private def processDataframe(df: DataFrame, dfName: String, outputPath: String, sortingColumns: Option[Array[String]]): Unit = {
     println("Writing " + dfName + " to: " + outputPath)
     df.printSchema()
 
@@ -57,11 +57,14 @@ object TextToParquet {
         None
       }
 
-      outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
-      processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
-
-      outputPath = DataStore.vessels.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
-      processDataframe(DataStore.vesselData, "vessels", outputPath, sortCols)
+      AppConfig.getString(qfpDatasetList).split(",").foreach( {
+        case `datasetAisMedNode` =>
+          outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
+          processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
+        case `datasetVessel` =>
+          outputPath = DataStore.vessels.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
+          processDataframe(DataStore.vesselData, "vessels", outputPath, sortCols)
+      })
     }
 
     println("Success!")

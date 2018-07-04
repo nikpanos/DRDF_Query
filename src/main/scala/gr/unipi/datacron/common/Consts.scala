@@ -22,12 +22,14 @@ object Consts {
   final val qfpJoinTripleO = "query.rdf_predicate.join.condition.o"
 
   final val qfpDataPropertyEnabled = "datasets.property.enabled"
+  final val qfpDatasetList = "datasets.list"
 
   final val qfpDicPath = "datasets.dictionary.path"
   final val qfpTriplesPath = "datasets.triples.path"
   final val qfpIntrvlsPath = "datasets.intervals.path"
   final val qfpNodePath = "datasets.node.path"
   final val qfpVesselsPath = "datasets.vessels.path"
+  final val qfpNodeLeftoversPath = "datasets.nodeLeftovers.path"
 
   final val qfpDicType = "datasets.dictionary.type"
   final val qfpDicTypeFile = "file"
@@ -48,6 +50,7 @@ object Consts {
   final val qfpParseTriples = "datasets.triples.parse"
   final val qfpParseNode = "datasets.node.parse"
   final val qfpParseVessel = "datasets.vessels.parse"
+  final val qfpParseNodeLeftovers = "datasets.nodeLeftovers.parse"
 
   final val qfpSparkMaster = "execution.spark_master"
   final val qfpNamenode = "execution.namenode"
@@ -170,6 +173,9 @@ object Consts {
 
   final val rdfType = rdfOntologyNamespace + "type"
   final val nodeTypes = Array("Node").map(datacronOntologyNamespace + _)
+
+  final val datasetAisMedNode = "aisMedNode"
+  final val datasetVessel = "vessel"
 
   final val redisKeyEncodingLatLower = "settings.min_lat"
   final val redisKeyEncodingLonLower = "settings.min_lon"

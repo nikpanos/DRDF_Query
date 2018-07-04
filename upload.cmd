@@ -1,0 +1,1 @@
+pscp.exe -i C:\Users\nikp\.ssh\id_rsa.ppk .\target\DRDF_Query-1.0-SNAPSHOT-jar-with-dependencies.jar pnikitopoulos@datacron1.ds.unipi.gr:/mnt/storage/sparql/query.jar
