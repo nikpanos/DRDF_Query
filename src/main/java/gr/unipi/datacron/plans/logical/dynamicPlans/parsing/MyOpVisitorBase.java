@@ -49,6 +49,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
     }
 
     private List<BaseOperator> bop = new ArrayList<>();
+
+
     //private BaseOperator[] bop;
     private List<String> selectVariables = new ArrayList<>();
     private static int getOptimizationFlag() {
@@ -260,6 +262,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     private void formBaseOperatorArray(List<BaseOperator> l) {
 
+        System.out.println("TEXT");
         if(getOptimizationFlag()==0){
             l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
         }
