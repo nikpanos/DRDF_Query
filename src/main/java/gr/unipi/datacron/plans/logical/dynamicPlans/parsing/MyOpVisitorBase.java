@@ -273,7 +273,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
         for (int i = 0; i < l.size(); i++) {
 
-            BaseOperator choosenBop = l.get(0);
+            BaseOperator choosenBop = l.get(i);
 
             int k = i + 1;
 
@@ -281,7 +281,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
                 if (choosenBop.hasCommonVariable(l.get(k))) {
 
-                    l.set(0, JoinOperator.newJoinOperator(choosenBop, l.get(k)));
+                    l.set(i, JoinOperator.newJoinOperator(choosenBop, l.get(k)));
                     l.remove(k);
 
                     formBaseOperatorArray(l);
@@ -291,8 +291,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
             }
 
-            bop.add(l.get(0));
-            l.remove(0);
+            bop.add(l.get(i));
+            l.remove(i);
             formBaseOperatorArray(l);
         }
 
