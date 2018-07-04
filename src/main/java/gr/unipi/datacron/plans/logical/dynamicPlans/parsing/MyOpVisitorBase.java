@@ -273,6 +273,10 @@ public class MyOpVisitorBase extends OpVisitorBase {
         if(getOptimizationFlag()==0){
             l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
         }
+        else if(getOptimizationFlag()==1){
+            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
+        }
+
 
         int i = 0;
         while (i < l.size()) {
