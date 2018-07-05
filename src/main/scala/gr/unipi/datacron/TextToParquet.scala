@@ -59,11 +59,16 @@ object TextToParquet {
 
       AppConfig.getString(qfpDatasetList).split(",").foreach( {
         case `datasetAisMedNode` =>
+          DataStore.nodeDatasetType = datasetAisMedNode
           outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
           processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
         case `datasetVessel` =>
           outputPath = DataStore.vessels.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
           processDataframe(DataStore.vesselData, "vessels", outputPath, sortCols)
+        case `datasetAdsbNode` =>
+          DataStore.nodeDatasetType = datasetAdsbNode
+          outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
+          processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
       })
     }
 

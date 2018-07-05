@@ -31,6 +31,7 @@ object DataStore {
 
   lazy val node: NodeProperties = new NodeProperties()
   lazy val nodeData: DataFrame = getCached(node.data)
+  var nodeDatasetType: String = ""  //only used for TextToParquet
 
   lazy val vessels: VesselProperties = new VesselProperties()
   lazy val vesselData: DataFrame = getCached(vessels.data)

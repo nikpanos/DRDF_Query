@@ -175,6 +175,7 @@ object Consts {
   final val nodeTypes = Array("Node").map(datacronOntologyNamespace + _)
 
   final val datasetAisMedNode = "aisMedNode"
+  final val datasetAdsbNode = "adsbNode"
   final val datasetVessel = "vessel"
 
   final val redisKeyEncodingLatLower = "settings.min_lat"

@@ -23,27 +23,54 @@ private[store] class NodeProperties() extends BaseHDFSStore {
       predicates.foreach(x => print(x + ", "))
       println("\n Total columns: " + predicates.length)
 
-      if (predicates.length != 8) {
-        throw new Exception("Expected 8 columns in dataset")
+      //println(datasetType)
+      DataStore.nodeDatasetType match {
+        case `datasetAisMedNode` =>
+          if (predicates.length != 8) {
+            throw new Exception("Expected 8 columns in dataset")
+          }
+          DataStore.sc.textFile(dataPath).map(s => {
+            SemanticObject.predicates = predicates
+            val tokenizer = TriplesTokenizer(s)
+
+            val sub = tokenizer.getNextToken.get
+            val semObject = new SemanticObject(sub)
+
+            var pred: Option[Long] = tokenizer.getNextToken
+            var obj: Option[Long] = tokenizer.getNextToken
+            while (pred.isDefined) {
+              semObject.setPropertyValue(pred.get, obj.get)
+              pred = tokenizer.getNextToken
+              obj = tokenizer.getNextToken
+            }
+            semObject.getValues match {
+              case Array(a, b, c, d, e, f, g, h) => (semObject.subj, a, b, c, d, e, f, g, h)
+            }
+          }).toDF(schema:_*)
+        case `datasetAdsbNode` =>
+          if (predicates.length != 10) {
+            throw new Exception("Expected 10 columns in dataset")
+          }
+          DataStore.sc.textFile(dataPath).map(s => {
+            SemanticObject.predicates = predicates
+            val tokenizer = TriplesTokenizer(s)
+
+            val sub = tokenizer.getNextToken.get
+            val semObject = new SemanticObject(sub)
+
+            var pred: Option[Long] = tokenizer.getNextToken
+            var obj: Option[Long] = tokenizer.getNextToken
+            while (pred.isDefined) {
+              semObject.setPropertyValue(pred.get, obj.get)
+              pred = tokenizer.getNextToken
+              obj = tokenizer.getNextToken
+            }
+            semObject.getValues match {
+              case Array(a, b, c, d, e, f, g, h, i, j) => (semObject.subj, a, b, c, d, e, f, g, h, i, j)
+            }
+          }).toDF(schema:_*)
+        case "" =>
+          throw new Exception("datasetType is not set")
       }
-
-      DataStore.sc.textFile(dataPath).map(s => {
-        SemanticObject.predicates = predicates
-        val tokenizer = TriplesTokenizer(s)
-
-        val sub = tokenizer.getNextToken.get
-        val semObject = new SemanticObject(sub)
-
-        var pred: Option[Long] = tokenizer.getNextToken
-        var obj: Option[Long] = tokenizer.getNextToken
-        while (pred.isDefined) {
-          semObject.setPropertyValue(pred.get, obj.get)
-          pred = tokenizer.getNextToken
-          obj = tokenizer.getNextToken
-        }
-        semObject.getValues match {
-          case Array(a, b, c, d, e, f, g, h) => (semObject.subj, a, b, c, d, e, f, g, h)
-        }
-      }).toDF(schema:_*)
   }
 }

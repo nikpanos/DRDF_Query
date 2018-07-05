@@ -1,9 +1,12 @@
 package gr.unipi.datacron.store
 
+import java.lang.Exception
+
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common._
-import gr.unipi.datacron.common.schema.SemanticObject
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.DataFrame
+
+import scala.util.control.Exception
 
 private[store] class TriplesData() extends BaseHDFSStore {
   import DataStore.spark.implicits._
