@@ -1,14 +1,10 @@
 package gr.unipi.datacron.store
 
-import java.util
-import java.util.concurrent.ConcurrentHashMap
-
 import com.typesafe.config.ConfigObject
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
-import redis.clients.jedis.{HostAndPort, JedisCluster}
+import redis.clients.jedis.HostAndPort
 import gr.unipi.datacron.store.utils.MyRedisCluster
-import redis.clients.jedis.Response
 
 import scala.util.Try
 
@@ -17,7 +13,7 @@ import collection.JavaConverters._
 class DictionaryRedis() {
   private def getClusterConnection(configParam: String, dbIndex: Int): MyRedisCluster = {
     val hosts = AppConfig.getObjectList(configParam)
-    val clusterNodes = new util.HashSet[HostAndPort]
+    //val clusterNodes = new util.HashSet[HostAndPort]
     val hostsAndPorts = hosts.toArray.map(x => {
       val y = x.asInstanceOf[ConfigObject]
       val host = y.get(qfpDicRedisAddress).unwrapped().asInstanceOf[String]
@@ -42,8 +38,8 @@ class DictionaryRedis() {
 
   def getDynamicSetting(key: String): Option[String] = Try(dynamicIdToUri.getNow(key)).toOption
 
-  def getLowerTimestampIdx(timestamp: Long): Int = Try(dynamicIdToUri.findInSetLowerNow(redisKeyTimestamps, timestamp).toInt).getOrElse(0)
-  def getUpperTimestampIdx(timestamp: Long): Int = getLowerTimestampIdx(timestamp) + 1
+  def getLowerTimestampIdx(timestamp: Long): Int = getUpperTimestampIdx(timestamp) + 1
+  def getUpperTimestampIdx(timestamp: Long): Int = Try(dynamicIdToUri.findInSetLowerNow(redisKeyTimestamps, timestamp).toInt).getOrElse(0)
 
   def getEncodedValue(key: String): Option[Long] = Try(staticUriToId.getNow(key).toLong).toOption
 

@@ -11,10 +11,17 @@ import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
 case class LLLTriples() extends BasePhysicalPlan with TTriples {
+
+  //prunkey values:
+  // -1: should be pruned (either negative id, or out of range)
+  // 0: no refinement needed (definitely in the result set)
+  // 1: Needs only temporal refinement (Does not need spatial refinement)
+  // 2: Needs only spatial refinement (Does not need temporal refinement)
+  // 3: Needs both refinements
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame = {
     val intervalIds = DataStore.temporalGrid.getIntervalIds(params.constraints)
     //println(intervalIds)
-    //println(params.constraints.low)
+    //println(params.constraints)
     val spatialIds = DataStore.spatialGrid.getSpatialIds(params.constraints)
     val encoder = params.encoder
     val result = params.df
@@ -104,7 +111,7 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
     if (altitudeColumn.isDefined) {
       params.df
         //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-        .filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get)), col(sanitize(timeColumn))))
+        .filter(filterBy3D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get)), col(sanitize(timeColumn))))
     }
     else {
       params.df

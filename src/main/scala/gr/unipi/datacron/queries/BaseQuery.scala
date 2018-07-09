@@ -43,20 +43,18 @@ abstract class BaseQuery() {
       }
 
       println("Starting query execution")
-      val startTime = System.currentTimeMillis
+      val startLogicalTime = System.currentTimeMillis
       plan.get.preparePlan()
-      val startPhysicalTime = System.currentTimeMillis
+      val endLogicalTime = System.currentTimeMillis
       val result = plan.get.executePlan
       processOutput(result)
-      val endTime = System.currentTimeMillis
 
-      val logicalTime = startPhysicalTime - startTime
-      val physicalTime = endTime - startPhysicalTime
-      val totalTime = endTime - startTime
+      val logicalTime = endLogicalTime - startLogicalTime
+      //val totalTime = physicalTime + logicalTime
       if (!AppConfig.getStringList(qfpQueryOutputDevices).contains(outputDeviceWeb)) {
         println("Logical plan build time (ms): " + logicalTime)
-        println("Query execution time (ms): " + physicalTime)
-        println("Total time (ms): " + totalTime)
+        //println("Query execution time (ms): " + physicalTime)
+        //println("Total time (ms): " + totalTime)
       }
 
       if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
@@ -79,8 +77,12 @@ abstract class BaseQuery() {
         if (AppConfig.getBoolean(qfpQueryOutputScreenExplain)) {
           result.explain(true)
         }
+        val startTime = System.currentTimeMillis
+        val count = result.count()
+        val endTime = System.currentTimeMillis
         result.show(AppConfig.getInt(qfpQueryOutputScreenHowMany), truncate = false)
-        println("Result count: " + result.count)
+        println("Result count: " + count)
+        println("Query execution time (ms): " + (endTime - startTime))
       case `outputDeviceDir` =>
         /*if (AppConfig.getOptionalBoolean(qfpWebExecution).getOrElse(false)) {
           spark.sql("set spark.sql.parquet.compression.codec=gzip")

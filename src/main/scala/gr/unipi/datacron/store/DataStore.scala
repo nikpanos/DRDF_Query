@@ -20,7 +20,9 @@ object DataStore {
 
   lazy val sc: SparkContext = spark.sparkContext
 
-  lazy val propertyData: Array[DataFrame] = Array(nodeData, vesselData)
+  lazy val propertyData: Array[DataFrame] = if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) Array(nodeData, vesselData)
+                                            else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 1) Array(nodeData)
+                                            else Array.empty[DataFrame]
   lazy val allData: Array[DataFrame] = propertyData :+ triplesData
 
   lazy val spatialGrid: SpatialGrid = new SpatialGrid()
