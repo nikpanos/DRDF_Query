@@ -38,7 +38,7 @@ class DictionaryRedis() {
 
   def getDynamicSetting(key: String): Option[String] = Try(dynamicIdToUri.getNow(key)).toOption
 
-  def getLowerTimestampIdx(timestamp: Long): Int = getUpperTimestampIdx(timestamp) + 1
+  def getLowerTimestampIdx(timestamp: Long): Int = getUpperTimestampIdx(timestamp)
   def getUpperTimestampIdx(timestamp: Long): Int = Try(dynamicIdToUri.findInSetLowerNow(redisKeyTimestamps, timestamp).toInt).getOrElse(0)
 
   def getEncodedValue(key: String): Option[Long] = Try(staticUriToId.getNow(key).toLong).toOption
