@@ -11,15 +11,18 @@ abstract class BaseQuery() {
   DataStore.init()
 
   private def executeWarmUp(plan: Option[BaseLogicalPlan]): (Long, Long) = {
-    val start = System.currentTimeMillis
+    val logicalStart = System.currentTimeMillis
     plan.get.preparePlan()
-    val startPhysical = System.currentTimeMillis
+    val logicalEnd = System.currentTimeMillis
+
     val result = plan.get.executePlan
-    println(result.count)
-    result.show()
-    val endTime = System.currentTimeMillis
-    val logicalTime = startPhysical - start
-    val physicalTime = endTime - startPhysical
+    val startPhysical = System.currentTimeMillis
+    val count = result.count
+    val endPhysical = System.currentTimeMillis
+    println(count)
+    //result.show()
+    val logicalTime = logicalEnd - logicalStart
+    val physicalTime = endPhysical - startPhysical
     (logicalTime, physicalTime)
   }
 
