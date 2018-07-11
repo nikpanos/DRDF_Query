@@ -97,12 +97,29 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
+  private def findObjectOfRdfType(node: BaseOperator): Option[String] = {
+    node match {
+      case fNode: FilterOf =>
+        val objFilter = fNode.getFilters.find(_.getColumn.getColumnTypes == OBJECT)
+        if (objFilter.isDefined) {
+          Some(getEncodedStr(objFilter.get.getValue))
+        }
+        else None
+      case jNode: JoinOrOperator =>
+        jNode.getBopChildren.asScala.foreach(child => {
+          val res = findObjectOfRdfType(child)
+          if (res.isDefined) return res
+        })
+        None
+    }
+  }
+
   private def guessDataFrame(dfO: Option[DataFrame], node: BaseOperator): Array[DataFrame] = {
     if (dfO.isEmpty) {
       val rdfTypeEnc = getEncodedStr(rdfType)
       var predicates = getPredicateList(node)
 
-      if ((predicates.length == 1) && (predicates(0) == getEncodedStr(rdfType))) {
+      if ((predicates.length == 1) && (predicates(0) == rdfTypeEnc)) {
         if (node.isInstanceOf[FilterOf]) {
           val objFilter = node.asInstanceOf[FilterOf].getFilters.find(_.getColumn.getColumnTypes == OBJECT)
           if (objFilter.isDefined) {
@@ -115,7 +132,15 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
         }) :+ DataStore.triplesData
       }
       else {
-
+        if (predicates.contains(rdfTypeEnc)) {
+          val objFilter = findObjectOfRdfType(node)
+          if (objFilter.isDefined) {
+            val dfA = DataStore.findDataframeBasedOnRdfType(objFilter.get)
+            if (!dfA.contains(DataStore.nodeData)) {
+              return dfA
+            }
+          }
+        }
         predicates = predicates.filter(!_.equals(rdfTypeEnc))
 
         val result = DataStore.propertyData.filter(df => {

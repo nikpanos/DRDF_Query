@@ -2,6 +2,7 @@ package gr.unipi.datacron.plans.physical.triples
 
 import java.text.SimpleDateFormat
 
+import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
@@ -106,17 +107,39 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
       filterBy(pruneKey, decodedSpatial, None, decodedTemporal)
     })
 
+    val filterBy3D_noKey = udf((decodedSpatial: String, decodedAltitude: String, decodedTemporal: String) => {
+      filterBy(3, decodedSpatial, Some(decodedAltitude), decodedTemporal)
+    })
+
+    val filterBy2D_noKey = udf((decodedSpatial: String, decodedTemporal: String) => {
+      filterBy(3, decodedSpatial, None, decodedTemporal)
+    })
+
     val pruneKey = params.df.findColumnNameWithPrefix(triplePruneSubKeyField).get
 
-    if (altitudeColumn.isDefined) {
-      params.df
-        //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-        .filter(filterBy3D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get)), col(sanitize(timeColumn))))
+    if (AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true)) {
+      if (altitudeColumn.isDefined) {
+        params.df
+          //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
+          .filter(filterBy3D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get)), col(sanitize(timeColumn))))
+      }
+      else {
+        params.df
+          //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
+          .filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(timeColumn))))
+      }
     }
     else {
-      params.df
-        //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-        .filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(timeColumn))))
+      if (altitudeColumn.isDefined) {
+        params.df
+          //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
+          .filter(filterBy3D_noKey(col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get)), col(sanitize(timeColumn))))
+      }
+      else {
+        params.df
+          //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
+          .filter(filterBy2D_noKey(col(sanitize(wktColumn)), col(sanitize(timeColumn))))
+      }
     }
   }
 

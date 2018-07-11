@@ -59,7 +59,8 @@ object DataStore {
   def findDataframeBasedOnRdfType(encodedRdfType: String): Array[DataFrame] = {
     val encodedRdfTypeL = encodedRdfType.toLong
     if (nodeTypesEncoded.contains(encodedRdfTypeL)) Array(nodeData)
-    else Array(vesselData, triplesData)
+    else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) Array(vesselData, triplesData)
+    else Array(triplesData)
   }
 
   def hdfsDirectoryExists(directory: String): Boolean = {
