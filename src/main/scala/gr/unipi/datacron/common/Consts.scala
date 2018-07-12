@@ -173,6 +173,7 @@ object Consts {
 
   final val rdfType = rdfOntologyNamespace + "type"
   final val nodeTypes = Array("Node").map(datacronOntologyNamespace + _)
+  final val weatherConditionTypes = Array("WeatherCondition").map(datacronOntologyNamespace + _)
 
   final val datasetAisMedNode = "aisMedNode"
   final val datasetAdsbNode = "adsbNode"

@@ -55,10 +55,12 @@ object DataStore {
   private def convertDecodedArrayToEncodedSet(arr: Array[String]): Set[Long] = arr.map(dictionaryRedis.getEncodedValue(_).get).toSet
 
   private lazy val nodeTypesEncoded: Set[Long] = convertDecodedArrayToEncodedSet(nodeTypes)
+  private lazy val weatherConditionTypesEncoded: Set[Long] = convertDecodedArrayToEncodedSet(weatherConditionTypes)
 
   def findDataframeBasedOnRdfType(encodedRdfType: String): Array[DataFrame] = {
     val encodedRdfTypeL = encodedRdfType.toLong
     if (nodeTypesEncoded.contains(encodedRdfTypeL)) Array(nodeData)
+    else if (weatherConditionTypesEncoded.contains(encodedRdfTypeL)) Array(triplesData)
     else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) Array(vesselData, triplesData)
     else Array(triplesData)
   }
