@@ -115,9 +115,8 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
       filterBy(3, decodedSpatial, None, decodedTemporal)
     })
 
-    val pruneKey = params.df.findColumnNameWithPrefix(triplePruneSubKeyField).get
-
     if (AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true)) {
+      val pruneKey = params.df.findColumnNameWithPrefix(triplePruneSubKeyField).get
       if (altitudeColumn.isDefined) {
         params.df
           //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
