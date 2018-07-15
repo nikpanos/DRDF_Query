@@ -106,6 +106,10 @@ object DataStore {
     }
     if (AppConfig.getInt(partitionsNumberAfterShuffle) > 0) {
       spark.sql("set spark.sql.shuffle.partitions=" + AppConfig.getInt(partitionsNumberAfterShuffle))
+      val oBroad = AppConfig.getOptionalInt(autoBroadcastJoinThreshold)
+      if (oBroad.isDefined) {
+        spark.sql("set spark.sql.autoBroadcastJoinThreshold=" + oBroad.get)
+      }
     }
     //temporalGrid.getIntervalId(0)  //to initialize the temporal grid
 

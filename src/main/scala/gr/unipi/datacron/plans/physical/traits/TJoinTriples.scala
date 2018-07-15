@@ -8,5 +8,5 @@ trait TJoinTriples {
   def joinDataframes(params: joinDataframesParams): DataFrame
 }
 
-case class joinDataframesParams(df1: DataFrame, df2: DataFrame, df1JoinColumn: String, df2JoinColumn: String,
+case class joinDataframesParams(df1: DataFrame, df2: DataFrame, df1JoinColumn: String, df2JoinColumn: String, df1EstimatedSize: Long, df2EstimatedSize: Long,
                                 override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams

@@ -60,7 +60,7 @@ abstract class BaseQuery() {
         //println("Total time (ms): " + totalTime)
       }
 
-      if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
+      if (AppConfig.getOptionalBoolean(qfpPrintLogicalTreeEnabled).getOrElse(false)) {
         Benchmarks.isBenchmarkingEnabled = true
         println("Calculating sizes...")
         executeWarmUp(plan)
@@ -77,13 +77,13 @@ abstract class BaseQuery() {
     var result = res
     AppConfig.getStringList(qfpQueryOutputDevices).foreach {
       case `outputDeviceScreen` =>
-        if (AppConfig.getBoolean(qfpQueryOutputScreenExplain)) {
-          result.explain(true)
-        }
         val startTime = System.currentTimeMillis
         val count = result.count()
         val endTime = System.currentTimeMillis
         result.show(AppConfig.getInt(qfpQueryOutputScreenHowMany), truncate = false)
+        if (AppConfig.getBoolean(qfpQueryOutputScreenExplain)) {
+          result.explain(true)
+        }
         println("Result count: " + count)
         println("Query execution time (ms): " + (endTime - startTime))
       case `outputDeviceDir` =>

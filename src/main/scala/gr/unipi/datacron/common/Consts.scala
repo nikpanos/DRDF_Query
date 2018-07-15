@@ -70,6 +70,8 @@ object Consts {
   final val qfpEnableMultipleFilterJoinOr = "query.enableMultipleFilterJoinOr"
   final val qfpEnableResultDecode = "query.enableResultDecode"
   final val qfpWarmUpEnabled = "query.warmUpEnabled"
+  final val qfpPrintLogicalTreeEnabled = "query.printLogicalTreeEnabled"
+  final val qfpBroadcastThreshold = "query.broadcastThreshold"
 
   final val qfpQueryOutputDevices = "output.outputDevices"
   final val qfpQueryOutputFolderPath = "output.dirOutput.path"
@@ -168,6 +170,7 @@ object Consts {
 
   //spark params
   final val partitionsNumberAfterShuffle = "sparkParams.spark.sql.shuffle.partitions"
+  final val autoBroadcastJoinThreshold = "sparkParams.spark.sql.autoBroadcastJoinThreshold"
 
   final val sparqlQuerySource = "query.sparql.source"
 
