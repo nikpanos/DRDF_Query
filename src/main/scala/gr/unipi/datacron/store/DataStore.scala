@@ -20,7 +20,7 @@ object DataStore {
 
   lazy val sc: SparkContext = spark.sparkContext
 
-  lazy val propertyData: Array[DataFrame] = if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) Array(nodeData, vesselData)
+  lazy val propertyData: Array[DataFrame] = if ((AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) || (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 2)) Array(nodeData, vesselData)
                                             else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 1) Array(nodeData)
                                             else Array.empty[DataFrame]
   lazy val allData: Array[DataFrame] = propertyData :+ triplesData
@@ -61,7 +61,7 @@ object DataStore {
     val encodedRdfTypeL = encodedRdfType.toLong
     if (nodeTypesEncoded.contains(encodedRdfTypeL)) Array(nodeData)
     else if (weatherConditionTypesEncoded.contains(encodedRdfTypeL)) Array(triplesData)
-    else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) Array(vesselData, triplesData)
+    else if ((AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) || (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 2)) Array(vesselData, triplesData)
     else Array(triplesData)
   }
 
