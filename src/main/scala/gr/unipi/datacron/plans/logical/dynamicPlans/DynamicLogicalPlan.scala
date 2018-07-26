@@ -58,6 +58,20 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
+  private def refineBySpatioTemporal(dfO: Option[DataFrame]): Option[DataFrame] = {
+    if (dfO.isDefined && constraints.isDefined && dfO.get.hasSpatialAndTemporalShortcutCols()) {
+      println("Filtering by spatio-temporal predicates")
+      val spatialShortcutCol = dfO.get.getSpatioTemporalShortucutCols()
+      val spatialShortcutCol_trans = spatialShortcutCol.map(_ + tripleTranslateSuffix)
+      val df = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfO.get, spatialShortcutCol))
+
+      Option(PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(df, constraints.get, spatialShortcutCol_trans)))
+    }
+    else {
+      dfO
+    }
+  }
+
   private val prefixMappings: mutable.HashMap[String, String] = mutable.HashMap[String, String]()
 
   private def getEncodedStr(decodedColumnName: String): String = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName)).getOrElse(0).toString
@@ -253,7 +267,13 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
           recursivelyExecuteNode(child, dfTmp)
         })
         joinOr.setRealOutputSize(joinOr.getBopChildren.asScala.last.getRealOutputSize)
-        filterBySpatioTemporalInfo(result, joinOr)
+        val dfO1 = filterBySpatioTemporalInfo(result, joinOr)
+        if (AppConfig.getBoolean(qfpEnableRefinementPushdown)) {
+          refineBySpatioTemporal(dfO1)
+        }
+        else {
+          dfO1
+        }
       }
       else {
         val df = if (AppConfig.getBoolean(qfpEnableMultipleFilterJoinOr)) {
@@ -311,14 +331,19 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     if (joinOp.getBopChildren.size() > 2) {
       throw new Exception("Not supported join between more than 2 operators")
     }
-
-    val child1 = joinOp.getBopChildren.get(0)
-    val child2 = joinOp.getBopChildren.get(1)
-    val dfAndCol1 = getDfAndColNameForJoin(child1, joinCols(0), df)
-    val dfAndCol2 = getDfAndColNameForJoin(child2, joinCols(1), df)
-    val child1Size = if (child1.getOutputSize >= 0)  child1.getOutputSize else Long.MaxValue
-    val child2Size = if (child2.getOutputSize >= 0)  child2.getOutputSize else Long.MaxValue
-    Option(PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, child1Size, child2Size, Option(joinOp))))
+    else if (joinOp.getBopChildren.size() == 1) {
+      val child1 = joinOp.getBopChildren.get(0)
+      Option(getDfAndColNameForJoin(child1, joinCols(0), df)._1)
+    }
+    else {
+      val child1 = joinOp.getBopChildren.get(0)
+      val child2 = joinOp.getBopChildren.get(1)
+      val dfAndCol1 = getDfAndColNameForJoin(child1, joinCols(0), df)
+      val dfAndCol2 = getDfAndColNameForJoin(child2, joinCols(1), df)
+      val child1Size = if (child1.getOutputSize >= 0) child1.getOutputSize else Long.MaxValue
+      val child2Size = if (child2.getOutputSize >= 0) child2.getOutputSize else Long.MaxValue
+      Option(PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, child1Size, child2Size, Option(joinOp))))
+    }
   }
 
   private def processJoin(joinOp: JoinOperator) : Option[DataFrame] = executeJoin(joinOp, joinOp.getColumnJoinPredicate, None)
@@ -341,23 +366,14 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def refineBySpatioTemporal(dfO: Option[DataFrame]): Option[DataFrame] = {
-    if (dfO.isDefined && constraints.isDefined && dfO.get.hasSpatialAndTemporalShortcutCols()) {
-      println("Filtering by spatio-temporal predicates")
-      val spatialShortcutCol = dfO.get.getSpatioTemporalShortucutCols()
-      val spatialShortcutCol_trans = spatialShortcutCol.map(_ + tripleTranslateSuffix)
-      val df = PhysicalPlanner.decodeColumns(decodeColumnsParams(dfO.get, spatialShortcutCol))
-
-      Option(PhysicalPlanner.filterBySpatioTemporalRange(filterBySpatioTemporalRangeParams(df, constraints.get, spatialShortcutCol_trans)))
+  private def filterFinalResults(dfO: Option[DataFrame]): Option[DataFrame] = {
+    //Perform refinement based on Filter operators here...
+    if (!AppConfig.getBoolean(qfpEnableRefinementPushdown)) {
+      refineBySpatioTemporal(dfO)
     }
     else {
       dfO
     }
-  }
-
-  private def filterFinalResults(dfO: Option[DataFrame]): Option[DataFrame] = {
-    //Perform filtering based on Filter operators here...
-    refineBySpatioTemporal(dfO)
   }
 
   private def projectResults(dfO: Option[DataFrame], s: SelectOperator): Option[DataFrame] = {

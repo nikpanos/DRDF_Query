@@ -67,6 +67,7 @@ object Consts {
   final val qfpLogicalOptimizationFlag = "query.plans.logical.optimizationFlag"
 
   final val qfpEnableFilterByEncodedInfo = "query.enableFilterByEncodedInfo"
+  final val qfpEnableRefinementPushdown = "query.enableRefinementPushdown"
   final val qfpEnableMultipleFilterJoinOr = "query.enableMultipleFilterJoinOr"
   final val qfpEnableResultDecode = "query.enableResultDecode"
   final val qfpWarmUpEnabled = "query.warmUpEnabled"
