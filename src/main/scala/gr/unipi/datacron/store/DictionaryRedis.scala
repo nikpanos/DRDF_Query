@@ -3,12 +3,12 @@ package gr.unipi.datacron.store
 import com.typesafe.config.ConfigObject
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
-import redis.clients.jedis.HostAndPort
+import redis.clients.jedis._
 import gr.unipi.datacron.store.utils.MyRedisCluster
 
 import scala.util.Try
-
 import collection.JavaConverters._
+import scala.collection.mutable
 
 class DictionaryRedis() {
   private def getClusterConnection(configParam: String, dbIndex: Int): MyRedisCluster = {
@@ -45,5 +45,45 @@ class DictionaryRedis() {
 
 
   //-------------------------------------- BATCH REDIS PROCESSING BELOW THIS LINE --------------------------------------
+  val hashMap = new mutable.HashMap[Long, Response[String]]()
 
+  def getDecodedValueLater(key: Long): Response[String] = {
+    val ret = hashMap.get(key)
+    if (ret.isDefined) {
+      ret.get
+    }
+    else {
+      val ret1 = getDecodedValueLaterInternal(key)
+      hashMap.put(key, ret1)
+      ret1
+    }
+  }
+
+  private def getDecodedValueLaterInternal(key: Long): Response[String] = {
+    if (key < 0) {
+      staticIdToUri.getLater(key.toString)
+    }
+    else {
+      dynamicIdToUri.getLater(key.toString)
+    }
+  }
+
+  def syncAllBatch(): Unit = {
+    staticIdToUri.syncPipes()
+    dynamicIdToUri.syncPipes()
+  }
+
+  def getDecodedValueResponse(key: Long): String = {
+    hashMap(key).get()
+  }
+
+  def close(): Unit = {
+    staticIdToUri.close()
+    staticUriToId.close()
+
+    dynamicIdToUri.close()
+    dynamicUriToId.close()
+
+    hashMap.clear()
+  }
 }

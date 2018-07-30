@@ -112,5 +112,8 @@ public class MyRedisCluster implements AutoCloseable {
     @Override
     public void close() throws Exception {
         jedisClu.close();
+        nodeMap.clear();
+        slotHostMap.clear();
+        pipes.clear();
     }
 }
