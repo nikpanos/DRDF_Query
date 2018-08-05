@@ -15,7 +15,7 @@ WHERE
     ?g :hasWKT ?pos .
     ?t :TimeStart ?time .
     ?event :occurs ?n .
-}
+ }
 
 Prefix : <http://www.datacron-project.eu/datAcron#>
 

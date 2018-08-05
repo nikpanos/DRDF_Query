@@ -1,0 +1,19 @@
+datasets {
+    dictionary {
+        type = "redis"
+        idToUri {
+            hosts = [
+                { address = "192.168.142.128", port = 6377 }
+                { address = "192.168.142.128", port = 6378 }
+                { address = "192.168.142.128", port = 6379 }
+            ]
+        }
+        uriToId {
+            hosts = [
+                { address = "192.168.142.128", port = 6380 }
+                { address = "192.168.142.128", port = 6381 }
+                { address = "192.168.142.128", port = 6382 }
+            ]
+        }
+    }
+}

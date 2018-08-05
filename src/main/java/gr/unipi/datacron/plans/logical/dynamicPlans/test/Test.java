@@ -6,9 +6,9 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.SelectOperator;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.FilterOf;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.SelectOperator;
 
 /**
  *
@@ -28,11 +28,11 @@ public class Test {
 "}").getBop();
         bop[0].getBopChildren().get(0);
 
-        ((SelectOperator) bop[0]).getVariables().forEach(e->System.out.println(e));
+        ((ProjectOperator) bop[0]).getVariables().forEach(e->System.out.println(e));
 
-        System.out.println("SUBJECT: "+((FilterOf) bop[0].getBopChildren().get(0)).getSubject());
-        System.out.println("PREDICATE: "+((FilterOf) bop[0].getBopChildren().get(0)).getSubject());
-        System.out.println("OBJECT: "+((FilterOf) bop[0].getBopChildren().get(0)).getSubject());
+        System.out.println("SUBJECT: "+((SelectOperator) bop[0].getBopChildren().get(0)).getSubject());
+        System.out.println("PREDICATE: "+((SelectOperator) bop[0].getBopChildren().get(0)).getSubject());
+        System.out.println("OBJECT: "+((SelectOperator) bop[0].getBopChildren().get(0)).getSubject());
 //       BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase("SELECT ?x" +
 //"WHERE" +
 //"{" +

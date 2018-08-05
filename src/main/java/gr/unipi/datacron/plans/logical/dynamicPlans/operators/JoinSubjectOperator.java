@@ -18,11 +18,11 @@ import java.util.logging.Logger;
  *
  * @author nicholaskoutroumanis
  */
-public class JoinOrOperator extends BaseOpWnChild {
+public class JoinSubjectOperator extends BaseOpWnChild {
     
     private Column[] columnJoinPredicate;
 
-    private JoinOrOperator(BaseOperator... bo) {
+    private JoinSubjectOperator(BaseOperator... bo) {
         this.addChild(bo);
         this.fillAndFormArrayColumns();
         setOutputSize(this.estimateOutputSize(bo));
@@ -49,7 +49,7 @@ public class JoinOrOperator extends BaseOpWnChild {
                 try {
                     throw new Exception("The triplets can not be determined by Join Or Operator");
                 } catch (Exception ex) {
-                    Logger.getLogger(JoinOrOperator.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(JoinSubjectOperator.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             columnJoinPredicateList.add(c);
@@ -65,8 +65,8 @@ public class JoinOrOperator extends BaseOpWnChild {
         return columnList;
     }
 
-    public static JoinOrOperator newJoinOrOperator(BaseOperator... bo) {
-        return new JoinOrOperator(bo);
+    public static JoinSubjectOperator newJoinOrOperator(BaseOperator... bo) {
+        return new JoinSubjectOperator(bo);
     }
     
     /**

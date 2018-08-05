@@ -12,12 +12,10 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase;
  *
  * @author nicholaskoutroumanis
  */
-public class JoinOrOperatorTester {
+public class JoinSubjectOperatorTester {
 
     public static void main(String args[]) {
 
-//        JoinOrOperator bop = JoinOrOperator.newJoinOrOperator(FilterOf.newFilterOf("?x", "tr", "45"),FilterOf.newFilterOf("?x", "hg", "mm"),
-//                FilterOf.newFilterOf("?x", "fd", "?y"),FilterOf.newFilterOf("?x", "fv", "nn"));
         BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase("SELECT ?x"
                 + "WHERE"
                 + "{"

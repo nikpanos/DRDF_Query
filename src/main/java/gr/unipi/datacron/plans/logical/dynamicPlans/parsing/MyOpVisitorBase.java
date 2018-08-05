@@ -11,7 +11,6 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithValue;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
-import gr.unipi.datacron.plans.logical.dynamicPlans.test.PanosTest;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -20,7 +19,6 @@ import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitorBase;
 import org.apache.jena.sparql.algebra.OpWalker;
 import org.apache.jena.sparql.algebra.op.OpBGP;
-import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpProject;
 import gr.unipi.datacron.store.DataStore;
 import scala.Option;
@@ -29,7 +27,7 @@ import scala.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static gr.unipi.datacron.plans.logical.dynamicPlans.operators.SelectOperator.newSelectOperator;
+import static gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOperator.newSelectOperator;
 
 /**
  *
@@ -160,7 +158,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
         List<Triple> triples = opBGP.getPattern().getList();
 
-        List<FilterOf> listOfFilters = new ArrayList<>();
+        List<SelectOperator> listOfFilters = new ArrayList<>();
 
         triples.forEach((triple) -> {
             //form the list with the correct form of Subject, Predicate, Object
@@ -183,7 +181,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
                 hm.put(c, c.copyToNewObject(Integer.toString(to.hashCode())));
             }
 
-            ProjectOperator p = ProjectOperator.newProjectOperator(to, hm);
+            RenameOperator p = RenameOperator.newProjectOperator(to, hm);
 
             List<ColumnWithValue> k = new ArrayList<>();
             for (Column c : p.getArrayColumns()) {
@@ -192,7 +190,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
                 }
             }
 
-                listOfFilters.add(FilterOf.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),outputSize));
+                listOfFilters.add(SelectOperator.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),outputSize));
 
         });
 
@@ -206,7 +204,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     }
 
-    private List<BaseOperator> formStarQueriesAndRemainingTriplets(List<FilterOf> listOfFilters) {
+    private List<BaseOperator> formStarQueriesAndRemainingTriplets(List<SelectOperator> listOfFilters) {
 
         Set<Integer> excludedElements = new HashSet<>();
 
@@ -242,7 +240,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
             if (aStarQueryTripletsList.size() > 1) {
                 excludedElements.add(i);
-                JoinOrOperator orp = JoinOrOperator.newJoinOrOperator(aStarQueryTripletsList.stream().toArray(BaseOperator[]::new));
+                JoinSubjectOperator orp = JoinSubjectOperator.newJoinOrOperator(aStarQueryTripletsList.stream().toArray(BaseOperator[]::new));
                 starQueryTreeList.add(orp);
             }
         }
@@ -257,7 +255,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
         starQueryTreeList.addAll(listOfFilters);
 
-        //return a list with the JoinOrOperators and FilterOf Operators 
+        //return a list with the JoinOrOperators and SelectOf Operators
         return starQueryTreeList;
     }
 
@@ -364,7 +362,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 //        }
     }
 
-    private List<FilterOf> checkForShortcuts(List<FilterOf> l) {
+    private List<SelectOperator> checkForShortcuts(List<SelectOperator> l) {
 
         final Set<String> set = new HashSet<>(Arrays.asList(Consts.uriHasGeometry(), Consts.uriMBR(), Consts.uriHasTemporalFeature(), Consts.uriTimeStart()));
 
@@ -373,17 +371,17 @@ public class MyOpVisitorBase extends OpVisitorBase {
         hashMap.put(new String[]{Consts.uriHasTemporalFeature(), Consts.uriTimeStart()}, Consts.tripleTimeStartField());
 
         //word - The list which contains the word as a predicate
-        Map<String, List<FilterOf>> p = l.stream().filter(f
+        Map<String, List<SelectOperator>> p = l.stream().filter(f
                 -> (!f.isPredicateVariable()) ? (set.contains(f.getPredicate()) && (f.isSubjectVariable() || f.isObjectVariable())) : false
         ).collect(Collectors.groupingBy(ba -> ba.getPredicate()));
 
         hashMap.forEach((k, v) -> {
             if (p.containsKey(k[0]) && p.containsKey(k[1])) {
 
-                List<FilterOf> list1 = p.get(k[0]);
-                List<FilterOf> list2 = p.get(k[1]);
+                List<SelectOperator> list1 = p.get(k[0]);
+                List<SelectOperator> list2 = p.get(k[1]);
 
-                for (FilterOf l1 : list1) {
+                for (SelectOperator l1 : list1) {
                     int i = 0;
                     while (i < list2.size()) {
                         if (l1.getObject().equals(list2.get(i).getSubject())) {
@@ -396,7 +394,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
                                 hm.put(c, c.copyToNewObject(Integer.toString(to.hashCode())));
                             }
 
-                            ProjectOperator pop = ProjectOperator.newProjectOperator(to, hm);
+                            RenameOperator pop = RenameOperator.newProjectOperator(to, hm);
 
                             List<ColumnWithValue> cwv = new ArrayList<>();
                             for (Column c : pop.getArrayColumns()) {
@@ -405,7 +403,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
                                 }
                             }
 
-                            l.set(l.indexOf(l1), FilterOf.newFilterOf(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new),new java.util.Random().nextInt(2000)+1));
+                            l.set(l.indexOf(l1), SelectOperator.newFilterOf(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new),new java.util.Random().nextInt(2000)+1));
 
                             l.remove(list2.get(i));
 

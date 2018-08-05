@@ -1,22 +1,106 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import java.util.List;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithValue;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author nicholaskoutroumanis
+ */
 public class SelectOperator extends BaseOpW1Child {
 
-    private List<String> variables;
+    private final ColumnWithValue[] listofColumnsWithValues;//columns with values only
 
-    private SelectOperator(List<String> variables, BaseOperator bop){
-        this.variables=variables;
-        this.addChild(bop);
+    private SelectOperator(BaseOperator bo, Column[] c, ColumnWithValue[] listofColumnsWithValues, long outputSize) {
+        this.addChild(bo);
+        setArrayColumns(c);
+        this.listofColumnsWithValues = listofColumnsWithValues;
+        setOutputSize(outputSize);
     }
 
-    public static SelectOperator newSelectOperator(List<String> variables, BaseOperator bop) {
-        return new SelectOperator(variables,bop);
+    private Column getColumn(ColumnTypes ct) {
+        for (Column c : this.getArrayColumns()) {
+            if (c.getColumnTypes() == ct) {
+                return c;
+            }
+        }
+        try {
+            throw new Exception("Can not define Column Type");
+        } catch (Exception ex) {
+            Logger.getLogger(SelectOperator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
+    }
+
+    public static SelectOperator newFilterOf(BaseOperator bo, Column[] c, ColumnWithValue[] listofColumnsWithValues, long outputSize) {
+        return new SelectOperator(bo, c, listofColumnsWithValues, outputSize);
+    }
+
+    public boolean isSubjectVariable() {
+        Column c = getColumn(ColumnTypes.SUBJECT);
+        return (c instanceof ColumnWithVariable);
+    }
+
+    public boolean isPredicateVariable() {
+        Column c = getColumn(ColumnTypes.PREDICATE);
+        return (c instanceof ColumnWithVariable);
+    }
+
+    public boolean isObjectVariable() {
+        Column c = getColumn(ColumnTypes.OBJECT);
+        return (c instanceof ColumnWithVariable);
+    }
+
+    public String getSubject() {
+        return getColumn(ColumnTypes.SUBJECT).getQueryString();
 
     }
 
-    public List<String> getVariables() {
-        return variables;
+    public String getPredicate() {
+        return getColumn(ColumnTypes.PREDICATE).getQueryString();
+
+    }
+
+    public String getObject() {
+        return getColumn(ColumnTypes.OBJECT).getQueryString();
+
+    }
+
+    @Override
+    protected String toString(String margin) {
+        StringBuilder s = new StringBuilder();
+        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append(" RealOutputSize: "+this.getRealOutputSize()).append("\n");
+        for (Column c : this.getArrayColumns()) {
+            if (c instanceof ColumnWithVariable) {
+                s.append(margin).append("ColumnName:").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
+            } else {
+                s.append(margin).append("ColumnName:").append(c.getColumnName()).append("\n");
+            }
+        }
+
+        this.getBopChildren().forEach((b) -> {
+            s.append(b.toString(margin + "|"));
+        });
+        return s.toString();
+    }
+
+    @Override
+    public String toString() {
+        return this.toString("");
+    }
+
+    public ColumnWithValue[] getFilters() {
+        return listofColumnsWithValues;
     }
 }

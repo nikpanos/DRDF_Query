@@ -83,14 +83,14 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def getPrefix(s: String): String = s.substring(0, s.indexOf('.') + 1)
   private def getSuffix(s: String): String = s.substring(s.indexOf('.') + 1)
 
-  private def getNewJoinOrOperator(node: JoinOrOperator, preds: Array[String]): JoinOrOperator = {
+  private def getNewJoinOrOperator(node: JoinSubjectOperator, preds: Array[String]): JoinSubjectOperator = {
     val filters = node.getBopChildren.asScala.toArray.filter(op => {
-      preds.contains(op.asInstanceOf[FilterOf].getPredicate)
+      preds.contains(op.asInstanceOf[SelectOperator].getPredicate)
     })
-    JoinOrOperator.newJoinOrOperator(filters: _*)
+    JoinSubjectOperator.newJoinOrOperator(filters: _*)
   }
 
-  private def convertJoinOr(joinOrOperator: JoinOrOperator, incl: Array[String], excl: Array[String]): JoinOperator = {
+  private def convertJoinOr(joinOrOperator: JoinSubjectOperator, incl: Array[String], excl: Array[String]): JoinOperator = {
     val joinOr1 = getNewJoinOrOperator(joinOrOperator, incl)
     val joinOr2 = getNewJoinOrOperator(joinOrOperator, excl)
 
@@ -99,11 +99,11 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def getPredicateList(node: BaseOperator): Array[String] = {
     node match {
-      case _: JoinOrOperator =>
+      case _: JoinSubjectOperator =>
         node.getBopChildren.asScala.foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
           preds ++ getPredicateList(child)
         })
-      case filter: FilterOf =>
+      case filter: SelectOperator =>
         filter.getFilters.filter(column => {
           column.getColumn.getColumnTypes == PREDICATE
         }).map(column => getEncodedStr(column.getValue))
@@ -113,13 +113,13 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def findObjectOfRdfType(node: BaseOperator): Option[String] = {
     node match {
-      case fNode: FilterOf =>
+      case fNode: SelectOperator =>
         val objFilter = fNode.getFilters.find(_.getColumn.getColumnTypes == OBJECT)
         if (objFilter.isDefined) {
           Some(getEncodedStr(objFilter.get.getValue))
         }
         else None
-      case jNode: JoinOrOperator =>
+      case jNode: JoinSubjectOperator =>
         jNode.getBopChildren.asScala.foreach(child => {
           val res = findObjectOfRdfType(child)
           if (res.isDefined) return res
@@ -134,8 +134,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       var predicates = getPredicateList(node)
 
       if ((predicates.length == 1) && (predicates(0) == rdfTypeEnc)) {
-        if (node.isInstanceOf[FilterOf]) {
-          val objFilter = node.asInstanceOf[FilterOf].getFilters.find(_.getColumn.getColumnTypes == OBJECT)
+        if (node.isInstanceOf[SelectOperator]) {
+          val objFilter = node.asInstanceOf[SelectOperator].getFilters.find(_.getColumn.getColumnTypes == OBJECT)
           if (objFilter.isDefined) {
             val encodedObjFilter = getEncodedStr(objFilter.get.getValue)
             return DataStore.findDataframeBasedOnRdfType(encodedObjFilter)
@@ -193,7 +193,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     (incl, excl)
   }
 
-  private def processFilterOf(filter: FilterOf, dfO: Option[DataFrame]) : Option[DataFrame] = {
+  private def processFilterOf(filter: SelectOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {
     val sub = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.SUBJECT)
     val pred = filter.getFilters.find(_.getColumn.getColumnTypes == PREDICATE)
     val obj = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
@@ -250,7 +250,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def processJoinOr(joinOr: JoinOrOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {
+  private def processJoinOr(joinOr: JoinSubjectOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {
     val dfs = guessDataFrame(dfO, joinOr)
 
     if (dfs.length > 1) {
@@ -348,7 +348,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def processJoin(joinOp: JoinOperator) : Option[DataFrame] = executeJoin(joinOp, joinOp.getColumnJoinPredicate, None)
 
-  private def processSelect(selectOp: SelectOperator) : Option[DataFrame] = {
+  private def processSelect(selectOp: ProjectOperator) : Option[DataFrame] = {
     val dfO = recursivelyExecuteNode(selectOp.getBopChildren.get(0), None)
     if (dfO.isDefined) {
       projectResults(filterFinalResults(dfO), selectOp)
@@ -358,10 +358,10 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def recursivelyExecuteNode(node: BaseOperator, df: Option[DataFrame]): Option[DataFrame] = {
     node match {
-      case f: FilterOf => processFilterOf(f, df)
-      case jo: JoinOrOperator => processJoinOr(jo, df)
+      case f: SelectOperator => processFilterOf(f, df)
+      case jo: JoinSubjectOperator => processJoinOr(jo, df)
       case j: JoinOperator => processJoin(j)
-      case s: SelectOperator => processSelect(s)
+      case s: ProjectOperator => processSelect(s)
       case _ => None
     }
   }
@@ -376,7 +376,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def projectResults(dfO: Option[DataFrame], s: SelectOperator): Option[DataFrame] = {
+  private def projectResults(dfO: Option[DataFrame], s: ProjectOperator): Option[DataFrame] = {
     if (dfO.isEmpty) {
       None
     }

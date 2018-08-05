@@ -6,17 +6,8 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.common.AppConfig;
-import gr.unipi.datacron.common.Consts;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.FilterOf;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.JoinOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase;
-import gr.unipi.datacron.store.DataStore;
-import scala.Option;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  *
