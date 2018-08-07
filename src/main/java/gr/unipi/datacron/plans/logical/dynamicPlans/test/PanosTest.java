@@ -7,7 +7,7 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.common.AppConfig;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
-import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase;
+import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 /**
  *
@@ -26,7 +26,7 @@ public class PanosTest {
         //String decodedValue = getRedisDecodedValue(-5L);
         //System.out.println(decodedValue);
 
-        BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase(
+        BaseOperator[] bop = LogicalPlanner.setSparqlQuery(
                 "Prefix : <http://www.datacron-project.eu/datAcron#>\n" +
                         "SELECT *\n" +
                         "WHERE\n" +
@@ -42,7 +42,7 @@ public class PanosTest {
                         "    ?event :occurs ?n .\n" +
                         "    ?n :hasWeatherCondition ?w.\n" +
                         "    ?w :windDirectionMin \"77.13083\"\n" +
-                        "}\n").getBop();
+                        "}\n").build().getBop();
         
         System.out.println("NumberOfTrees: " + bop.length);
         System.out.println("--------------------------");

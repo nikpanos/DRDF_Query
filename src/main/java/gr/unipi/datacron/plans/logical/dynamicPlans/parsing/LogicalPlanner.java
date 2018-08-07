@@ -14,12 +14,8 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.sparql.algebra.Algebra;
-import org.apache.jena.sparql.algebra.Op;
-import org.apache.jena.sparql.algebra.OpVisitorBase;
-import org.apache.jena.sparql.algebra.OpWalker;
-import org.apache.jena.sparql.algebra.op.OpBGP;
-import org.apache.jena.sparql.algebra.op.OpProject;
+import org.apache.jena.sparql.algebra.*;
+import org.apache.jena.sparql.algebra.op.*;
 import gr.unipi.datacron.store.DataStore;
 import scala.Option;
 
@@ -33,7 +29,7 @@ import static gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOper
  *
  * @author nicholaskoutroumanis
  */
-public class MyOpVisitorBase extends OpVisitorBase {
+public class LogicalPlanner extends OpVisitorBase {
 
     /**
      * @return the bop
@@ -48,6 +44,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     private List<BaseOperator> bop = new ArrayList<>();
 
+    private final boolean optimized;
 
     //private BaseOperator[] bop;
     private List<String> selectVariables = new ArrayList<>();
@@ -56,27 +53,27 @@ public class MyOpVisitorBase extends OpVisitorBase {
     }
 
 
-    private MyOpVisitorBase(String sparql) {
-        getTriples(sparql);
-    }
+//    private LogicalPlanner(String sparql) {
+//        getTriples(sparql);
+//    }
 
     private void myOpVisitorWalker(Op op) {
         OpWalker.walk(op, this);
     }
 
     private static Long getRedisEncodedValue(String key) {
-        Option<Object> optionValue = DataStore.dictionaryRedis().getEncodedValue(key);
-        Long value = null;
-        if (optionValue.isDefined()) {
-            value = (Long) optionValue.get();
-        }
-        return value;
-        //return -1L;
+//        Option<Object> optionValue = DataStore.dictionaryRedis().getEncodedValue(key);
+//        Long value = null;
+//        if (optionValue.isDefined()) {
+//            value = (Long) optionValue.get();
+//        }
+//        return value;
+        return -1L;
     }
 
 
     private Long getStatisticsValue(String key) {
-        return Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
+        return 1L;//Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
     }
 
     private static String getRedisDecodedValue(Long key) {
@@ -92,6 +89,18 @@ public class MyOpVisitorBase extends OpVisitorBase {
     public void visit(final OpProject opProject){
         opProject.getVars().forEach(e -> selectVariables.add(e.toString()));
     }
+
+    @Override
+    public void visit(final OpTopN op){
+        System.out.println("TEST LIMIT: "+ op.getLimit());
+    }
+
+    @Override
+    public void visit(final OpFilter op){
+        System.out.print("FILTER ");
+        op.getExprs().getList().forEach((s)->System.out.println(s.getVarName()));
+    }
+
 
     private Long getOutputSize(String subject, String predicate, String object){
 
@@ -155,7 +164,7 @@ public class MyOpVisitorBase extends OpVisitorBase {
     @Override
     public void visit(final OpBGP opBGP) {
 
-
+        System.out.println("OPBGPSSSSSS");
         List<Triple> triples = opBGP.getPattern().getList();
 
         List<SelectOperator> listOfFilters = new ArrayList<>();
@@ -194,15 +203,18 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
         });
 
-        formSelectOperators(formStarQueriesAndRemainingTriplets(checkForShortcuts(listOfFilters)));
+        formSelectOperators(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfFilters/*)*/));
     }
 
-    private void getTriples(String q) {
-        Query query = QueryFactory.create(q);
-        Op op = Algebra.compile(query);
-        this.myOpVisitorWalker(op);
-
-    }
+//    private void getTriples(String q) {
+//        Query query = QueryFactory.create(q);
+//        System.out.println("THELIMIT: "+query.getProject().getVars().get(0).);
+//
+//        Op op = Algebra.compile(query);
+//        this.myOpVisitorWalker(op);
+//
+//
+//    }
 
     private List<BaseOperator> formStarQueriesAndRemainingTriplets(List<SelectOperator> listOfFilters) {
 
@@ -268,12 +280,12 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
     private List<BaseOperator> formBaseOperatorArray(List<BaseOperator> l) {
 
-        if(getOptimizationFlag()==0){
+        if(optimized){
             l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
         }
-        else if(getOptimizationFlag()==1){
-            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
-        }
+//        else if(getOptimizationFlag()==1){
+//            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
+//        }
 
 
         int i = 0;
@@ -420,8 +432,48 @@ public class MyOpVisitorBase extends OpVisitorBase {
         return l;
     }
 
-    public static MyOpVisitorBase newMyOpVisitorBase(String sparql) {
-        return new MyOpVisitorBase(sparql);
+    public static class Builder {
+        private final String sparqlQuery;
+
+        private boolean optimized = false;
+
+        private Builder(String sparqlQuery){
+            this.sparqlQuery = sparqlQuery;
+
+        }
+
+        public Builder optimized(){
+            optimized = true;
+            return this;
+        }
+
+        public LogicalPlanner build(){
+            return new LogicalPlanner(this);
+        }
 
     }
+
+    private LogicalPlanner(Builder builder){
+        optimized = builder.optimized;
+        //getTriples(builder.sparqlQuery);
+
+        Query query = QueryFactory.create(builder.sparqlQuery);
+
+
+        if(query.hasLimit()){
+            query.getLimit();
+        }
+
+        if(query.hasOrderBy()){
+            query.getOrderBy().forEach((s)->System.out.println("ORDERING " +s.expression.getVarName()+" "+s.direction));
+        }
+
+        Op op = Algebra.compile(query);
+        this.myOpVisitorWalker(op);
+    }
+
+    public static Builder setSparqlQuery(String sparqlQuery) {
+        return new Builder(sparqlQuery);
+    }
+
 }

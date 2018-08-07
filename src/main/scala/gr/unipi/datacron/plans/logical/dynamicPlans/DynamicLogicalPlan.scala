@@ -4,13 +4,13 @@ import java.text.SimpleDateFormat
 
 import gr.unipi.datacron.common.{AppConfig, Consts, SpatioTemporalInfo, SpatioTemporalRange}
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
-import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
+import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
 import org.apache.spark.sql.DataFrame
@@ -35,7 +35,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       q
     }
     //println(sparqlQuery)
-    logicalPlan = MyOpVisitorBase.newMyOpVisitorBase(sparqlQuery).getBop()(0)
+    //logicalPlan = LogicalPlanner.newMyOpVisitorBase(sparqlQuery).getBop()(0)
+    logicalPlan = LogicalPlanner.setSparqlQuery(sparqlQuery).optimized().build().getBop()(0)
   }
 
   override def doAfterPrepare(): Unit = println(logicalPlan.getBopChildren.get(0))

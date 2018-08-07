@@ -6,7 +6,7 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
-import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.MyOpVisitorBase;
+import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 /**
  *
@@ -16,12 +16,12 @@ public class JoinOperatorTester {
 
     public static void main(String args[]) {
 
-        BaseOperator[] bop = MyOpVisitorBase.newMyOpVisitorBase("SELECT ?x"
+        BaseOperator[] bop = LogicalPlanner.setSparqlQuery("SELECT ?x"
                 + "WHERE"
                 + "{"
                 + " ?k <tr> 45 ."
                 + " ?x <hg> ?k ."
-                + "}").getBop();
+                + "}").build().getBop();
 
         System.out.println("NumberOfTrees: " + bop.length);
         for(BaseOperator b:bop){
