@@ -14,7 +14,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
  *
  * @author nicholaskoutroumanis
  */
-public class TestSort {
+public class TestUnion {
 
     public static void main(String args[]) {
 
@@ -27,7 +27,7 @@ public class TestSort {
 "{" +
 " ?x rdf:type ?y" +
 "}" + "" +
-        " ORDER BY ?ct_title ASC(?added)").build().getBop();
+        " ORDER BY ?ct_title ASC (?added)").build().getBop();
         bop[0].getBopChildren().get(0);
 
         ((ProjectOperator) bop[0]).getVariables().forEach(e->System.out.println(e));

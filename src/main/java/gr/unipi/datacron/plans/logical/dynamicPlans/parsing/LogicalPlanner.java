@@ -87,12 +87,19 @@ public class LogicalPlanner extends OpVisitorBase {
 
     @Override
     public void visit(final OpProject opProject){
+        opProject.getVars().forEach(e -> System.out.println("PROJECT"+e.toString()));
         opProject.getVars().forEach(e -> selectVariables.add(e.toString()));
+
     }
 
+    @Override public void visit(OpUnion opUnion){
+        opUnion.getName();
+    }
+
+
     @Override
-    public void visit(final OpTopN op){
-        System.out.println("TEST LIMIT: "+ op.getLimit());
+    public void visit(final OpDistinct opDistinct){
+        System.out.println("TEST Distinct: "+ opDistinct);
     }
 
     @Override
@@ -164,7 +171,6 @@ public class LogicalPlanner extends OpVisitorBase {
     @Override
     public void visit(final OpBGP opBGP) {
 
-        System.out.println("OPBGPSSSSSS");
         List<Triple> triples = opBGP.getPattern().getList();
 
         List<SelectOperator> listOfFilters = new ArrayList<>();
@@ -461,12 +467,15 @@ public class LogicalPlanner extends OpVisitorBase {
 
 
         if(query.hasLimit()){
-            query.getLimit();
+            LimitOperator.newJoinOperator((int) query.getLimit());
         }
 
         if(query.hasOrderBy()){
             query.getOrderBy().forEach((s)->System.out.println("ORDERING " +s.expression.getVarName()+" "+s.direction));
         }
+
+        //query.getProject().forEachVar((e)->System.out.println("AGGREGATOR: "+e.));
+
 
         Op op = Algebra.compile(query);
         this.myOpVisitorWalker(op);
