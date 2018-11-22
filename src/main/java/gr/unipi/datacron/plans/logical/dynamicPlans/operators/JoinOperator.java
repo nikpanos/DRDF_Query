@@ -35,7 +35,6 @@ public class JoinOperator extends BaseOpW2Child {
         this.fillAndFormArrayColumns();
         setOutputSize(this.estimateOutputSize(bo1,bo2));
 
-
     }
 
     @Override
@@ -75,13 +74,14 @@ public class JoinOperator extends BaseOpW2Child {
             //a++;
         }
 
-        if (c == 0) {
-            try {
-                throw new Exception("The triplets can not be determined by Join Operator");
-            } catch (Exception ex) {
-                Logger.getLogger(JoinOperator.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+//        if (c == 0) {
+//            try {
+//                throw new Exception("The triplets can not be determined by Join Operator");
+//            } catch (Exception ex) {
+//                Logger.getLogger(JoinOperator.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+
         columnJoinPredicate = columnJoinPredicateList.stream().toArray(Column[]::new);
 
         Collections.reverse(elementsToBeDeleted);

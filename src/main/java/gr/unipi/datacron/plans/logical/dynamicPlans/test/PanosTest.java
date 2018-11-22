@@ -26,7 +26,7 @@ public class PanosTest {
         //String decodedValue = getRedisDecodedValue(-5L);
         //System.out.println(decodedValue);
 
-        BaseOperator[] bop = LogicalPlanner.setSparqlQuery(
+        BaseOperator bop = LogicalPlanner.setSparqlQuery(
                 "Prefix : <http://www.datacron-project.eu/datAcron#>\n" +
                         "SELECT *\n" +
                         "WHERE\n" +
@@ -43,10 +43,9 @@ public class PanosTest {
                         "    ?n :hasWeatherCondition ?w.\n" +
                         "    ?w :windDirectionMin \"77.13083\"\n" +
                         "}\n").build().getBop();
-        
-        System.out.println("NumberOfTrees: " + bop.length);
+
         System.out.println("--------------------------");
-        System.out.println(bop[0].toString());
+        System.out.println(bop.toString());
         /*Column[] cs = ((JoinOperator)bop[0]).getColumnJoinPredicate();
         System.out.println(cs.length);
         System.out.println();

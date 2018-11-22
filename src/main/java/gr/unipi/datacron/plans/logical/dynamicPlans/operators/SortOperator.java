@@ -5,7 +5,7 @@ import org.apache.jena.query.Query;
 public class SortOperator extends BaseOpW1Child {
 
     private final String columnName;
-    private final int direction;//Query.ORDER_DEFAULT = -2, Query.ORDER_ASCENDING = 1, Query.ORDER_DESCENDING = -1
+    private final int direction;//Query.ORDER_ASCENDING = 1, Query.ORDER_DESCENDING = -1
 
     private SortOperator(String columnName, int direction){
         this.columnName = columnName;
