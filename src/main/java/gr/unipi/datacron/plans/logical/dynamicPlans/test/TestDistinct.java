@@ -19,7 +19,7 @@ public class TestDistinct {
     public static void main(String args[]) {
 
 
-        BaseOperator[] bop = LogicalPlanner.setSparqlQuery(
+        BaseOperator bop = LogicalPlanner.setSparqlQuery(
 "Prefix : <http://www.datacron-project.eu/datAcron#>"+
 "Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
 "SELECT DISTINCT ?x ?y " +
@@ -27,19 +27,16 @@ public class TestDistinct {
 "{" +
 " ?x rdf:type ?y" +
 "}").build().getBop();
-        bop[0].getBopChildren().get(0);
+        bop.getBopChildren().get(0);
 
-        ((ProjectOperator) bop[0]).getVariables().forEach(e->System.out.println(e));
+        ((ProjectOperator) bop).getVariables().forEach(e->System.out.println(e));
 
-        System.out.println("SUBJECT: "+((SelectOperator) bop[0].getBopChildren().get(0)).getSubject());
-        System.out.println("PREDICATE: "+((SelectOperator) bop[0].getBopChildren().get(0)).getSubject());
-        System.out.println("OBJECT: "+((SelectOperator) bop[0].getBopChildren().get(0)).getSubject());
+        System.out.println("SUBJECT: "+((SelectOperator) bop.getBopChildren().get(0)).getSubject());
+        System.out.println("PREDICATE: "+((SelectOperator) bop.getBopChildren().get(0)).getSubject());
+        System.out.println("OBJECT: "+((SelectOperator) bop.getBopChildren().get(0)).getSubject());
 
-       
-        System.out.println("NumberOfTrees: " + bop.length);
-        for(BaseOperator b:bop){
             System.out.println("--------------------------");
-            System.out.println(bop[0].toString());
-        }
+            System.out.println(bop.toString());
+
     }
 }

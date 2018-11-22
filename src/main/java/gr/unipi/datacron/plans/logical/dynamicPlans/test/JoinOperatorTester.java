@@ -16,17 +16,16 @@ public class JoinOperatorTester {
 
     public static void main(String args[]) {
 
-        BaseOperator[] bop = LogicalPlanner.setSparqlQuery("SELECT ?x"
+        BaseOperator bop = LogicalPlanner.setSparqlQuery("SELECT ?x"
                 + "WHERE"
                 + "{"
                 + " ?k <tr> 45 ."
-                + " ?x <hg> ?k ."
+                + " ?x <hg> ?w ."
+                + " ?q <g> ?z ."
                 + "}").build().getBop();
 
-        System.out.println("NumberOfTrees: " + bop.length);
-        for(BaseOperator b:bop){
             System.out.println("--------------------------");
-            System.out.println(bop[0].toString());
-        }
+            System.out.println(bop.toString());
+
     }
 }

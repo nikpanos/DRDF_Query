@@ -43,7 +43,7 @@ public class SelectOperator extends BaseOpW1Child {
         return null;
     }
 
-    public static SelectOperator newFilterOf(BaseOperator bo, Column[] c, ColumnWithValue[] listofColumnsWithValues, long outputSize) {
+    public static SelectOperator newSelectOperator(BaseOperator bo, Column[] c, ColumnWithValue[] listofColumnsWithValues, long outputSize) {
         return new SelectOperator(bo, c, listofColumnsWithValues, outputSize);
     }
 

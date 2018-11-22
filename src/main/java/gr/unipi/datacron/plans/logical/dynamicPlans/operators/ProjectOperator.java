@@ -11,7 +11,7 @@ public class ProjectOperator extends BaseOpW1Child {
         this.addChild(bop);
     }
 
-    public static ProjectOperator newSelectOperator(List<String> variables, BaseOperator bop) {
+    public static ProjectOperator newProjectOperator(List<String> variables, BaseOperator bop) {
         return new ProjectOperator(variables,bop);
 
     }

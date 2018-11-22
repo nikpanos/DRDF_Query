@@ -23,10 +23,9 @@ import scala.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOperator.newSelectOperator;
+import static gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOperator.newProjectOperator;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class LogicalPlanner extends OpVisitorBase {
@@ -37,17 +36,17 @@ public class LogicalPlanner extends OpVisitorBase {
 //    public BaseOperator[] getBop() {
 //        return bop;
 //    }
-
-    public BaseOperator[] getBop() {
-        return bop.stream().toArray(BaseOperator[]::new);
+    public BaseOperator getBop() {
+        return bop;
     }
 
-    private List<BaseOperator> bop = new ArrayList<>();
+    private BaseOperator bop;
 
     private final boolean optimized;
 
     //private BaseOperator[] bop;
     private List<String> selectVariables = new ArrayList<>();
+
     private static int getOptimizationFlag() {
         return AppConfig.getInt(Consts.qfpLogicalOptimizationFlag());
     }
@@ -73,7 +72,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
 
     private Long getStatisticsValue(String key) {
-        return 1L;//Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
+        return 8L;//Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
     }
 
     private static String getRedisDecodedValue(Long key) {
@@ -86,86 +85,81 @@ public class LogicalPlanner extends OpVisitorBase {
     }
 
     @Override
-    public void visit(final OpProject opProject){
-        opProject.getVars().forEach(e -> System.out.println("PROJECT"+e.toString()));
+    public void visit(final OpProject opProject) {
+        opProject.getVars().forEach(e -> System.out.println("PROJECT" + e.toString()));
         opProject.getVars().forEach(e -> selectVariables.add(e.toString()));
 
     }
 
-    @Override public void visit(OpUnion opUnion){
+    @Override
+    public void visit(OpUnion opUnion) {
         opUnion.getName();
     }
 
 
     @Override
-    public void visit(final OpDistinct opDistinct){
-        System.out.println("TEST Distinct: "+ opDistinct);
+    public void visit(final OpDistinct opDistinct) {
+        System.out.println("TEST Distinct: " + opDistinct);
     }
 
     @Override
-    public void visit(final OpFilter op){
+    public void visit(final OpFilter op) {
         System.out.print("FILTER ");
-        op.getExprs().getList().forEach((s)->System.out.println(s.getVarName()));
+        op.getExprs().getList().forEach((s) -> System.out.println(s.getVarName()));
     }
 
 
-    private Long getOutputSize(String subject, String predicate, String object){
+    private Long getOutputSize(String subject, String predicate, String object) {
 
-        String subjectEnc = "";
-        String predicateEnc = "";
-        String objectEnc = "";
+//        String subjectEnc = "";
+//        String predicateEnc = "";
+//        String objectEnc = "";
+//
+//        boolean subIsValue = false;
+//        boolean predIsValue = false;
+//        boolean objIsValue = false;
+//
+//
+//        if (!subject.substring(0, 1).equals("?")) {
+//            subjectEnc = getRedisEncodedValue(subject).toString();
+//            subIsValue = true;
+//        }
+//
+//        if (!predicate.substring(0, 1).equals("?")) {
+//            predicateEnc = getRedisEncodedValue(predicate).toString();
+//            predIsValue = true;
+//
+//        }
+//
+//        if (!object.substring(0, 1).equals("?")) {
+//            objectEnc = getRedisEncodedValue(object).toString();
+//            objIsValue = true;
+//        }
+//
+//        Long outputSize;
+//        Long numberOfCellsPerAxis = 1000L;
+//
+//        if (subIsValue && predIsValue) {
+//            if (Integer.parseInt(subjectEnc) < 0) {
+//                Long groupId = (((Long.parseLong(subjectEnc) - getStatisticsValue("minSub")) * numberOfCellsPerAxis / ((getStatisticsValue("maxNegSub") + 1L) - getStatisticsValue("minSub"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis / (getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+//                outputSize = getStatisticsValue("spn." + numberOfCellsPerAxis + "." + groupId);
+//            } else {
+//                outputSize = getStatisticsValue("spp.1.0");
+//            }
+//        } else if (predIsValue && objIsValue) {
+//            if (Integer.parseInt(objectEnc) < 0) {
+//                Long groupId = (((Long.parseLong(objectEnc) - getStatisticsValue("minObj")) * numberOfCellsPerAxis / ((getStatisticsValue("maxNegObj") + 1L) - getStatisticsValue("minObj"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis / (getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
+//                outputSize = getStatisticsValue("opn." + numberOfCellsPerAxis + "." + groupId);
+//            } else {
+//                outputSize = getStatisticsValue("opp.1.0");
+//            }
+//        } else {
+//            Long groupId = (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis / ((getStatisticsValue("maxPred") + 1L) - getStatisticsValue("minPred"))));
+//            outputSize = getStatisticsValue("p." + numberOfCellsPerAxis + "." + groupId);
+//        }
 
-        boolean subIsValue = false;
-        boolean predIsValue = false;
-        boolean objIsValue = false;
 
-
-        if(!subject.substring(0,1).equals("?")){
-            subjectEnc = getRedisEncodedValue(subject).toString();
-            subIsValue = true;
-        }
-
-        if(!predicate.substring(0,1).equals("?")){
-            predicateEnc=getRedisEncodedValue(predicate).toString();
-            predIsValue = true;
-
-        }
-
-        if(!object.substring(0,1).equals("?")){
-            objectEnc=getRedisEncodedValue(object).toString();
-            objIsValue = true;
-        }
-
-        Long outputSize;
-        Long numberOfCellsPerAxis = 1000L;
-
-        if(subIsValue && predIsValue){
-            if(Integer.parseInt(subjectEnc)<0)
-            {
-                Long groupId = (((Long.parseLong(subjectEnc) - getStatisticsValue("minSub")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegSub") + 1L) - getStatisticsValue("minSub"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
-                outputSize = getStatisticsValue("spn."+ numberOfCellsPerAxis+"."+ groupId);
-            }
-            else{
-                outputSize = getStatisticsValue("spp.1.0");
-            }
-        }
-        else if (predIsValue && objIsValue){
-            if(Integer.parseInt(objectEnc)<0)
-            {
-                Long groupId = (((Long.parseLong(objectEnc) - getStatisticsValue("minObj")) * numberOfCellsPerAxis /((getStatisticsValue("maxNegObj") + 1L) - getStatisticsValue("minObj"))) + (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /(getStatisticsValue("maxPred") - getStatisticsValue("minPred"))) * numberOfCellsPerAxis));
-                outputSize = getStatisticsValue("opn."+ numberOfCellsPerAxis+"."+ groupId);
-            }
-            else{
-                outputSize = getStatisticsValue("opp.1.0");
-            }
-        }
-
-        else {
-            Long groupId = (((Long.parseLong(predicateEnc) - getStatisticsValue("minPred")) * numberOfCellsPerAxis /((getStatisticsValue("maxPred") + 1L) - getStatisticsValue("minPred"))));
-            outputSize = getStatisticsValue("p."+ numberOfCellsPerAxis+"."+ groupId);
-        }
-
-        return outputSize;
+        return 4L/*outputSize*/;
     }
 
     @Override
@@ -173,15 +167,15 @@ public class LogicalPlanner extends OpVisitorBase {
 
         List<Triple> triples = opBGP.getPattern().getList();
 
-        List<SelectOperator> listOfFilters = new ArrayList<>();
+        List<SelectOperator> listOfSelectOperators = new ArrayList<>();
 
         triples.forEach((triple) -> {
             //form the list with the correct form of Subject, Predicate, Object
             //form the list with the correct form of Subject, Predicate, Object
 
-            String subject = (triple.getSubject().toString().substring(0, 1).equals("\"")) || (triple.getSubject().toString().substring(0, 1).equals("'")) ? (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("\"")) || (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("'"))  ? (triple.getSubject().toString().substring(1, (triple.getSubject().toString().length() - 1))) : triple.getSubject().toString() : triple.getSubject().toString();
-            String predicate =  triple.getPredicate().toString();
-            String object =  (triple.getObject().toString().substring(0, 1).equals("\"")) || (triple.getObject().toString().substring(0, 1).equals("'")) ? (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("\"")) || (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("'")) ? (triple.getObject().toString().substring(1, (triple.getObject().toString().length() - 1))) : triple.getObject().toString() : triple.getObject().toString();
+            String subject = (triple.getSubject().toString().substring(0, 1).equals("\"")) || (triple.getSubject().toString().substring(0, 1).equals("'")) ? (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("\"")) || (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("'")) ? (triple.getSubject().toString().substring(1, (triple.getSubject().toString().length() - 1))) : triple.getSubject().toString() : triple.getSubject().toString();
+            String predicate = triple.getPredicate().toString();
+            String object = (triple.getObject().toString().substring(0, 1).equals("\"")) || (triple.getObject().toString().substring(0, 1).equals("'")) ? (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("\"")) || (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("'")) ? (triple.getObject().toString().substring(1, (triple.getObject().toString().length() - 1))) : triple.getObject().toString() : triple.getObject().toString();
 
             Long outputSize = getOutputSize(subject, predicate, object);
 
@@ -205,11 +199,11 @@ public class LogicalPlanner extends OpVisitorBase {
                 }
             }
 
-                listOfFilters.add(SelectOperator.newFilterOf(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new),outputSize));
+            listOfSelectOperators.add(SelectOperator.newSelectOperator(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new), outputSize));
 
         });
 
-        formSelectOperators(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfFilters/*)*/));
+        formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
     }
 
 //    private void getTriples(String q) {
@@ -277,17 +271,39 @@ public class LogicalPlanner extends OpVisitorBase {
         return starQueryTreeList;
     }
 
-    private void formSelectOperators(List<BaseOperator> l) {
-        bop.addAll(formBaseOperatorArray(l));
-        for(int i = 0; i < bop.size(); i++) {
-            bop.set(i,newSelectOperator(selectVariables, bop.get(i)));
+    private void formBaseOperator(List<BaseOperator> l) {
+
+        List<BaseOperator> bopList = formBaseOperatorsWithCommonColumnPredicates(l);
+
+        System.out.println("s111111111111111111111111111");
+        int initialListSize = bopList.size();
+
+        while (initialListSize >= 2) {
+
+            if (optimized) {
+                bopList.sort((bo1, bo2) -> Long.compare(bo2.getOutputSize(), bo1.getOutputSize()));
+            }
+
+            JoinOperator joinOperator = JoinOperator.newJoinOperator(bopList.get(bopList.size() - 1), bopList.get(bopList.size() - 2));
+            bopList.add(bopList.size() - 2, joinOperator);
+            bopList.remove(bopList.size() - 1);
+
+            initialListSize--;
         }
+
+        bop = bopList.get(0);
+
+
+//        bop.addAll(formBaseOperatorArray(l));
+//        for (int i = 0; i < bop.size(); i++) {
+//            bop.set(i, newProjectOperator(selectVariables, bop.get(i)));
+//        }
     }
 
-    private List<BaseOperator> formBaseOperatorArray(List<BaseOperator> l) {
+    private List<BaseOperator> formBaseOperatorsWithCommonColumnPredicates(List<BaseOperator> l) {
 
-        if(optimized){
-            l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
+        if (optimized) {
+            l.sort((bo1, bo2) -> Long.compare(bo1.getOutputSize(), bo2.getOutputSize()));
         }
 //        else if(getOptimizationFlag()==1){
 //            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
@@ -308,7 +324,6 @@ public class LogicalPlanner extends OpVisitorBase {
                     l.set(i, JoinOperator.newJoinOperator(choosenBop, l.get(k)));
                     l.remove(k);
 
-                    //formBaseOperatorArray(l);
                     i = l.size();
                     break;
                 }
@@ -317,11 +332,11 @@ public class LogicalPlanner extends OpVisitorBase {
             }
             i++;
         }
+
         if (l.size() == 1) {
             return l;
-        }
-        else {
-            return formBaseOperatorArray(l);
+        } else {
+            return formBaseOperatorsWithCommonColumnPredicates(l);
         }
 
         /*for(int i=0;i<bop.size();i++)
@@ -421,7 +436,7 @@ public class LogicalPlanner extends OpVisitorBase {
                                 }
                             }
 
-                            l.set(l.indexOf(l1), SelectOperator.newFilterOf(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new),new java.util.Random().nextInt(2000)+1));
+                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new), new java.util.Random().nextInt(2000) + 1));
 
                             l.remove(list2.get(i));
 
@@ -443,35 +458,35 @@ public class LogicalPlanner extends OpVisitorBase {
 
         private boolean optimized = false;
 
-        private Builder(String sparqlQuery){
+        private Builder(String sparqlQuery) {
             this.sparqlQuery = sparqlQuery;
 
         }
 
-        public Builder optimized(){
+        public Builder optimized() {
             optimized = true;
             return this;
         }
 
-        public LogicalPlanner build(){
+        public LogicalPlanner build() {
             return new LogicalPlanner(this);
         }
 
     }
 
-    private LogicalPlanner(Builder builder){
+    private LogicalPlanner(Builder builder) {
         optimized = builder.optimized;
         //getTriples(builder.sparqlQuery);
 
         Query query = QueryFactory.create(builder.sparqlQuery);
 
 
-        if(query.hasLimit()){
+        if (query.hasLimit()) {
             LimitOperator.newJoinOperator((int) query.getLimit());
         }
 
-        if(query.hasOrderBy()){
-            query.getOrderBy().forEach((s)->System.out.println("ORDERING " +s.expression.getVarName()+" "+s.direction));
+        if (query.hasOrderBy()) {
+            query.getOrderBy().forEach((s) -> System.out.println("ORDERING " + s.expression.getVarName() + " " + s.direction));
         }
 
         //query.getProject().forEachVar((e)->System.out.println("AGGREGATOR: "+e.));

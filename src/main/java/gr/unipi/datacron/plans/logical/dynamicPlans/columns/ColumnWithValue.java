@@ -12,6 +12,7 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.columns;
 public class ColumnWithValue {
     
     private final Column column;
+
     private final String value;
     
     private ColumnWithValue(Column column, String value)

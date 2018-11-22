@@ -35,8 +35,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       q
     }
     //println(sparqlQuery)
-    //logicalPlan = LogicalPlanner.newMyOpVisitorBase(sparqlQuery).getBop()(0)
-    logicalPlan = LogicalPlanner.setSparqlQuery(sparqlQuery).optimized().build().getBop()(0)
+    //logicalPlan = LogicalPlanner.newMyOpVisitorBase(sparqlQuery).getBop
+    logicalPlan = LogicalPlanner.setSparqlQuery(sparqlQuery).optimized().build().getBop
   }
 
   override def doAfterPrepare(): Unit = println(logicalPlan.getBopChildren.get(0))
