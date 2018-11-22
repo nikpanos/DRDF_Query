@@ -16,5 +16,9 @@ public class BaseOpW1Child extends BaseOperator {
         return 1;
    
     }
+
+    public BaseOperator getChild() {
+        return getBopChildren().get(0);
+    }
     
 }

@@ -91,4 +91,10 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
 
   override def selectColumns(params: selectColumnsParams): DataFrame =
     doBenchmark[DataFrame](() => projection.selectColumns(params), params)
+
+  override def limitResults(params: limitResultsParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.limitResults(params), params)
+
+  override def sortResults(params: sortResultsParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.sortResults(params), params)
 }

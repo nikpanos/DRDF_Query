@@ -215,4 +215,15 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
   }
 
   override def unionDataframes(params: unionDataframesParams): DataFrame = params.df1.union(params.df2)
+
+  override def limitResults(params: limitResultsParams): DataFrame = params.df.limit(params.limitNo)
+
+  override def sortResults(params: sortResultsParams): DataFrame = {
+    val sortExprs = params.cols.map(x => {
+      val colName = sanitize(x._1)
+      if (x._2) asc(colName)
+      else desc(colName)
+    })
+    params.df.orderBy(sortExprs:_*)
+  }
 }

@@ -15,5 +15,13 @@ public class BaseOpW2Child extends BaseOperator {
     @Override
     protected int getMaxNumberOfChildren() {
         return 2;
-    }    
+    }
+
+    public BaseOperator getLeftChild() {
+        return getBopChildren().get(0);
+    }
+
+    public BaseOperator getRightChild() {
+        return getBopChildren().get(1);
+    }
 }
