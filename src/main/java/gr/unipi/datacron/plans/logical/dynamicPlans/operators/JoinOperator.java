@@ -42,8 +42,7 @@ public class JoinOperator extends BaseOpW2Child {
 
         List<Integer> elementsToBeDeleted = new ArrayList<>();
         List<Column> columnJoinPredicateList = new ArrayList<>();
-         
-        //int a = 0;
+
         int b;
         int c = 0;
         //find the common variable of the first two child operators        
@@ -56,9 +55,6 @@ public class JoinOperator extends BaseOpW2Child {
                 for (Column k : getBopChildren().get(1).getArrayColumns()) {
                     if (k instanceof ColumnWithVariable) {
                         if (((ColumnWithVariable) i).getVariableName().equals(((ColumnWithVariable) k).getVariableName())) {
-//                            /* first element to be deleted*/
-//                            elementsToBeDeleted.add(a);
-//                            /*-------*/
                             elementsToBeDeleted.add(getBopChildren().get(0).getArrayColumns().length + b);
 
                             columnJoinPredicateList.add(i);
@@ -71,7 +67,6 @@ public class JoinOperator extends BaseOpW2Child {
                     b++;
                 }
             }
-            //a++;
         }
 
 //        if (c == 0) {

@@ -267,66 +267,44 @@ public class LogicalPlanner extends OpVisitorBase {
 
         starQueryTreeList.addAll(listOfFilters);
 
-
-//        if(!optimized){
-//            Collections.reverse(starQueryTreeList);
-//        }
-
-
-
-
         //return a list with the JoinOrOperators and SelectOf Operators
         return starQueryTreeList;
     }
 
     private void formBaseOperator(List<BaseOperator> l) {
 
+        /* The method formBaseOperatorsWithCommonColumnPredicates forms Joins on given
+        Bese Operators with common variables. The method formBaseOperator forms joins
+        on given Base Operators that do not have common variables. The formBaseOperator
+        method forms the whole tree using these kind of Joins.
+        */
         List<BaseOperator> bopList = formBaseOperatorsWithCommonColumnPredicates(l);
-        System.out.println("BOOOOP" + bopList.size());
-
-        int i = 0;
-
-        while (i < l.size()) {
-
-            if (optimized) {
-                bopList.sort((bo1, bo2) -> Long.compare(bo1.getOutputSize(), bo2.getOutputSize()));
-            }
-
-//            System.out.println("----------------------------");
-//            System.out.println(l);
-//            System.out.println("----------------------------");
-
-            System.out.println("BOPLISTSIZE" + bopList.size() );
-            JoinOperator joinOperator = JoinOperator.newJoinOperator(bopList.get(i), bopList.get(i+1));
-            bopList.set(i, joinOperator);
-            bopList.remove(i+1);
-
-            i++;
-
+        if(!optimized){
+            /*
+            The list is reversed because it is read reversed. By reading reverse, we
+            achieve that the deletion will happen on thelast element of the list
+            which is efficient. It is used only in the non-optimized case since in
+            the optimized case a sorting procedure takes place
+             */
+            Collections.reverse(bopList);
         }
 
+        int initialBopListSize = bopList.size();
+
+        while (initialBopListSize >= 2) {
+
+            if (optimized) {
+                bopList.sort((bo1, bo2) -> Long.compare(bo2.getOutputSize(), bo1.getOutputSize()));
+            }
+
+            JoinOperator joinOperator = JoinOperator.newJoinOperator(bopList.get(bopList.size() - 1), bopList.get(bopList.size() - 2));
+            bopList.set(bopList.size() - 2, joinOperator);
+            bopList.remove(bopList.size() - 1);
+
+            initialBopListSize--;
+        }
 
         bop = bopList.get(0);
-
-//        List<BaseOperator> bopList = formBaseOperatorsWithCommonColumnPredicates(l);
-//
-//        System.out.println("s111111111111111111111111111");
-//        int initialListSize = bopList.size();
-//
-//        while (initialListSize >= 2) {
-//
-//            if (optimized) {
-//                bopList.sort((bo1, bo2) -> Long.compare(bo2.getOutputSize(), bo1.getOutputSize()));
-//            }
-//
-//            JoinOperator joinOperator = JoinOperator.newJoinOperator(bopList.get(bopList.size() - 1), bopList.get(bopList.size() - 2));
-//            bopList.add(bopList.size() - 2, joinOperator);
-//            bopList.remove(bopList.size() - 1);
-//
-//            initialListSize--;
-//        }
-//
-//        bop = bopList.get(0);
     }
 
     private List<BaseOperator> formBaseOperatorsWithCommonColumnPredicates(List<BaseOperator> l) {
@@ -352,133 +330,9 @@ public class LogicalPlanner extends OpVisitorBase {
             }
             i++;
         }
-        System.out.println("COMMONPREDICATES" + l.size());
+
         return l;
 
-
-
-
-
-//        int i = l.size();
-//        while(i>=1){
-//            BaseOperator choosenBop = l.get(i-1);
-//            for(int j=i-2;j>=0;j--){
-//
-//                if (choosenBop.hasCommonVariable(l.get(j))) {
-//
-//                    l.set(i-1, JoinOperator.newJoinOperator(choosenBop, l.get(j)));
-//                    l.remove(j);
-//                    return formBaseOperatorsWithCommonColumnPredicates(l);
-//                }
-//
-//            }
-//            i--;
-//        }
-//
-//        return l;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //-----------------
-//        int i = 0;
-//        while (i < l.size()) {
-//
-//            BaseOperator choosenBop = l.get(i);
-//
-//            int k = i + 1;
-//
-//            while (k < l.size()) {
-//
-//                if (choosenBop.hasCommonVariable(l.get(k))) {
-//
-//                    l.set(i, JoinOperator.newJoinOperator(choosenBop, l.get(k)));
-//                    l.remove(k);
-//
-//                    i = l.size();
-//                    break;
-//                }
-//                k++;
-//
-//            }
-//            i++;
-//        }
-//
-//        if (l.size() == 1) {
-//            return l;
-//        } else {
-//            return formBaseOperatorsWithCommonColumnPredicates(l);
-//        }
-        //-------------------
-
-        /*for(int i=0;i<bop.size();i++)
-        {
-            bop.set(i,newSelectOperator(selectVariables, bop.get(i)));
-        }*/
-
-//        //sort the list by the value of outputSize
-//
-//        if(getOptimizationFlag()==0){
-//            l.sort((bo1,bo2)->Long.compare(bo1.getOutputSize(),bo2.getOutputSize()));
-//        }
-//        else if(getOptimizationFlag()==2)
-//        {
-//            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
-//        }
-//
-//
-//        Set<Integer> excludedFromList = new HashSet<>();
-//
-//        List<BaseOperator> bopList = new ArrayList<>();
-//
-//        for (int i = 0; i < l.size(); i++) {
-//
-//            if (excludedFromList.contains(i)) {
-//                continue;
-//            }
-//
-//            BaseOperator choosenBop = l.get(i);
-//
-//            int k = i + 1;
-//            while (k < l.size()) {
-//
-//                if (excludedFromList.contains(k)) {
-//                    k++;
-//                    continue;
-//                }
-//
-//                if (choosenBop.hasCommonVariable(l.get(k))) {
-//                    choosenBop = JoinOperator.newJoinOperator(choosenBop, l.get(k));
-//                    excludedFromList.add(k);
-//                    k = i + 1;
-//                } else {
-//                    k++;
-//                }
-//            }
-//            excludedFromList.add(i);
-//            bopList.add(choosenBop);
-//        }
-//
-//
-//
-//        bop = bopList.stream().toArray(BaseOperator[]::new);
-//        for(int k=0;k<bop.length;k++){
-//            bop[k] = newSelectOperator(selectVariables, bop[k]);
-//        }
     }
 
     private List<SelectOperator> checkForShortcuts(List<SelectOperator> l) {
