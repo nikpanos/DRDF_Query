@@ -267,6 +267,16 @@ public class LogicalPlanner extends OpVisitorBase {
 
         starQueryTreeList.addAll(listOfFilters);
 
+
+        if(!optimized){
+            Collections.reverse(starQueryTreeList);
+        }
+
+        System.out.println("444444444444444444444444444");
+        System.out.println(starQueryTreeList.toString());
+
+
+
         //return a list with the JoinOrOperators and SelectOf Operators
         return starQueryTreeList;
     }
@@ -274,8 +284,8 @@ public class LogicalPlanner extends OpVisitorBase {
     private void formBaseOperator(List<BaseOperator> l) {
 
         List<BaseOperator> bopList = formBaseOperatorsWithCommonColumnPredicates(l);
+        System.out.println("BOOOOP" + bopList.size());
 
-        System.out.println("s111111111111111111111111111");
         int initialListSize = bopList.size();
 
         while (initialListSize >= 2) {
@@ -284,11 +294,18 @@ public class LogicalPlanner extends OpVisitorBase {
                 bopList.sort((bo1, bo2) -> Long.compare(bo2.getOutputSize(), bo1.getOutputSize()));
             }
 
+//            System.out.println("----------------------------");
+//            System.out.println(l);
+//            System.out.println("----------------------------");
+
             JoinOperator joinOperator = JoinOperator.newJoinOperator(bopList.get(bopList.size() - 1), bopList.get(bopList.size() - 2));
-            bopList.add(bopList.size() - 2, joinOperator);
-            bopList.remove(bopList.size() - 1);
+            bopList.set(bopList.size() - 1, joinOperator);
+            bopList.remove(bopList.size() - 2);
+
 
             initialListSize--;
+
+
         }
 
         bop = bopList.get(0);
@@ -303,41 +320,78 @@ public class LogicalPlanner extends OpVisitorBase {
     private List<BaseOperator> formBaseOperatorsWithCommonColumnPredicates(List<BaseOperator> l) {
 
         if (optimized) {
-            l.sort((bo1, bo2) -> Long.compare(bo1.getOutputSize(), bo2.getOutputSize()));
+            l.sort((bo1, bo2) -> Long.compare(bo2.getOutputSize(), bo1.getOutputSize()));
         }
-//        else if(getOptimizationFlag()==1){
-//            l.sort((bo1,bo2)->Long.compare(bo2.getOutputSize(),bo1.getOutputSize()));
-//        }
 
+        int i = l.size();
+        while(i>=1){
+            BaseOperator choosenBop = l.get(i-1);
+            for(int j=i-2;j>=0;j--){
 
-        int i = 0;
-        while (i < l.size()) {
+                if (choosenBop.hasCommonVariable(l.get(j))) {
 
-            BaseOperator choosenBop = l.get(i);
-
-            int k = i + 1;
-
-            while (k < l.size()) {
-
-                if (choosenBop.hasCommonVariable(l.get(k))) {
-
-                    l.set(i, JoinOperator.newJoinOperator(choosenBop, l.get(k)));
-                    l.remove(k);
-
-                    i = l.size();
-                    break;
+                    l.set(i-1, JoinOperator.newJoinOperator(choosenBop, l.get(j)));
+                    l.remove(j);
+                    return formBaseOperatorsWithCommonColumnPredicates(l);
                 }
-                k++;
 
             }
-            i++;
+            i--;
         }
 
-        if (l.size() == 1) {
-            return l;
-        } else {
-            return formBaseOperatorsWithCommonColumnPredicates(l);
-        }
+        return l;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //-----------------
+//        int i = 0;
+//        while (i < l.size()) {
+//
+//            BaseOperator choosenBop = l.get(i);
+//
+//            int k = i + 1;
+//
+//            while (k < l.size()) {
+//
+//                if (choosenBop.hasCommonVariable(l.get(k))) {
+//
+//                    l.set(i, JoinOperator.newJoinOperator(choosenBop, l.get(k)));
+//                    l.remove(k);
+//
+//                    i = l.size();
+//                    break;
+//                }
+//                k++;
+//
+//            }
+//            i++;
+//        }
+//
+//        if (l.size() == 1) {
+//            return l;
+//        } else {
+//            return formBaseOperatorsWithCommonColumnPredicates(l);
+//        }
+        //-------------------
 
         /*for(int i=0;i<bop.size();i++)
         {
