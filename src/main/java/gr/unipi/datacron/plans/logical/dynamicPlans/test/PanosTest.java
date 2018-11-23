@@ -42,7 +42,7 @@ public class PanosTest {
                         "    ?event :occurs ?n .\n" +
                         "    ?n :hasWeatherCondition ?w.\n" +
                         "    ?w :windDirectionMin \"77.13083\"\n" +
-                        "}\n").build().getBop();
+                        "}\n").optimized().build().getBop();
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());
