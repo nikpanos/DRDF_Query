@@ -140,22 +140,29 @@ class PlanAnalyzer {
   }
 
   private def processSelectOperator(so: SelectOperator, dfO: Option[DataFrame]): analyzedOperators.commonOperators.BaseOperator = {
-    val dfs = guessDataFrame(dfO, so)
-    if (dfs.length > 1) {
-      convertSelectToUnionOperator(so, dfs)
+    so.getChild match {
+      case _: TripleOperator =>
+        val dfs = guessDataFrame(dfO, so)
+        if (dfs.length > 1) {
+          convertSelectToUnionOperator(so, dfs)
+        }
+        else {
+          val dso = analyzedOperators.dataOperators.DatasourceOperator(dfs(0))
+          val selOp = createSelectOperator(so, dso)
+          if (!dso.isPropertyTableSource) {
+            val po = analyzedOperators.columnOperators.ProjectOperator(selOp, Array(tripleSubLongField, tripleObjLongField))
+            val newColName = getEncodedStr(so.getFilters.find(_.getColumn.getColumnTypes == PREDICATE).get.getValue)
+            analyzedOperators.columnOperators.RenameOperator(po, Array((tripleObjLongField, newColName)))
+          }
+          else {
+            selOp
+          }
+        }
+      case _ =>
+        val child = processNode(so.getChild, dfO)
+        createSelectOperator(so, child)
     }
-    else {
-      val dso = analyzedOperators.dataOperators.DatasourceOperator(dfs(0))
-      val selOp = createSelectOperator(so, dso)
-      if (!dso.isPropertyTableSource) {
-        val po = analyzedOperators.columnOperators.ProjectOperator(selOp, Array(tripleSubLongField, tripleObjLongField))
-        val newColName = getEncodedStr(so.getFilters.find(_.getColumn.getColumnTypes == PREDICATE).get.getValue)
-        analyzedOperators.columnOperators.RenameOperator(po, Array((tripleObjLongField, newColName)))
-      }
-      else {
-        selOp
-      }
-    }
+
   }
 
   private def createSelectOperator(so: SelectOperator, child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.dataOperators.SelectOperator = {
@@ -172,7 +179,7 @@ class PlanAnalyzer {
         analyzedOperators.logicalOperators.LogicalAggregateOperator(left, conditionRight, LogicalAggregateEnums.And)
       })
     }
-     analyzedOperators.dataOperators.SelectOperator(child, condition)
+    analyzedOperators.dataOperators.SelectOperator(child, condition)
   }
 
   def processSortOperator(so: SortOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.SortOperator = {
@@ -254,6 +261,16 @@ class PlanAnalyzer {
     }
   }
 
+  private def processProjectOperator(po: ProjectOperator, dfO: Option[DataFrame]): analyzedOperators.columnOperators.ProjectOperator = {
+    val child = processNode(po.getChild, dfO)
+    analyzedOperators.columnOperators.ProjectOperator(child, po.getVariables.asScala.toArray)
+  }
+
+  private def processRenameOperator(ro: RenameOperator, dfO: Option[DataFrame]): analyzedOperators.columnOperators.RenameOperator = {
+    val child = processNode(ro.getChild, dfO)
+    analyzedOperators.columnOperators.RenameOperator(child, ro.getColumnMapping.asScala.toArray.map(x => (x._1.getColumnName, x._2.getColumnName)))
+  }
+
   private def processNode(node: BaseOperator, dfO: Option[DataFrame]): analyzedOperators.commonOperators.BaseOperator = {
     node match {
       case so: SelectOperator => processSelectOperator(so, dfO)
@@ -262,6 +279,9 @@ class PlanAnalyzer {
       case lo: LimitOperator => processLimitOperator(lo, dfO)
       case jo: JoinOperator => processJoinOperator(jo, dfO)
       case js: JoinSubjectOperator => processJoinSubjectOperator(js, dfO)
+      case po: ProjectOperator => processProjectOperator(po, dfO)
+      case ro: RenameOperator => processRenameOperator(ro, dfO)
+      case _ => throw new Exception("Not supported operator")
     }
   }
 

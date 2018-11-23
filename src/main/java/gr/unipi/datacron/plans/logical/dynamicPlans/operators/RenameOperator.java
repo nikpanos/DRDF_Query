@@ -35,6 +35,10 @@ public class RenameOperator extends BaseOpW1Child {
     @Override
     public String toString(){
         return "";
-    }         
+    }
+
+    public Map<Column, Column> getColumnMapping() {
+        return m;
+    }
     
 }
