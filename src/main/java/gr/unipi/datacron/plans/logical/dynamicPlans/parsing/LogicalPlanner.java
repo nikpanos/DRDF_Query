@@ -268,12 +268,10 @@ public class LogicalPlanner extends OpVisitorBase {
         starQueryTreeList.addAll(listOfFilters);
 
 
-        if(!optimized){
-            Collections.reverse(starQueryTreeList);
-        }
+//        if(!optimized){
+//            Collections.reverse(starQueryTreeList);
+//        }
 
-        System.out.println("444444444444444444444444444");
-        System.out.println(starQueryTreeList.toString());
 
 
 
@@ -286,64 +284,98 @@ public class LogicalPlanner extends OpVisitorBase {
         List<BaseOperator> bopList = formBaseOperatorsWithCommonColumnPredicates(l);
         System.out.println("BOOOOP" + bopList.size());
 
-        int initialListSize = bopList.size();
+        int i = 0;
 
-        while (initialListSize >= 2) {
+        while (i < l.size()) {
 
             if (optimized) {
-                bopList.sort((bo1, bo2) -> Long.compare(bo2.getOutputSize(), bo1.getOutputSize()));
+                bopList.sort((bo1, bo2) -> Long.compare(bo1.getOutputSize(), bo2.getOutputSize()));
             }
 
 //            System.out.println("----------------------------");
 //            System.out.println(l);
 //            System.out.println("----------------------------");
 
-            JoinOperator joinOperator = JoinOperator.newJoinOperator(bopList.get(bopList.size() - 1), bopList.get(bopList.size() - 2));
-            bopList.set(bopList.size() - 1, joinOperator);
-            bopList.remove(bopList.size() - 2);
+            System.out.println("BOPLISTSIZE" + bopList.size() );
+            JoinOperator joinOperator = JoinOperator.newJoinOperator(bopList.get(i), bopList.get(i+1));
+            bopList.set(i, joinOperator);
+            bopList.remove(i+1);
 
-
-            initialListSize--;
-
+            i++;
 
         }
 
+
         bop = bopList.get(0);
 
-
-//        bop.addAll(formBaseOperatorArray(l));
-//        for (int i = 0; i < bop.size(); i++) {
-//            bop.set(i, newProjectOperator(selectVariables, bop.get(i)));
+//        List<BaseOperator> bopList = formBaseOperatorsWithCommonColumnPredicates(l);
+//
+//        System.out.println("s111111111111111111111111111");
+//        int initialListSize = bopList.size();
+//
+//        while (initialListSize >= 2) {
+//
+//            if (optimized) {
+//                bopList.sort((bo1, bo2) -> Long.compare(bo2.getOutputSize(), bo1.getOutputSize()));
+//            }
+//
+//            JoinOperator joinOperator = JoinOperator.newJoinOperator(bopList.get(bopList.size() - 1), bopList.get(bopList.size() - 2));
+//            bopList.add(bopList.size() - 2, joinOperator);
+//            bopList.remove(bopList.size() - 1);
+//
+//            initialListSize--;
 //        }
+//
+//        bop = bopList.get(0);
     }
 
     private List<BaseOperator> formBaseOperatorsWithCommonColumnPredicates(List<BaseOperator> l) {
 
         if (optimized) {
-            l.sort((bo1, bo2) -> Long.compare(bo2.getOutputSize(), bo1.getOutputSize()));
+            l.sort((bo1, bo2) -> Long.compare(bo1.getOutputSize(), bo2.getOutputSize()));
         }
 
-        int i = l.size();
-        while(i>=1){
-            BaseOperator choosenBop = l.get(i-1);
-            for(int j=i-2;j>=0;j--){
+        int i = 0;
+        while(i<l.size()){
+
+            BaseOperator choosenBop = l.get(i);
+
+            for(int j=i+1;j<l.size();j++){
 
                 if (choosenBop.hasCommonVariable(l.get(j))) {
 
-                    l.set(i-1, JoinOperator.newJoinOperator(choosenBop, l.get(j)));
+                    l.set(i, JoinOperator.newJoinOperator(choosenBop, l.get(j)));
                     l.remove(j);
+
                     return formBaseOperatorsWithCommonColumnPredicates(l);
                 }
-
             }
-            i--;
+            i++;
         }
-
+        System.out.println("COMMONPREDICATES" + l.size());
         return l;
 
 
 
 
+
+//        int i = l.size();
+//        while(i>=1){
+//            BaseOperator choosenBop = l.get(i-1);
+//            for(int j=i-2;j>=0;j--){
+//
+//                if (choosenBop.hasCommonVariable(l.get(j))) {
+//
+//                    l.set(i-1, JoinOperator.newJoinOperator(choosenBop, l.get(j)));
+//                    l.remove(j);
+//                    return formBaseOperatorsWithCommonColumnPredicates(l);
+//                }
+//
+//            }
+//            i--;
+//        }
+//
+//        return l;
 
 
 
