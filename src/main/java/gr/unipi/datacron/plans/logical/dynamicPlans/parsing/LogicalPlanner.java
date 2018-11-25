@@ -30,12 +30,6 @@ import static gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOper
  */
 public class LogicalPlanner extends OpVisitorBase {
 
-    /**
-     * @return the bop
-     */
-//    public BaseOperator[] getBop() {
-//        return bop;
-//    }
     public BaseOperator getBop() {
         return bop;
     }
