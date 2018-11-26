@@ -23,7 +23,7 @@ public class RenameOperator extends BaseOpW1Child {
         setArrayColumns(m.values().stream().toArray(Column[]::new));
     }
     
-    public static RenameOperator newProjectOperator(BaseOperator bo, Map<Column,Column> m) {
+    public static RenameOperator newRenameOperator(BaseOperator bo, Map<Column,Column> m) {
         return new RenameOperator(bo, m);
     }    
     

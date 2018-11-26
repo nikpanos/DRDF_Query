@@ -171,17 +171,12 @@ public class LogicalPlanner extends OpVisitorBase {
 
         triples.forEach((triple) -> {
             //form the list with the correct form of Subject, Predicate, Object
-            //form the list with the correct form of Subject, Predicate, Object
 
             String subject = (triple.getSubject().toString().substring(0, 1).equals("\"")) || (triple.getSubject().toString().substring(0, 1).equals("'")) ? (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("\"")) || (triple.getSubject().toString().substring((triple.getSubject().toString().length() - 1), (triple.getSubject().toString().length())).equals("'")) ? (triple.getSubject().toString().substring(1, (triple.getSubject().toString().length() - 1))) : triple.getSubject().toString() : triple.getSubject().toString();
             String predicate = triple.getPredicate().toString();
             String object = (triple.getObject().toString().substring(0, 1).equals("\"")) || (triple.getObject().toString().substring(0, 1).equals("'")) ? (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("\"")) || (triple.getObject().toString().substring((triple.getObject().toString().length() - 1), (triple.getObject().toString().length())).equals("'")) ? (triple.getObject().toString().substring(1, (triple.getObject().toString().length() - 1))) : triple.getObject().toString() : triple.getObject().toString();
 
             Long outputSize = getOutputSize(subject, predicate, object);
-
-//            String subject = (triple.getSubject().toString().substring(0, 1).equals("?")) ? triple.getSubject().toString() : triple.getSubject().toString().substring(1, triple.getSubject().toString().length() - 1);
-//            String predicate = (triple.getPredicate().toString().substring(0, 1).equals("?")) ? triple.getPredicate().toString() : triple.getPredicate().toString().substring(1, triple.getPredicate().toString().length() - 1);
-//            String object = (triple.getObject().toString().substring(0, 1).equals("?")) ? triple.getObject().toString() : triple.getObject().toString().substring(1, triple.getObject().toString().length() - 1);
             TripleOperator to = TripleOperator.newTripleOperator(subject, predicate, object);
 
             Map<Column, Column> hm = new LinkedHashMap<>();
@@ -190,7 +185,7 @@ public class LogicalPlanner extends OpVisitorBase {
                 hm.put(c, c.copyToNewObject(Integer.toString(to.hashCode())));
             }
 
-            RenameOperator p = RenameOperator.newProjectOperator(to, hm);
+            RenameOperator p = RenameOperator.newRenameOperator(to, hm);
 
             List<OperandPair> k = new ArrayList<>();
             for (Column c : p.getArrayColumns()) {
@@ -368,7 +363,7 @@ public class LogicalPlanner extends OpVisitorBase {
                                 hm.put(c, c.copyToNewObject(Integer.toString(to.hashCode())));
                             }
 
-                            RenameOperator pop = RenameOperator.newProjectOperator(to, hm);
+                            RenameOperator pop = RenameOperator.newRenameOperator(to, hm);
 
                             List<OperandPair> cwv = new ArrayList<>();
                             for (Column c : pop.getArrayColumns()) {
@@ -434,71 +429,71 @@ public class LogicalPlanner extends OpVisitorBase {
             bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit());
         }
 
-        if(filters != null){
-
-            System.out.println("sdsddssdsdds");
-            for(Expr expr: filters){
-                ConditionType ct = null;
-
-                BaseOperand bo1 = null;
-                BaseOperand bo2 = null;
-
-                String s = expr.toString().substring(1, expr.toString().length()-1);
-
-                String[] elements = s.split(" ");
-                System.out.println(elements[2]);
-                switch(elements[0]){
-                    case "=": ct = ConditionType.EQ;
-                        break;
-                    case "<": ct = ConditionType.LT;
-                        break;
-                    case ">": ct = ConditionType.GT;
-                        break;
-                    case "<=": ct = ConditionType.LTE;
-                        break;
-                    case ">=": ct = ConditionType.GTE;
-                        break;
-                }
-
-
-
-                if(elements[1].startsWith("?")){
-                    for(Column c: bop.){
-                        if(c.getColumnName().equals(elements[1])){
-                            bo1 = ColumnOperand.newColumnOperand(c);
-                            break;
-                        }
-                    }
-                }
-                else{
-                    bo1 = ValueOperand.newValueOperand(elements[1]);
-                }
-
-                if(elements[2].startsWith("?")){
-                    for(Column c: bop.getArrayColumns()){
-                        if(c.getColumnName().equals(elements[2])){
-                            bo2 = ColumnOperand.newColumnOperand(c);
-                            break;
-                        }
-                    }
-                }
-                else{
-                    bo2 = ValueOperand.newValueOperand(elements[2]);
-                }
-
-                if(bo1== null || bo2 == null){
-                    try {
-                        throw new Exception("Filter's Variable was not found in WHERE clause");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                bop = SelectOperator.newSelectOperator(bop,bop.getArrayColumns(), new OperandPair[] {OperandPair.newOperandPair(bo1,bo2)} , ct, bop.getOutputSize());
-
-            }
-
-        }
+//        if(filters != null){
+//
+//            System.out.println("sdsddssdsdds");
+//            for(Expr expr: filters){
+//                ConditionType ct = null;
+//
+//                BaseOperand bo1 = null;
+//                BaseOperand bo2 = null;
+//
+//                String s = expr.toString().substring(1, expr.toString().length()-1);
+//
+//                String[] elements = s.split(" ");
+//                System.out.println(elements[2]);
+//                switch(elements[0]){
+//                    case "=": ct = ConditionType.EQ;
+//                        break;
+//                    case "<": ct = ConditionType.LT;
+//                        break;
+//                    case ">": ct = ConditionType.GT;
+//                        break;
+//                    case "<=": ct = ConditionType.LTE;
+//                        break;
+//                    case ">=": ct = ConditionType.GTE;
+//                        break;
+//                }
+//
+//
+//
+//                if(elements[1].startsWith("?")){
+//                    for(Column c: bop.){
+//                        if(c.getColumnName().equals(elements[1])){
+//                            bo1 = ColumnOperand.newColumnOperand(c);
+//                            break;
+//                        }
+//                    }
+//                }
+//                else{
+//                    bo1 = ValueOperand.newValueOperand(elements[1]);
+//                }
+//
+//                if(elements[2].startsWith("?")){
+//                    for(Column c: bop.getArrayColumns()){
+//                        if(c.getColumnName().equals(elements[2])){
+//                            bo2 = ColumnOperand.newColumnOperand(c);
+//                            break;
+//                        }
+//                    }
+//                }
+//                else{
+//                    bo2 = ValueOperand.newValueOperand(elements[2]);
+//                }
+//
+//                if(bo1== null || bo2 == null){
+//                    try {
+//                        throw new Exception("Filter's Variable was not found in WHERE clause");
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//                bop = SelectOperator.newSelectOperator(bop,bop.getArrayColumns(), new OperandPair[] {OperandPair.newOperandPair(bo1,bo2)} , ct, bop.getOutputSize());
+//
+//            }
+//
+//        }
 
 
 
