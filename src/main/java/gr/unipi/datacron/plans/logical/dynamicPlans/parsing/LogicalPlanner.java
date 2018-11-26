@@ -205,8 +205,6 @@ public class LogicalPlanner extends OpVisitorBase {
 
         bop = formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
 
-
-        System.out.println("1111111111111111111111111111");
     }
 
 //    private void getTriples(String q) {
@@ -430,7 +428,7 @@ public class LogicalPlanner extends OpVisitorBase {
         Op op = Algebra.compile(query);
         this.myOpVisitorWalker(op);
 
-        bop = ProjectOperator.newProjectOperator(selectVariables,bop);
+        //bop = ProjectOperator.newProjectOperator(selectVariables,bop);
 
         if (query.hasLimit()) {
             bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit());
@@ -438,6 +436,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
         if(filters != null){
 
+            System.out.println("sdsddssdsdds");
             for(Expr expr: filters){
                 ConditionType ct = null;
 
@@ -445,8 +444,9 @@ public class LogicalPlanner extends OpVisitorBase {
                 BaseOperand bo2 = null;
 
                 String s = expr.toString().substring(1, expr.toString().length()-1);
-                String[] elements = s.split(" ");
 
+                String[] elements = s.split(" ");
+                System.out.println(elements[2]);
                 switch(elements[0]){
                     case "=": ct = ConditionType.EQ;
                         break;
@@ -460,8 +460,10 @@ public class LogicalPlanner extends OpVisitorBase {
                         break;
                 }
 
+
+
                 if(elements[1].startsWith("?")){
-                    for(Column c: bop.getArrayColumns()){
+                    for(Column c: bop.){
                         if(c.getColumnName().equals(elements[1])){
                             bo1 = ColumnOperand.newColumnOperand(c);
                             break;
