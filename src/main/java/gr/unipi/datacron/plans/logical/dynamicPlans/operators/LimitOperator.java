@@ -4,7 +4,8 @@ public class LimitOperator extends BaseOpW1Child {
 
     private final int limit;
 
-    private LimitOperator(int limit){
+    private LimitOperator(BaseOperator baseOperator, int limit){
+        this.addChild(baseOperator);
         this.limit = limit;
     }
 
@@ -12,8 +13,8 @@ public class LimitOperator extends BaseOpW1Child {
         return limit;
     }
 
-    public static LimitOperator newJoinOperator(int limit) {
-        return new LimitOperator(limit);
+    public static LimitOperator newLimitOperator(BaseOperator baseOperator, int limit) {
+        return new LimitOperator(baseOperator,limit);
 
     }
 }

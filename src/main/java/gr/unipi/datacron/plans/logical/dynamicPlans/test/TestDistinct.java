@@ -27,14 +27,9 @@ public class TestDistinct {
 "{" +
 " ?x rdf:type ?y" +
 "}").build().getBop();
-        bop.getBopChildren().get(0);
-
-        ((ProjectOperator) bop).getVariables().forEach(e->System.out.println(e));
 
 
-        System.out.println("SUBJECT: "+((SelectOperator) bop.getBopChildren().get(0)).getSubject());
-        System.out.println("PREDICATE: "+((SelectOperator) bop.getBopChildren().get(0)).getSubject());
-        System.out.println("OBJECT: "+((SelectOperator) bop.getBopChildren().get(0)).getSubject());
+
 
             System.out.println("--------------------------");
             System.out.println(bop.toString());

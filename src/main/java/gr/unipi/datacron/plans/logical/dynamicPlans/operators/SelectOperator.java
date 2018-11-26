@@ -5,10 +5,7 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithValue;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,12 +16,14 @@ import java.util.logging.Logger;
  */
 public class SelectOperator extends BaseOpW1Child {
 
-    private final ColumnWithValue[] listofColumnsWithValues;//columns with values only
+    private final OperandPair[] operandPairList;//columns with values only
+    private final ConditionType conditionType;
 
-    private SelectOperator(BaseOperator bo, Column[] c, ColumnWithValue[] listofColumnsWithValues, long outputSize) {
+    private SelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, ConditionType conditionType, long outputSize) {
         this.addChild(bo);
         setArrayColumns(c);
-        this.listofColumnsWithValues = listofColumnsWithValues;
+        this.operandPairList = operandPairList;
+        this.conditionType = conditionType;
         setOutputSize(outputSize);
     }
 
@@ -43,8 +42,8 @@ public class SelectOperator extends BaseOpW1Child {
         return null;
     }
 
-    public static SelectOperator newSelectOperator(BaseOperator bo, Column[] c, ColumnWithValue[] listofColumnsWithValues, long outputSize) {
-        return new SelectOperator(bo, c, listofColumnsWithValues, outputSize);
+    public static SelectOperator newSelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, ConditionType conditionType, long outputSize) {
+        return new SelectOperator(bo, c, operandPairList, conditionType, outputSize);
     }
 
     public boolean isSubjectVariable() {
@@ -100,7 +99,11 @@ public class SelectOperator extends BaseOpW1Child {
         return this.toString("");
     }
 
-    public ColumnWithValue[] getFilters() {
-        return listofColumnsWithValues;
+    public OperandPair[] getFilters() {
+        return operandPairList;
+    }
+
+    public ConditionType getConditionType() {
+        return conditionType;
     }
 }

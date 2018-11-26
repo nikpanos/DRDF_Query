@@ -46,7 +46,7 @@ public class NikosTest {
                 + "}").build().getBop();
 
         System.out.println("--------------------------");
-        //System.out.println(bop.toString());
+        System.out.println(bop.toString());
 
 
 //        List<Integer> l = Arrays.asList(50,40,70,80,30,10,20,90,60);

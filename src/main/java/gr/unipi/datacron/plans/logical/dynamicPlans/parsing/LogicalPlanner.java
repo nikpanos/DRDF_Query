@@ -7,9 +7,13 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.parsing;
 
 import gr.unipi.datacron.common.AppConfig;
 import gr.unipi.datacron.common.Consts;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ColumnOperand;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ValueOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithValue;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.OperandPair;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -17,13 +21,12 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.algebra.*;
 import org.apache.jena.sparql.algebra.op.*;
 import gr.unipi.datacron.store.DataStore;
+import org.apache.jena.sparql.expr.Expr;
 import scala.Option;
 
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOperator.newProjectOperator;
 
 /**
  * @author nicholaskoutroumanis
@@ -38,8 +41,9 @@ public class LogicalPlanner extends OpVisitorBase {
 
     private final boolean optimized;
 
-    //private BaseOperator[] bop;
     private List<String> selectVariables = new ArrayList<>();
+
+    private List<Expr> filters;
 
     private static int getOptimizationFlag() {
         return AppConfig.getInt(Consts.qfpLogicalOptimizationFlag());
@@ -98,8 +102,10 @@ public class LogicalPlanner extends OpVisitorBase {
 
     @Override
     public void visit(final OpFilter op) {
+        filters = op.getExprs().getList();
         System.out.print("FILTER ");
-        op.getExprs().getList().forEach((s) -> System.out.println(s.getVarName()));
+        System.out.println(op.getExprs().getList());
+        op.getExprs().getList().forEach((s) -> System.out.println(s));
     }
 
 
@@ -186,18 +192,21 @@ public class LogicalPlanner extends OpVisitorBase {
 
             RenameOperator p = RenameOperator.newProjectOperator(to, hm);
 
-            List<ColumnWithValue> k = new ArrayList<>();
+            List<OperandPair> k = new ArrayList<>();
             for (Column c : p.getArrayColumns()) {
                 if (!(c instanceof ColumnWithVariable)) {
-                    k.add(ColumnWithValue.newColumnWithValue(c, c.getQueryString()));
+                    k.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString())));
                 }
             }
 
-            listOfSelectOperators.add(SelectOperator.newSelectOperator(p, p.getArrayColumns(), k.stream().toArray(ColumnWithValue[]::new), outputSize));
+            listOfSelectOperators.add(SelectOperator.newSelectOperator(p, p.getArrayColumns(), k.stream().toArray(OperandPair[]::new), ConditionType.EQ, outputSize));
 
         });
 
-        formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
+        bop = formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
+
+
+        System.out.println("1111111111111111111111111111");
     }
 
 //    private void getTriples(String q) {
@@ -265,7 +274,7 @@ public class LogicalPlanner extends OpVisitorBase {
         return starQueryTreeList;
     }
 
-    private void formBaseOperator(List<BaseOperator> l) {
+    private BaseOperator formBaseOperator(List<BaseOperator> l) {
 
         /* The method formBaseOperatorsWithCommonColumnPredicates forms Joins on given
         Bese Operators with common variables. The method formBaseOperator forms joins
@@ -298,7 +307,7 @@ public class LogicalPlanner extends OpVisitorBase {
             initialBopListSize--;
         }
 
-        bop = bopList.get(0);
+        return bopList.get(0);
     }
 
     private List<BaseOperator> formBaseOperatorsWithCommonColumnPredicates(List<BaseOperator> l) {
@@ -363,14 +372,14 @@ public class LogicalPlanner extends OpVisitorBase {
 
                             RenameOperator pop = RenameOperator.newProjectOperator(to, hm);
 
-                            List<ColumnWithValue> cwv = new ArrayList<>();
+                            List<OperandPair> cwv = new ArrayList<>();
                             for (Column c : pop.getArrayColumns()) {
                                 if (!(c instanceof ColumnWithVariable)) {
-                                    cwv.add(ColumnWithValue.newColumnWithValue(c, c.getQueryString()));
+                                    cwv.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString())));
                                 }
                             }
 
-                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(ColumnWithValue[]::new), new java.util.Random().nextInt(2000) + 1));
+                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(OperandPair[]::new), ConditionType.EQ , new java.util.Random().nextInt(2000) + 1));
 
                             l.remove(list2.get(i));
 
@@ -415,19 +424,91 @@ public class LogicalPlanner extends OpVisitorBase {
         Query query = QueryFactory.create(builder.sparqlQuery);
 
 
-        if (query.hasLimit()) {
-            LimitOperator.newJoinOperator((int) query.getLimit());
-        }
-
-        if (query.hasOrderBy()) {
-            query.getOrderBy().forEach((s) -> System.out.println("ORDERING " + s.expression.getVarName() + " " + s.direction));
-        }
-
         //query.getProject().forEachVar((e)->System.out.println("AGGREGATOR: "+e.));
 
 
         Op op = Algebra.compile(query);
         this.myOpVisitorWalker(op);
+
+        bop = ProjectOperator.newProjectOperator(selectVariables,bop);
+
+        if (query.hasLimit()) {
+            bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit());
+        }
+
+        if(filters != null){
+
+            for(Expr expr: filters){
+                ConditionType ct = null;
+
+                BaseOperand bo1 = null;
+                BaseOperand bo2 = null;
+
+                String s = expr.toString().substring(1, expr.toString().length()-1);
+                String[] elements = s.split(" ");
+
+                switch(elements[0]){
+                    case "=": ct = ConditionType.EQ;
+                        break;
+                    case "<": ct = ConditionType.LT;
+                        break;
+                    case ">": ct = ConditionType.GT;
+                        break;
+                    case "<=": ct = ConditionType.LTE;
+                        break;
+                    case ">=": ct = ConditionType.GTE;
+                        break;
+                }
+
+                if(elements[1].startsWith("?")){
+                    for(Column c: bop.getArrayColumns()){
+                        if(c.getColumnName().equals(elements[1])){
+                            bo1 = ColumnOperand.newColumnOperand(c);
+                            break;
+                        }
+                    }
+                }
+                else{
+                    bo1 = ValueOperand.newValueOperand(elements[1]);
+                }
+
+                if(elements[2].startsWith("?")){
+                    for(Column c: bop.getArrayColumns()){
+                        if(c.getColumnName().equals(elements[2])){
+                            bo2 = ColumnOperand.newColumnOperand(c);
+                            break;
+                        }
+                    }
+                }
+                else{
+                    bo2 = ValueOperand.newValueOperand(elements[2]);
+                }
+
+                if(bo1== null || bo2 == null){
+                    try {
+                        throw new Exception("Filter's Variable was not found in WHERE clause");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                bop = SelectOperator.newSelectOperator(bop,bop.getArrayColumns(), new OperandPair[] {OperandPair.newOperandPair(bo1,bo2)} , ct, bop.getOutputSize());
+
+            }
+
+        }
+
+
+
+        if (query.hasOrderBy()) {
+            query.getOrderBy().forEach((s) -> System.out.println("ORDERING " + s.expression.getVarName() + " " + s.direction));
+        }
+
+        //SelectOperator.newSelectOperator(bop,bop.getArrayColumns(),,bop.getOutputSize());
+
+
+
+
     }
 
     public static Builder setSparqlQuery(String sparqlQuery) {
