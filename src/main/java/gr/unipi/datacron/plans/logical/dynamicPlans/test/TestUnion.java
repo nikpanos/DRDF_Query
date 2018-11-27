@@ -27,6 +27,7 @@ public class TestUnion {
                         " ?x rdf:type ?y" +
                         "}" + "" +
                         union
+
                 "{" +
                         " ?x rdf:type ?y" +
                         "}" + ""
