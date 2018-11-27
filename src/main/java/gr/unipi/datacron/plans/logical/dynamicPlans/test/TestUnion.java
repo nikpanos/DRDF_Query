@@ -26,6 +26,10 @@ public class TestUnion {
                         "{" +
                         " ?x rdf:type ?y" +
                         "}" + "" +
+                        union
+                "{" +
+                        " ?x rdf:type ?y" +
+                        "}" + ""
                         " ORDER BY ?ct_title ASC (?added)").build().getBop();
         bop.getBopChildren().get(0);
 

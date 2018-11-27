@@ -82,7 +82,6 @@ public class LogicalPlanner extends OpVisitorBase {
 
     @Override
     public void visit(final OpProject opProject) {
-        opProject.getVars().forEach(e -> System.out.println("PROJECT" + e.toString()));
         opProject.getVars().forEach(e -> selectVariables.add(e.toString()));
 
     }
@@ -92,18 +91,9 @@ public class LogicalPlanner extends OpVisitorBase {
         opUnion.getName();
     }
 
-
-    @Override
-    public void visit(final OpDistinct opDistinct) {
-        System.out.println("TEST Distinct: " + opDistinct);
-    }
-
     @Override
     public void visit(final OpFilter op) {
         filters = op.getExprs().getList();
-        System.out.print("FILTER ");
-        System.out.println(op.getExprs().getList());
-        op.getExprs().getList().forEach((s) -> System.out.println(s));
     }
 
 
@@ -421,6 +411,7 @@ public class LogicalPlanner extends OpVisitorBase {
         Op op = Algebra.compile(query);
         this.myOpVisitorWalker(op);
 
+        query.has
 
         if (filters != null) {
 
@@ -489,6 +480,10 @@ public class LogicalPlanner extends OpVisitorBase {
 
         }
 
+        if(query.isDistinct()){
+
+        }
+
 
         if (query.hasOrderBy()) {
             List<ColumnWithDirection> cwd = new ArrayList<>();
@@ -525,6 +520,10 @@ public class LogicalPlanner extends OpVisitorBase {
         if (query.hasLimit()) {
             bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit(), bop.getOutputSize());
         }
+
+
+
+        System.out.println(query.getAggregators().size());
 
         bop = ProjectOperator.newProjectOperator(bop, selectVariables, bop.getOutputSize());
 

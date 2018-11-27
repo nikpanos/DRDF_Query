@@ -19,7 +19,7 @@ public class TestOrderBy {
         BaseOperator bop = LogicalPlanner.setSparqlQuery(
                 "Prefix : <http://www.datacron-project.eu/datAcron#>" +
                         "Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                        "SELECT ?x ?y " +
+                        "SELECT DISTINCT ?x ?y " +
                         "WHERE" +
                         "{" +
                         " ?x rdf:type ?y ." +

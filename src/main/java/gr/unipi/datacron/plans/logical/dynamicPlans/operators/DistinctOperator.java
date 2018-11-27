@@ -1,19 +1,18 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithDirection;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
-public class UnionOperator extends BaseOpW2Child {
+public class DistinctOperator extends BaseOpW1Child {
 
-    private UnionOperator(BaseOperator bop1,BaseOperator bop2, long outputSize){
-        this.addChild(bop1,bop2);
+    private DistinctOperator(BaseOperator bop, long outputSize){
+        this.addChild(bop);
         this.fillAndFormArrayColumns();
         setOutputSize(outputSize);
     }
 
-    public static UnionOperator newUnionOperator(){
-        return new UnionOperator();
+    public static DistinctOperator newDistinctOperator(){
+        return new DistinctOperator();
     }
 
     @Override
