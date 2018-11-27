@@ -8,22 +8,19 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.columns;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class OperandPair {
 
     private final BaseOperand leftOperand;
     private final BaseOperand rightOperand;
-    
-    private OperandPair(BaseOperand leftOperand, BaseOperand rightOperand)
-    {      
+
+    private OperandPair(BaseOperand leftOperand, BaseOperand rightOperand) {
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
     }
-    
-    public static OperandPair newOperandPair(BaseOperand leftOperand, BaseOperand rightOperand)
-    {
+
+    public static OperandPair newOperandPair(BaseOperand leftOperand, BaseOperand rightOperand) {
         return new OperandPair(leftOperand, rightOperand);
     }
 //

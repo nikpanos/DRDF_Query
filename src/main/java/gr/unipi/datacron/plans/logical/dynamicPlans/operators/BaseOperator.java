@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public abstract class BaseOperator {
@@ -82,8 +81,8 @@ public abstract class BaseOperator {
         for (Column c1 : this.arrayColumns) {
             if (c1 instanceof ColumnWithVariable) {
                 for (Column c2 : bop.arrayColumns) {
-                    if(c2 instanceof ColumnWithVariable){
-                        if(((ColumnWithVariable) c1).getVariableName().equals(((ColumnWithVariable) c2).getVariableName())){
+                    if (c2 instanceof ColumnWithVariable) {
+                        if (((ColumnWithVariable) c1).getVariableName().equals(((ColumnWithVariable) c2).getVariableName())) {
                             return true;
                         }
                     }
@@ -93,13 +92,13 @@ public abstract class BaseOperator {
         }
         return false;
     }
-    
-    protected String toString(String margin){
+
+    protected String toString(String margin) {
         return margin;
     }
 
 
-    protected long estimateOutputSize(BaseOperator... bo){
+    protected long estimateOutputSize(BaseOperator... bo) {
         return 0;
     }
 

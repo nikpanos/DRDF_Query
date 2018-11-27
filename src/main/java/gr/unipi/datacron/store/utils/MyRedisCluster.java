@@ -20,14 +20,14 @@ public class MyRedisCluster implements AutoCloseable {
             String anyHost = nodeMap.keySet().iterator().next();
             slotHostMap = getSlotHostMap(anyHost);
             pipes = getPipesDictionary(nodeMap);
-        }catch (JedisClusterException e){
+        } catch (JedisClusterException e) {
             e.printStackTrace();
         }
     }
 
     private Hashtable<String, Pipeline> getPipesDictionary(Map<String, JedisPool> jedises) {
         Hashtable<String, Pipeline> result = new Hashtable<>(jedises.size());
-        for (Map.Entry<String, JedisPool> jedisEntry: jedises.entrySet()) {
+        for (Map.Entry<String, JedisPool> jedisEntry : jedises.entrySet()) {
             Jedis jedis = jedisEntry.getValue().getResource();
             result.put(jedisEntry.getKey(), jedis.pipelined());
         }
@@ -66,8 +66,7 @@ public class MyRedisCluster implements AutoCloseable {
         for (JedisPool pool : nodeMap.values()) {
             try (Jedis jedis = pool.getResource()) {
                 jedis.flushAll();
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
         }

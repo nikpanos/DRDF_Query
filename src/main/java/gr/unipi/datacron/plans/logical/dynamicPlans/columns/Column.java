@@ -6,7 +6,6 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.columns;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class Column {
@@ -31,8 +30,8 @@ public class Column {
     public String getQueryString() {
         return queryString;
     }
-    
-    
+
+
     public static Column newColumn(String columnName, String queryString, ColumnTypes columnTypes) {
         return new Column(columnName, queryString, columnTypes);
     }
@@ -42,30 +41,30 @@ public class Column {
 //    }
 
     public Column copyToNewObject(String prefix) {
-        return new Column(prefix+"."+this.columnName, this.getQueryString(), this.getColumnTypes());
+        return new Column(prefix + "." + this.columnName, this.getQueryString(), this.getColumnTypes());
     }
-    
+
     /**
      * @return the columnName
      */
     public String getColumnName() {
         return columnName;
     }
-    
+
     /**
      * @return the columnTypes
      */
     public ColumnTypes getColumnTypes() {
         return columnTypes;
     }
-    
+
     public Column getColumn() {
         return this;
     }
-    
+
     @Override
     public String toString() {
         return "COLUMNNAME: " + columnName;
     }
-    
+
 }

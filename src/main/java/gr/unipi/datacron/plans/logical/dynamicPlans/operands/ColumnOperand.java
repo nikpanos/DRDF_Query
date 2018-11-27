@@ -13,8 +13,8 @@ public class ColumnOperand extends BaseOperand {
 
     }
 
-    public static ColumnOperand newColumnOperand(Column column){
-        return  new ColumnOperand(column);
+    public static ColumnOperand newColumnOperand(Column column) {
+        return new ColumnOperand(column);
     }
 
 }

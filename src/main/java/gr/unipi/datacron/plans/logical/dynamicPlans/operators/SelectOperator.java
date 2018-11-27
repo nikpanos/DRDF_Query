@@ -6,12 +6,12 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.*;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class SelectOperator extends BaseOpW1Child {
@@ -79,12 +79,18 @@ public class SelectOperator extends BaseOpW1Child {
     @Override
     protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
-        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append(" RealOutputSize: "+this.getRealOutputSize()).append("\n");
+        s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
+
+        for (OperandPair b : operandPairList) {
+            s.append(margin).append("OperandPair: ").append(this.getClass().getSimpleName()).append(" Left Operand: " + b.getLeftOperand().getClass().getSimpleName() + " - ").append("Right Operand: " + b.getRightOperand().getClass().getSimpleName()).append("\n");
+        }
+
+        s.append(margin).append("Array Columns: \n");
         for (Column c : this.getArrayColumns()) {
             if (c instanceof ColumnWithVariable) {
-                s.append(margin).append("ColumnName:").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
+                s.append(margin).append("ColumnName: ").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
             } else {
-                s.append(margin).append("ColumnName:").append(c.getColumnName()).append("\n");
+                s.append(margin).append("ColumnName: ").append(c.getColumnName()).append("\n");
             }
         }
 

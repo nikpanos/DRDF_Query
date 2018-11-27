@@ -9,7 +9,6 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class JoinSubjectOperatorTester {
@@ -26,9 +25,8 @@ public class JoinSubjectOperatorTester {
                 + "}").build().getBop();
 
 
-
-            System.out.println("--------------------------");
-            System.out.println(bop.toString());
+        System.out.println("--------------------------");
+        System.out.println(bop.toString());
 
     }
 }

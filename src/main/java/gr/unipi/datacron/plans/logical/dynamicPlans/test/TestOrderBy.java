@@ -6,14 +6,12 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOperator;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.SelectOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 /**
  * @author nicholaskoutroumanis
  */
-public class TestUnion {
+public class TestOrderBy {
 
     public static void main(String args[]) {
 
@@ -24,17 +22,11 @@ public class TestUnion {
                         "SELECT ?x ?y " +
                         "WHERE" +
                         "{" +
-                        " ?x rdf:type ?y" +
-                        "}" + "" +
-                        " ORDER BY ?ct_title ASC (?added)").build().getBop();
-        bop.getBopChildren().get(0);
-
-        ((ProjectOperator) bop).getVariables().forEach(e -> System.out.println(e));
-
-        System.out.println("SUBJECT: " + ((SelectOperator) bop.getBopChildren().get(0)).getSubject());
-        System.out.println("PREDICATE: " + ((SelectOperator) bop.getBopChildren().get(0)).getSubject());
-        System.out.println("OBJECT: " + ((SelectOperator) bop.getBopChildren().get(0)).getSubject());
-
+                        " ?x rdf:type ?y ." +
+                        "FILTER (?x < 123) ." +
+                        "FILTER (30 < ?x) ." +
+                        "}" +
+                        "ORDER BY ASC (?x) DESC(?y)").build().getBop();
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());

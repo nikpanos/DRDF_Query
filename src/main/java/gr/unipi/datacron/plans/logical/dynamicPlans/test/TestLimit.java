@@ -11,7 +11,6 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.SelectOperator;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class TestLimit {
@@ -20,18 +19,18 @@ public class TestLimit {
 
 
         BaseOperator bop = LogicalPlanner.setSparqlQuery(
-"Prefix : <http://www.datacron-project.eu/datAcron#>"+
-"Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
-"SELECT ?x ?y " +
-"WHERE" +
-"{" +
-" ?x rdf:type ?y" +
-"}" + "" +
-        " LIMIT 10").build().getBop();
+                "Prefix : <http://www.datacron-project.eu/datAcron#>" +
+                        "Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        "SELECT ?x ?y " +
+                        "WHERE" +
+                        "{" +
+                        " ?x rdf:type ?y" +
+                        "}" + "" +
+                        " LIMIT 10").build().getBop();
 
 
-            System.out.println("--------------------------");
-            System.out.println(bop.toString());
+        System.out.println("--------------------------");
+        System.out.println(bop.toString());
 
     }
 }

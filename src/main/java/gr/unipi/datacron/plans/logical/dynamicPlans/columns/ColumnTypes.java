@@ -6,10 +6,9 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.columns;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public enum ColumnTypes {
     SUBJECT, PREDICATE, OBJECT
-    
+
 }

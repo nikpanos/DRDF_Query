@@ -10,11 +10,9 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class PanosTest {
-
 
 
     public static void main(String args[]) {

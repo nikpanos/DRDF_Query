@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class JoinOperator extends BaseOpW2Child {
@@ -31,9 +30,9 @@ public class JoinOperator extends BaseOpW2Child {
 
     private JoinOperator(BaseOperator bo1, BaseOperator bo2) {
 
-        this.addChild(bo1,bo2);
+        this.addChild(bo1, bo2);
         this.fillAndFormArrayColumns();
-        setOutputSize(this.estimateOutputSize(bo1,bo2));
+        setOutputSize(this.estimateOutputSize(bo1, bo2));
 
     }
 
@@ -80,7 +79,7 @@ public class JoinOperator extends BaseOpW2Child {
         columnJoinPredicate = columnJoinPredicateList.stream().toArray(Column[]::new);
 
         Collections.reverse(elementsToBeDeleted);
-        elementsToBeDeleted.forEach((Integer i)->columnList.remove(i.intValue()));
+        elementsToBeDeleted.forEach((Integer i) -> columnList.remove(i.intValue()));
 
         return columnList;
     }
@@ -89,37 +88,37 @@ public class JoinOperator extends BaseOpW2Child {
         return new JoinOperator(bo1, bo2);
 
     }
-    
+
     @Override
-    protected String toString(String margin){
+    protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
-        s.append(margin).append("Operator: ").append(this.getClass()).append(" OutputSize: "+this.getOutputSize()).append(" RealOutputSize: "+this.getRealOutputSize()).append(" JOIN ON COLUMNS:");
-        for(Column c:getColumnJoinPredicate()){
-            s.append("ColumnName: ").append(c.getColumnName()).append(" Variable: ").append(c.getQueryString()).append(" ");
+        s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
+        s.append(margin).append("Join on Columns: \n");
+        for (Column c : getColumnJoinPredicate()) {
+            s.append(margin).append("ColumnName: ").append(c.getColumnName()).append(" Variable: ").append(c.getQueryString()).append("\n");
         }
-        s.append("\n");
-        for(Column c:this.getArrayColumns()){
-            if(c instanceof ColumnWithVariable){
-                s.append(margin).append("ColumnName:").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
+        s.append(margin).append("Array Columns: \n");
+        for (Column c : this.getArrayColumns()) {
+            if (c instanceof ColumnWithVariable) {
+                s.append(margin).append("ColumnName: ").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
+            } else {
+                s.append(margin).append("ColumnName: ").append(c.getColumnName()).append("\n");
             }
-            else{
-                s.append(margin).append("ColumnName:").append(c.getColumnName()).append("\n");
-            }  
         }
-        
+
         this.getBopChildren().forEach((b) -> {
-            s.append(b.toString(margin+"|"));
+            s.append(b.toString(margin + "|"));
         });
-        return s.toString();        
+        return s.toString();
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return this.toString("");
     }
 
     @Override
-    protected long estimateOutputSize(BaseOperator... bo){
+    protected long estimateOutputSize(BaseOperator... bo) {
 
         Long i = 1L;
         for (BaseOperator b : bo) {

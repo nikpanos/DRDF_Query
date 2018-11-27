@@ -7,17 +7,15 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.parsing;
 
 import gr.unipi.datacron.common.AppConfig;
 import gr.unipi.datacron.common.Consts;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ColumnOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ValueOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.OperandPair;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.SortCondition;
 import org.apache.jena.sparql.algebra.*;
 import org.apache.jena.sparql.algebra.op.*;
 import gr.unipi.datacron.store.DataStore;
@@ -188,10 +186,12 @@ public class LogicalPlanner extends OpVisitorBase {
             RenameOperator p = RenameOperator.newRenameOperator(to, hm);
 
             List<OperandPair> k = new ArrayList<>();
+
             for (Column c : p.getArrayColumns()) {
                 if (!(c instanceof ColumnWithVariable)) {
                     k.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString())));
                 }
+
             }
 
             listOfSelectOperators.add(SelectOperator.newSelectOperator(p, p.getArrayColumns(), k.stream().toArray(OperandPair[]::new), ConditionType.EQ, outputSize));
@@ -275,7 +275,7 @@ public class LogicalPlanner extends OpVisitorBase {
         method forms the whole tree using these kind of Joins.
         */
         List<BaseOperator> bopList = formBaseOperatorsWithCommonColumnPredicates(l);
-        if(!optimized){
+        if (!optimized) {
             /*
             The list is reversed because it is read reversed. By reading reverse, we
             achieve that the deletion will happen on thelast element of the list
@@ -310,11 +310,11 @@ public class LogicalPlanner extends OpVisitorBase {
         }
 
         int i = 0;
-        while(i<l.size()){
+        while (i < l.size()) {
 
             BaseOperator choosenBop = l.get(i);
 
-            for(int j=i+1;j<l.size();j++){
+            for (int j = i + 1; j < l.size(); j++) {
 
                 if (choosenBop.hasCommonVariable(l.get(j))) {
 
@@ -372,7 +372,7 @@ public class LogicalPlanner extends OpVisitorBase {
                                 }
                             }
 
-                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(OperandPair[]::new), ConditionType.EQ , new java.util.Random().nextInt(2000) + 1));
+                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(OperandPair[]::new), ConditionType.EQ, new java.util.Random().nextInt(2000) + 1));
 
                             l.remove(list2.get(i));
 
@@ -416,95 +416,117 @@ public class LogicalPlanner extends OpVisitorBase {
 
         Query query = QueryFactory.create(builder.sparqlQuery);
 
-
         //query.getProject().forEachVar((e)->System.out.println("AGGREGATOR: "+e.));
-
 
         Op op = Algebra.compile(query);
         this.myOpVisitorWalker(op);
 
-        //bop = ProjectOperator.newProjectOperator(selectVariables,bop);
 
-        if (query.hasLimit()) {
-            bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit());
+        if (filters != null) {
+
+            for (Expr expr : filters) {
+                ConditionType ct = null;
+
+                BaseOperand bo1 = null;
+                BaseOperand bo2 = null;
+
+                String s = expr.toString().substring(1, expr.toString().length() - 1);
+
+                String[] elements = s.split(" ");
+                System.out.println(elements[2]);
+                switch (elements[0]) {
+                    case "=":
+                        ct = ConditionType.EQ;
+                        break;
+                    case "<":
+                        ct = ConditionType.LT;
+                        break;
+                    case ">":
+                        ct = ConditionType.GT;
+                        break;
+                    case "<=":
+                        ct = ConditionType.LTE;
+                        break;
+                    case ">=":
+                        ct = ConditionType.GTE;
+                        break;
+                }
+
+
+                if (elements[1].startsWith("?")) {
+                    for (Column c : bop.getArrayColumns()) {
+                        if (c.getQueryString().equals(elements[1])) {
+                            bo1 = ColumnOperand.newColumnOperand(c);
+                            break;
+                        }
+                    }
+                } else {
+                    bo1 = ValueOperand.newValueOperand(elements[1]);
+                }
+
+                if (elements[2].startsWith("?")) {
+                    for (Column c : bop.getArrayColumns()) {
+                        if (c.getQueryString().equals(elements[2])) {
+                            bo2 = ColumnOperand.newColumnOperand(c);
+                            break;
+                        }
+                    }
+                } else {
+                    bo2 = ValueOperand.newValueOperand(elements[2]);
+                }
+
+                if (bo1 == null || bo2 == null) {
+                    try {
+                        throw new Exception("Filter's Variable was not found in WHERE clause");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                bop = SelectOperator.newSelectOperator(bop, bop.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2)}, ct, bop.getOutputSize());
+
+            }
+
         }
-
-//        if(filters != null){
-//
-//            System.out.println("sdsddssdsdds");
-//            for(Expr expr: filters){
-//                ConditionType ct = null;
-//
-//                BaseOperand bo1 = null;
-//                BaseOperand bo2 = null;
-//
-//                String s = expr.toString().substring(1, expr.toString().length()-1);
-//
-//                String[] elements = s.split(" ");
-//                System.out.println(elements[2]);
-//                switch(elements[0]){
-//                    case "=": ct = ConditionType.EQ;
-//                        break;
-//                    case "<": ct = ConditionType.LT;
-//                        break;
-//                    case ">": ct = ConditionType.GT;
-//                        break;
-//                    case "<=": ct = ConditionType.LTE;
-//                        break;
-//                    case ">=": ct = ConditionType.GTE;
-//                        break;
-//                }
-//
-//
-//
-//                if(elements[1].startsWith("?")){
-//                    for(Column c: bop.){
-//                        if(c.getColumnName().equals(elements[1])){
-//                            bo1 = ColumnOperand.newColumnOperand(c);
-//                            break;
-//                        }
-//                    }
-//                }
-//                else{
-//                    bo1 = ValueOperand.newValueOperand(elements[1]);
-//                }
-//
-//                if(elements[2].startsWith("?")){
-//                    for(Column c: bop.getArrayColumns()){
-//                        if(c.getColumnName().equals(elements[2])){
-//                            bo2 = ColumnOperand.newColumnOperand(c);
-//                            break;
-//                        }
-//                    }
-//                }
-//                else{
-//                    bo2 = ValueOperand.newValueOperand(elements[2]);
-//                }
-//
-//                if(bo1== null || bo2 == null){
-//                    try {
-//                        throw new Exception("Filter's Variable was not found in WHERE clause");
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//
-//                bop = SelectOperator.newSelectOperator(bop,bop.getArrayColumns(), new OperandPair[] {OperandPair.newOperandPair(bo1,bo2)} , ct, bop.getOutputSize());
-//
-//            }
-//
-//        }
-
 
 
         if (query.hasOrderBy()) {
-            query.getOrderBy().forEach((s) -> System.out.println("ORDERING " + s.expression.getVarName() + " " + s.direction));
+            List<ColumnWithDirection> cwd = new ArrayList<>();
+
+            for (SortCondition sc : query.getOrderBy()) {
+
+                for (Column c : bop.getArrayColumns()) {
+                    if (c instanceof ColumnWithVariable) {
+                        if (c.getQueryString().equals(sc.expression.getExprVar().toString())) {
+                            int direction = sc.direction;
+                            if (sc.direction == -2) {
+                                direction = 1;
+                            }
+                            cwd.add(ColumnWithDirection.newColumnWithDirection(c, direction));
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (cwd.size() != query.getOrderBy().size()) {
+                try {
+                    throw new Exception("Order by variable was not found in Array Columns");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            bop = SortOperator.newSortOperator(bop, cwd.stream().toArray(ColumnWithDirection[]::new), bop.getOutputSize());
+
+
         }
 
-        //SelectOperator.newSelectOperator(bop,bop.getArrayColumns(),,bop.getOutputSize());
+        if (query.hasLimit()) {
+            bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit(), bop.getOutputSize());
+        }
 
-
-
+        bop = ProjectOperator.newProjectOperator(bop, selectVariables, bop.getOutputSize());
 
     }
 

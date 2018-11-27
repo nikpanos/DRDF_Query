@@ -10,13 +10,12 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class TripleOperator extends BaseOpW0Child {
 
     private TripleOperator(String subject, String predicate, String object) {
-        
+
         Column[] c = new Column[3];
 
         if (!subject.substring(0, 1).equals("?")) {
@@ -36,21 +35,21 @@ public class TripleOperator extends BaseOpW0Child {
         } else {
             c[2] = (ColumnWithVariable.newColumnWithVariable("Object", object, ColumnTypes.OBJECT));
         }
-        
+
         setArrayColumns(c);
     }
 
     public static TripleOperator newTripleOperator(String subject, String predicate, String object) {
         return new TripleOperator(subject, predicate, object);
     }
-    
+
     @Override
-    protected String toString(String margin){
+    protected String toString(String margin) {
         return "";
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return "";
-    }  
+    }
 }

@@ -10,35 +10,34 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import java.util.Map;
 
 /**
- *
  * @author nicholaskoutroumanis
  */
 public class RenameOperator extends BaseOpW1Child {
-    
-    private final Map<Column,Column> m;
-    
-    private RenameOperator(BaseOperator bo, Map<Column,Column> m){
+
+    private final Map<Column, Column> m;
+
+    private RenameOperator(BaseOperator bo, Map<Column, Column> m) {
         this.addChild(bo);
-        this.m=m;
+        this.m = m;
         setArrayColumns(m.values().stream().toArray(Column[]::new));
     }
-    
-    public static RenameOperator newRenameOperator(BaseOperator bo, Map<Column,Column> m) {
+
+    public static RenameOperator newRenameOperator(BaseOperator bo, Map<Column, Column> m) {
         return new RenameOperator(bo, m);
-    }    
-    
+    }
+
     @Override
-    protected String toString(String margin){
+    protected String toString(String margin) {
         return "";
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return "";
     }
 
     public Map<Column, Column> getColumnMapping() {
         return m;
     }
-    
+
 }
