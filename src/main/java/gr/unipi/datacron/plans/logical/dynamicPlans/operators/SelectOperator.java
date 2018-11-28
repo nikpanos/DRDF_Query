@@ -22,7 +22,7 @@ public class SelectOperator extends BaseOpW1Child {
 
 
     private SelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, long outputSize) {
-        this.addChild(bo);
+        super(bo);
         setArrayColumns(c);
         this.operandPairList = operandPairList;
         setOutputSize(outputSize);

@@ -6,7 +6,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 public class UnionOperator extends BaseOpW2Child {
 
     private UnionOperator(BaseOperator bop1, BaseOperator bop2, long outputSize) {
-        this.addChild(bop1, bop2);
+        super(bop1, bop2);
         this.fillAndFormArrayColumns();
         setOutputSize(outputSize);
     }

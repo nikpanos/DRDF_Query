@@ -22,7 +22,7 @@ public class JoinSubjectOperator extends BaseOpWnChild {
     private Column[] columnJoinPredicate;
 
     private JoinSubjectOperator(BaseOperator... bo) {
-        this.addChild(bo);
+        super(bo);
         this.fillAndFormArrayColumns();
         setOutputSize(this.estimateOutputSize(bo));
     }

@@ -1,5 +1,7 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans
 
+import java.text.SimpleDateFormat
+
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
@@ -10,15 +12,26 @@ import org.apache.spark.sql.DataFrame
 
 import collection.JavaConverters._
 import gr.unipi.datacron.common.DataFrameUtils._
+import gr.unipi.datacron.common.{AppConfig, SpatioTemporalInfo, SpatioTemporalRange}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOperators.{DatasourceOperator, SortEnums}
-import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.{BooleanTrait, ConditionEnums, ConditionOperator, LogicalAggregateEnums}
+import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.{BooleanTrait, ConditionOperator, LogicalAggregateEnums}
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{ColumnTypes, ConditionType, OperandPair}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.{BaseOperand, ColumnOperand, ValueOperand}
 
+import scala.util.Try
 
-class PlanAnalyzer {
 
-  private def getChildren(bop: BaseOperator) = bop.getBopChildren.asScala
+class PlanAnalyzer() {
+
+  private val dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+
+  private var shouldApplyExactSpatioTemporalFilterLater = false
+
+  private val constraints = Try(SpatioTemporalRange(
+    SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), AppConfig.getOptionalDouble(qfpAltLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
+    SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), AppConfig.getOptionalDouble(qfpAltUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
+
+  private def getChildren(bop: BaseOperator): Array[BaseOperator] = bop.getBopChildren
 
   private def getEncodedStr(decodedColumnName: String): String = {
     val result = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName))
@@ -159,6 +172,29 @@ class PlanAnalyzer {
     analyzedOperators.dataOperators.UnionOperator(selOps)
   }
 
+  private def refineBySpatioTemporalInfo(child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.commonOperators.BaseOperator = {
+    if (shouldApplyExactSpatioTemporalFilterLater) {
+      shouldApplyExactSpatioTemporalFilterLater = false
+      analyzedOperators.spatiotemporalOperators.ExactBoxOperator(child, constraints.get)
+    }
+    else {
+      child
+    }
+  }
+
+  private def getPushedDownSpatioTemporalOperator(df: DataFrame, child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.commonOperators.BaseOperator = {
+    if (constraints.isDefined && df.hasSpatialAndTemporalShortcutCols) {
+      val newOp = if (AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true)) {
+        shouldApplyExactSpatioTemporalFilterLater = true
+        analyzedOperators.spatiotemporalOperators.ApproximateBoxOperator(child, constraints.get)
+      } else { child }
+      if (AppConfig.getBoolean(qfpEnableRefinementPushdown)) {
+        refineBySpatioTemporalInfo(child)
+      } else { newOp }
+    }
+    else { child }
+  }
+
   private def processSelectOperator(so: SelectOperator, dfO: Option[DataFrame]): analyzedOperators.commonOperators.BaseOperator = {
     so.getChild match {
       case _: TripleOperator =>
@@ -168,7 +204,10 @@ class PlanAnalyzer {
         }
         else {
           val dso = analyzedOperators.dataOperators.DatasourceOperator(dfs(0))
-          val selOp = createSelectOperator(so, dso)
+
+          val spto = getPushedDownSpatioTemporalOperator(dfs(0), dso)
+
+          val selOp = createSelectOperator(so, spto)
           if (!dso.isPropertyTableSource) {
             val po = analyzedOperators.columnOperators.ProjectOperator(selOp, Array(tripleSubLongField, tripleObjLongField))
             val newColName = getEncodedStr(findSelectOperator(so, PREDICATE).get.getRightOperand.asInstanceOf[ValueOperand].getValue)
@@ -217,7 +256,7 @@ class PlanAnalyzer {
   }
 
   def processSortOperator(so: SortOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.SortOperator = {
-    val child = processNode(so.getChild, dfO)
+    val child = refineBySpatioTemporalInfo(processNode(so.getChild, dfO))
     val colWithDirections = so.getColumnWithDirection.map(cwd => {
       val sortEnum: SortEnums.SortEnum = cwd.getDirection match {
         case 1 => SortEnums.Asc
@@ -231,13 +270,13 @@ class PlanAnalyzer {
   }
 
   def processUnionOperator(uo: UnionOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.UnionOperator = {
-    val leftChild = processNode(uo.getLeftChild, dfO)
-    val rightChild = processNode(uo.getRightChild, dfO)
+    val leftChild = refineBySpatioTemporalInfo(processNode(uo.getLeftChild, dfO))
+    val rightChild = refineBySpatioTemporalInfo(processNode(uo.getRightChild, dfO))
     analyzedOperators.dataOperators.UnionOperator(Array(leftChild, rightChild))
   }
 
   def processLimitOperator(lo: LimitOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.LimitOperator = {
-    val child = processNode(lo.getChild, dfO)
+    val child = refineBySpatioTemporalInfo(processNode(lo.getChild, dfO))
     analyzedOperators.dataOperators.LimitOperator(child, lo.getLimit)
   }
 
@@ -284,24 +323,24 @@ class PlanAnalyzer {
         val encPred = getEncodedStr(so.getPredicate)
         propertyDf.hasColumn(encPred)
       })
-      val propertyTree = processPropertyTable(inclSo.toArray, propertyDf)
-      val triplesTree = processTriplesTable(exclSo.toArray, triplesDf)
+      val propertyTree = processPropertyTable(inclSo, propertyDf)
+      val triplesTree = processTriplesTable(exclSo, triplesDf)
       val condition = Some(analyzedOperators.logicalOperators.ConditionOperator(tripleSubLongField, ConditionType.EQ, tripleSubLongField))
       analyzedOperators.dataOperators.JoinOperator(propertyTree, triplesTree, condition)
     }
     else {
       if (dfs(0).isPropertyTable) {
-        processPropertyTable(getChildren(jso).map(_.asInstanceOf[SelectOperator]).toArray, dfs(0))
+        processPropertyTable(getChildren(jso).map(_.asInstanceOf[SelectOperator]), dfs(0))
       }
       else {
-        processTriplesTable(getChildren(jso).map(_.asInstanceOf[SelectOperator]).toArray, dfs(0))
+        processTriplesTable(getChildren(jso).map(_.asInstanceOf[SelectOperator]), dfs(0))
       }
     }
   }
 
   private def processProjectOperator(po: ProjectOperator, dfO: Option[DataFrame]): analyzedOperators.columnOperators.ProjectOperator = {
-    val child = processNode(po.getChild, dfO)
-    analyzedOperators.columnOperators.ProjectOperator(child, po.getVariables.asScala.toArray)
+    val child = refineBySpatioTemporalInfo(processNode(po.getChild, dfO))
+    analyzedOperators.columnOperators.ProjectOperator(child, po.getVariables)
   }
 
   private def processRenameOperator(ro: RenameOperator, dfO: Option[DataFrame]): analyzedOperators.columnOperators.RenameOperator = {

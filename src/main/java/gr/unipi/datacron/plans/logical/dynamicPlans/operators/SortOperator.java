@@ -10,7 +10,7 @@ public class SortOperator extends BaseOpW1Child {
     //Query.ORDER_ASCENDING = 1, Query.ORDER_DESCENDING = -1
 
     private SortOperator(BaseOperator bop, ColumnWithDirection[] columnWithDirection, long outputSize) {
-        this.addChild(bop);
+        super(bop);
         this.fillAndFormArrayColumns();
         this.columnWithDirection = columnWithDirection;
         setOutputSize(outputSize);

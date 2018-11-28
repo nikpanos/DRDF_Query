@@ -23,4 +23,8 @@ public class BaseOpW2Child extends BaseOperator {
     public BaseOperator getRightChild() {
         return getBopChildren()[1];
     }
+
+    protected BaseOpW2Child(BaseOperator bopLeft, BaseOperator bopRight) {
+        super(bopLeft, bopRight);
+    }
 }

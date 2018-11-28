@@ -18,8 +18,8 @@ import java.util.List;
 public abstract class BaseOperator {
 
 
-    private BaseOperator[] bopChildren;//list with base operators children
-    private BaseOperator parent;
+    private final BaseOperator[] bopChildren;//list with base operators children
+    //private BaseOperator parent;
     private long outputSize;
     private long realOutputSize;
 
@@ -30,13 +30,17 @@ public abstract class BaseOperator {
         return columnList;
     }
 
-    protected void addChild(BaseOperator... bop) {
+    protected BaseOperator(BaseOperator... bop) {
         bopChildren = bop;
 
         if (!(this.getNumberOfBopChildren() <= getMaxNumberOfChildren())) {
             throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
         }
     }
+
+    /*protected void addChild(BaseOperator... bop) {
+
+    }*/
 
     protected void fillAndFormArrayColumns() {
 

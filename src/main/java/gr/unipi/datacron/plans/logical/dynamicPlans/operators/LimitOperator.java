@@ -10,7 +10,7 @@ public class LimitOperator extends BaseOpW1Child {
     private LimitOperator(BaseOperator baseOperator, int limit, long outputSize) {
 
 
-        this.addChild(baseOperator);
+        super(baseOperator);
         this.fillAndFormArrayColumns();
         this.limit = limit;
 

@@ -28,7 +28,7 @@ public class JoinOperator extends BaseOpW2Child {
 
     private JoinOperator(BaseOperator bo1, BaseOperator bo2) {
 
-        this.addChild(bo1, bo2);
+        super(bo1, bo2);
         this.fillAndFormArrayColumns();
         setOutputSize(this.estimateOutputSize(bo1, bo2));
 

@@ -16,4 +16,7 @@ public class BaseOpW0Child extends BaseOperator {
 
     }
 
+    protected BaseOpW0Child() {
+        super();
+    }
 }

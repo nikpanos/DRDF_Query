@@ -10,7 +10,7 @@ public class ProjectOperator extends BaseOpW1Child {
     private String[] variables;
 
     private ProjectOperator(BaseOperator bop, List<String> variables, long outputSize) {
-        this.addChild(bop);
+        super(bop);
         this.fillAndFormArrayColumns();
         this.variables = variables.stream().toArray(String[]::new);
         setOutputSize(outputSize);

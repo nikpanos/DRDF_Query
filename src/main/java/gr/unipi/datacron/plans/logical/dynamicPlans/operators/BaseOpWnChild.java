@@ -13,4 +13,8 @@ public class BaseOpWnChild extends BaseOperator {
     protected int getMaxNumberOfChildren() {
         return Integer.MAX_VALUE;
     }
+
+    protected BaseOpWnChild(BaseOperator... bop) {
+        super(bop);
+    }
 }

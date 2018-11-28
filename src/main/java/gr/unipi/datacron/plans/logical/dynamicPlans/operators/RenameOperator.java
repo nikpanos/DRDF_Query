@@ -17,7 +17,7 @@ public class RenameOperator extends BaseOpW1Child {
     private final Map<Column, Column> m;
 
     private RenameOperator(BaseOperator bo, Map<Column, Column> m) {
-        this.addChild(bo);
+        super(bo);
         this.m = m;
         setArrayColumns(m.values().stream().toArray(Column[]::new));
     }

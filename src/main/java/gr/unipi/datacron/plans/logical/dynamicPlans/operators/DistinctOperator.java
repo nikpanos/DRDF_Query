@@ -6,7 +6,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 public class DistinctOperator extends BaseOpW1Child {
 
     private DistinctOperator(BaseOperator bop, long outputSize) {
-        this.addChild(bop);
+        super(bop);
         this.fillAndFormArrayColumns();
         setOutputSize(outputSize);
     }
