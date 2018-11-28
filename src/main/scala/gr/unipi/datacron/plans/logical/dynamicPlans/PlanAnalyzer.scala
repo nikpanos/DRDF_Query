@@ -1,17 +1,19 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans
 
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.DataFrameUtils._
-import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOperators.{DatasourceOperator, SortEnums}
-import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.{BooleanTrait, ConditionEnums, LogicalAggregateEnums}
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
-import scala.collection.JavaConverters._
+import collection.JavaConverters._
+import gr.unipi.datacron.common.DataFrameUtils._
+import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOperators.{DatasourceOperator, SortEnums}
+import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.{BooleanTrait, ConditionEnums, ConditionOperator, LogicalAggregateEnums}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{ColumnTypes, ConditionType, OperandPair}
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.{BaseOperand, ColumnOperand, ValueOperand}
 
 
 class PlanAnalyzer {
@@ -20,12 +22,32 @@ class PlanAnalyzer {
 
   private def getEncodedStr(decodedColumnName: String): String = {
     val result = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName))
-    if (result.isEmpty) {
+    if (result.isEmpty){
       throw new Exception("Could not find encoded value for column name: " + decodedColumnName)
     }
     else {
       result.get.toString
     }
+  }
+
+  private def getSelectOperators(so: SelectOperator, columnType: ColumnTypes): Array[OperandPair] = {
+    so.getFilters.filter(operandPair => {
+      operandPair.getLeftOperand match {
+        case column: ColumnOperand =>
+          column.getColumn.getColumnTypes == columnType
+        case _ => throw new Exception("Should be ColumnOperand")
+      }
+    })
+  }
+
+  private def findSelectOperator(so: SelectOperator, columnType: ColumnTypes): Option[OperandPair] = {
+    so.getFilters.find(operandPair => {
+      operandPair.getLeftOperand match {
+        case column: ColumnOperand =>
+          column.getColumn.getColumnTypes == columnType
+        case _ => throw new Exception("Should be ColumnOperand")
+      }
+    })
   }
 
   private def getPredicateList(node: BaseOperator): Array[String] = {
@@ -34,10 +56,8 @@ class PlanAnalyzer {
         getChildren(node).foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
           preds ++ getPredicateList(child)
         })
-      case filter: SelectOperator =>
-        filter.getFilters.filter(column => {
-          column.getColumn.getColumnTypes == PREDICATE
-        }).map(column => getEncodedStr(column.getValue))
+      case so: SelectOperator =>
+        getSelectOperators(so, PREDICATE).map(operandPair => getEncodedStr(operandPair.getRightOperand.asInstanceOf[ValueOperand].getValue))
       case _ => throw new Exception("Only support JoinOr and FilterOfLogicalOperator under JoinOr")
     }
   }
@@ -45,9 +65,9 @@ class PlanAnalyzer {
   private def findObjectOfRdfType(node: BaseOperator): Option[String] = {
     node match {
       case sNode: SelectOperator =>
-        val objFilter = sNode.getFilters.find(_.getColumn.getColumnTypes == OBJECT)
+        val objFilter = findSelectOperator(sNode, OBJECT)
         if (objFilter.isDefined) {
-          Some(getEncodedStr(objFilter.get.getValue))
+          Some(getEncodedStr(objFilter.get.getRightOperand.asInstanceOf[ValueOperand].getValue))
         }
         else None
       case jsNode: JoinSubjectOperator =>
@@ -67,9 +87,9 @@ class PlanAnalyzer {
       if ((predicates.length == 1) && (predicates(0) == rdfTypeEnc)) {
         node match {
           case so: SelectOperator =>
-            val objFilter = so.getFilters.find(_.getColumn.getColumnTypes == OBJECT)
+            val objFilter = findSelectOperator(so, OBJECT)
             if (objFilter.isDefined) {
-              val encodedObjFilter = getEncodedStr(objFilter.get.getValue)
+              val encodedObjFilter = getEncodedStr(objFilter.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
               return DataStore.findDataframeBasedOnRdfType(encodedObjFilter)
             }
         }
@@ -98,7 +118,7 @@ class PlanAnalyzer {
         }
         else if (result.length == 1) {
           val df = result(0)
-          var excl = df.getExcludingColumns(predicates)
+          val excl = df.getExcludingColumns(predicates)
           if (excl.length > 0) {
             Array(df, DataStore.triplesData)
           }
@@ -119,7 +139,7 @@ class PlanAnalyzer {
   private def findFirstDatasourceOperator(bo: analyzedOperators.commonOperators.BaseOperator): DatasourceOperator = {
     bo match {
       case ds: DatasourceOperator => ds
-      case _ => findFirstDatasourceOperator(bo)
+      case _=> findFirstDatasourceOperator(bo)
     }
   }
 
@@ -129,7 +149,7 @@ class PlanAnalyzer {
       val bo = processNode(so, Some(df))
       val ds = findFirstDatasourceOperator(bo)
       if (ds.isPropertyTableSource) {
-        val colName = getEncodedStr(so.getFilters.find(_.getColumn.getColumnTypes == PREDICATE).get.getValue)
+        val colName = getEncodedStr(findSelectOperator(so, PREDICATE).get.getRightOperand.asInstanceOf[ValueOperand].getValue)
         analyzedOperators.columnOperators.ProjectOperator(bo, Array(tripleSubLongField, colName))
       }
       else {
@@ -151,7 +171,7 @@ class PlanAnalyzer {
           val selOp = createSelectOperator(so, dso)
           if (!dso.isPropertyTableSource) {
             val po = analyzedOperators.columnOperators.ProjectOperator(selOp, Array(tripleSubLongField, tripleObjLongField))
-            val newColName = getEncodedStr(so.getFilters.find(_.getColumn.getColumnTypes == PREDICATE).get.getValue)
+            val newColName = getEncodedStr(findSelectOperator(so, PREDICATE).get.getRightOperand.asInstanceOf[ValueOperand].getValue)
             analyzedOperators.columnOperators.RenameOperator(po, Array((tripleObjLongField, newColName)))
           }
           else {
@@ -165,18 +185,32 @@ class PlanAnalyzer {
 
   }
 
+  private def getOperandStr(op: BaseOperand): String = {
+    op match {
+      case co: ColumnOperand => co.getColumn.getColumnName
+      case vo: ValueOperand => vo.getValue
+      case _ => throw new Exception("Not supported Operand!")
+    }
+  }
+
+  private def getConditionOperatorFromOperandPair(operandPair: OperandPair): ConditionOperator = {
+    val leftStr = getOperandStr(operandPair.getLeftOperand)
+    val rightStr = getOperandStr(operandPair.getLeftOperand)
+    analyzedOperators.logicalOperators.ConditionOperator(leftStr, operandPair.getConditionType, rightStr)
+  }
+
   private def createSelectOperator(so: SelectOperator, child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.dataOperators.SelectOperator = {
-    val conditions = so.getFilters
-    val condition = if (conditions.length == 1) {
-      val cv = conditions(0)
-      analyzedOperators.logicalOperators.ConditionOperator(cv.getColumn.getColumnName, ConditionEnums.Eq, cv.getValue)
+    val filters = so.getFilters
+    val condition = if (filters.length == 1) {
+      getConditionOperatorFromOperandPair(filters(0))
     }
     else {
-      val left = conditions.head
-      val conditionLeft: analyzedOperators.commonOperators.BaseOperator with BooleanTrait = analyzedOperators.logicalOperators.ConditionOperator(left.getColumn.getColumnName, ConditionEnums.Eq, left.getValue)
-      conditions.tail.foldLeft(conditionLeft)((left, cv) => {
-        val conditionRight = analyzedOperators.logicalOperators.ConditionOperator(cv.getColumn.getColumnName, ConditionEnums.Eq, cv.getValue)
-        analyzedOperators.logicalOperators.LogicalAggregateOperator(left, conditionRight, LogicalAggregateEnums.And)
+      val first = filters.head
+
+      val conditionFirst: analyzedOperators.commonOperators.BaseOperator with BooleanTrait = getConditionOperatorFromOperandPair(first)
+      filters.tail.foldLeft(conditionFirst)((conditionLeft, op) => {
+        val conditionRight = getConditionOperatorFromOperandPair(op)
+        analyzedOperators.logicalOperators.LogicalAggregateOperator(conditionLeft, conditionRight, LogicalAggregateEnums.And)
       })
     }
     analyzedOperators.dataOperators.SelectOperator(child, condition)
@@ -184,12 +218,16 @@ class PlanAnalyzer {
 
   def processSortOperator(so: SortOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.SortOperator = {
     val child = processNode(so.getChild, dfO)
-    val sortEnum = so.getDirection match {
-      case 1 => SortEnums.Asc
-      case -1 => SortEnums.Desc
-      case _ => throw new Exception("Unrecognized sorting direction")
-    }
-    analyzedOperators.dataOperators.SortOperator(child, Array((so.getColumnName, sortEnum)))
+    val colWithDirections = so.getColumnWithDirection.map(cwd => {
+      val sortEnum: SortEnums.SortEnum = cwd.getDirection match {
+        case 1 => SortEnums.Asc
+        case -1 => SortEnums.Desc
+        case _ => throw new Exception("Unrecognized sorting direction")
+      }
+      (cwd.getColumn.getColumnName, sortEnum)
+    })
+
+    analyzedOperators.dataOperators.SortOperator(child, colWithDirections)
   }
 
   def processUnionOperator(uo: UnionOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.UnionOperator = {
@@ -212,7 +250,7 @@ class PlanAnalyzer {
       None
     }
     else {
-      Some(analyzedOperators.logicalOperators.ConditionOperator(cols(0).getColumnName, ConditionEnums.Eq, cols(1).getColumnName))
+      Some(analyzedOperators.logicalOperators.ConditionOperator(cols(0).getColumnName, ConditionType.EQ, cols(1).getColumnName))
     }
     analyzedOperators.dataOperators.JoinOperator(leftChild, rightChild, condition)
   }
@@ -228,7 +266,7 @@ class PlanAnalyzer {
 
     def processTriplesTable(selectOps: Array[SelectOperator], df: DataFrame): analyzedOperators.commonOperators.BaseOperator = {
       val triples = selectOps.map(x => processNode(x, Some(df)))
-      val condition = Some(analyzedOperators.logicalOperators.ConditionOperator(tripleSubLongField, ConditionEnums.Eq, tripleSubLongField))
+      val condition = Some(analyzedOperators.logicalOperators.ConditionOperator(tripleSubLongField, ConditionType.EQ, tripleSubLongField))
       val firstJoin = analyzedOperators.dataOperators.JoinOperator(triples(0), triples(1), condition)
       triples.slice(2, triples.length).foldLeft(firstJoin)((joinOp, bop) => {
         analyzedOperators.dataOperators.JoinOperator(joinOp, bop, condition)
@@ -242,21 +280,21 @@ class PlanAnalyzer {
       }
       val propertyDf = dfs.find(_.isPropertyTable).get
       val triplesDf = dfs.find(!_.isPropertyTable).get
-      val (inclSo, exclSo) = jso.getBopChildren.asScala.map(_.asInstanceOf[SelectOperator]).partition(so => {
+      val (inclSo, exclSo) = getChildren(jso).map(_.asInstanceOf[SelectOperator]).partition(so => {
         val encPred = getEncodedStr(so.getPredicate)
         propertyDf.hasColumn(encPred)
       })
       val propertyTree = processPropertyTable(inclSo.toArray, propertyDf)
       val triplesTree = processTriplesTable(exclSo.toArray, triplesDf)
-      val condition = Some(analyzedOperators.logicalOperators.ConditionOperator(tripleSubLongField, ConditionEnums.Eq, tripleSubLongField))
+      val condition = Some(analyzedOperators.logicalOperators.ConditionOperator(tripleSubLongField, ConditionType.EQ, tripleSubLongField))
       analyzedOperators.dataOperators.JoinOperator(propertyTree, triplesTree, condition)
     }
     else {
       if (dfs(0).isPropertyTable) {
-        processPropertyTable(jso.getBopChildren.asScala.map(_.asInstanceOf[SelectOperator]).toArray, dfs(0))
+        processPropertyTable(getChildren(jso).map(_.asInstanceOf[SelectOperator]).toArray, dfs(0))
       }
       else {
-        processTriplesTable(jso.getBopChildren.asScala.map(_.asInstanceOf[SelectOperator]).toArray, dfs(0))
+        processTriplesTable(getChildren(jso).map(_.asInstanceOf[SelectOperator]).toArray, dfs(0))
       }
     }
   }

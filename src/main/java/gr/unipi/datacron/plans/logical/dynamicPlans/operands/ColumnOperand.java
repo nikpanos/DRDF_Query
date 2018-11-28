@@ -15,4 +15,8 @@ public class ColumnOperand extends BaseOperand {
         return new ColumnOperand(column);
     }
 
+    public Column getColumn() {
+        return this.column;
+    }
+
 }

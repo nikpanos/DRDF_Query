@@ -66,10 +66,26 @@ WHERE
 }
 
 Prefix : <http://www.datacron-project.eu/datAcron#>
-
 SELECT *
 WHERE
 {
-    ?n a ?node .
     ?event :occurs ?n .
+}
+LIMIT 10
+
+Prefix : <http://www.datacron-project.eu/datAcron#>
+SELECT *
+WHERE
+{
+    ?event :occurs ?n .
+}
+ORDER BY ?n
+
+Prefix : <http://www.datacron-project.eu/datAcron#>
+SELECT *
+WHERE
+{
+    {:StoppedInit :occurs ?n .}
+    UNION
+    {:SpeedChangeStart :occurs ?n .}
 }
