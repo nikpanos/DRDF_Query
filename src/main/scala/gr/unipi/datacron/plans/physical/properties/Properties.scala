@@ -1,8 +1,8 @@
 package gr.unipi.datacron.plans.physical.properties
 
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits._
-import gr.unipi.datacron.common.Consts._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
@@ -10,7 +10,7 @@ case class Properties() extends BasePhysicalPlan with TProperties {
   override def addTemporaryColumnForRefinement(params: addTemporaryColumnForRefinementParams): DataFrame = {
     val predicates = params.predicates
 
-    val myUDf = udf((s:String) => {
+    val myUDf = udf((s: String) => {
       predicates.map(x => {
         val pos = s.indexOf(x.toString)
         if (pos >= 0) {
@@ -34,8 +34,8 @@ case class Properties() extends BasePhysicalPlan with TProperties {
 
   override def addSpatialAndTemporalColumnsByTemporaryColumn(params: addSpatialAndTemporalColumnsByTemporaryColumnParams): DataFrame = {
     params.df.withColumn(tripleMBRField, col(tripleTemporaryRefinementField)(params.spatialColumn))
-             .withColumn(tripleTimeStartField, col(tripleTemporaryRefinementField)(params.temporalColumn))
-             .drop(tripleTemporaryRefinementField)
+      .withColumn(tripleTimeStartField, col(tripleTemporaryRefinementField)(params.temporalColumn))
+      .drop(tripleTemporaryRefinementField)
   }
 
   override def filterNullProperties(params: filterNullPropertiesParams): DataFrame = params.df.na.drop(params.columnNames)

@@ -1,10 +1,10 @@
 package gr.unipi.datacron
 
-import gr.unipi.datacron.common.{AppConfig, Consts}
 import gr.unipi.datacron.common.Consts._
+import gr.unipi.datacron.common.{AppConfig, Consts}
 import gr.unipi.datacron.store.DataStore
-import gr.unipi.datacron.store.DataStore.spark
 import org.apache.spark.sql.DataFrame
+
 object TextToParquet {
   private def processDataframe(df: DataFrame, dfName: String, outputPath: String, sortingColumns: Option[Array[String]]): Unit = {
     println("Writing " + dfName + " to: " + outputPath)
@@ -18,7 +18,7 @@ object TextToParquet {
         throw new Exception("When sorting, you must specify the number of partitions")
       }
       //spark.sql("set spark.sql.shuffle.partitions=" + partitionsNum)
-      df.sort(cols(0), cols.drop(1):_*)
+      df.sort(cols(0), cols.drop(1): _*)
     }
     else if (partitionsNum != 0) {
       df.repartition(AppConfig.getInt(partitionsNumberAfterShuffle))
@@ -32,7 +32,7 @@ object TextToParquet {
     println("Completed " + dfName + "\n")
   }
 
-  def main(args : Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
     AppConfig.init(args(0))
     DataStore.init()
 
@@ -45,7 +45,7 @@ object TextToParquet {
       None
     }
 
-    var outputPath = DataStore.triples.dataPath.replace("/text/", "/parquet/")  //TODO: dirty, maybe clean it
+    var outputPath = DataStore.triples.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
     processDataframe(DataStore.triplesData, "triples", outputPath, sortCols)
 
     if (AppConfig.getOptionalBoolean(Consts.qfpDataPropertyEnabled).getOrElse(true)) {
@@ -57,7 +57,7 @@ object TextToParquet {
         None
       }
 
-      AppConfig.getString(qfpDatasetList).split(",").foreach( {
+      AppConfig.getString(qfpDatasetList).split(",").foreach({
         case `datasetAisMedNode` =>
           DataStore.nodeDatasetType = datasetAisMedNode
           outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it

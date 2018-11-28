@@ -3,8 +3,6 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithDirection;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.OperandPair;
-import org.apache.jena.query.Query;
 
 public class SortOperator extends BaseOpW1Child {
 

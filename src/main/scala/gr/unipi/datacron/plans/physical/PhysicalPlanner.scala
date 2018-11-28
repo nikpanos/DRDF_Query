@@ -1,14 +1,14 @@
 package gr.unipi.datacron.plans.physical
 
-import gr.unipi.datacron.common._
+import gr.unipi.datacron.common.Benchmarks.doBenchmark
 import gr.unipi.datacron.common.Consts._
+import gr.unipi.datacron.common._
 import gr.unipi.datacron.plans.physical.dictionary._
 import gr.unipi.datacron.plans.physical.joinTriples.{AJoinLLLTriples, _}
-import gr.unipi.datacron.plans.physical.traits._
-import gr.unipi.datacron.plans.physical.triples._
-import gr.unipi.datacron.common.Benchmarks.doBenchmark
 import gr.unipi.datacron.plans.physical.projection.Projection
 import gr.unipi.datacron.plans.physical.properties.Properties
+import gr.unipi.datacron.plans.physical.traits._
+import gr.unipi.datacron.plans.physical.triples._
 import org.apache.spark.sql.DataFrame
 
 
@@ -25,23 +25,23 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   private lazy val projection = Projection()
 
   private def pickTriplesPlanBasedOnRules: TTriples = AppConfig.getString(qfpTriples_trait) match {
-      case Consts.tLLLTriples => lllTriples
-      case _ => throw new Exception("Triples trait not found")
-    }
+    case Consts.tLLLTriples => lllTriples
+    case _ => throw new Exception("Triples trait not found")
+  }
 
   private def pickJoinTriplesPlanBasedOnRules: TJoinTriples = AppConfig.getString(qfpJoinTriples_trait) match {
-      case Consts.tMBJoinSTriples => mbJoinSTriples
-      case Consts.tMBJoinLLLTriples => mbJoinLLLTriples
-      case Consts.tAJoinLLLTriples => aJoinLLLTriples
-      case Consts.tABJoinLLLTriples => abJoinLLLTriples
-      case _ => throw new Exception("JoinTriples trait not found")
-    }
+    case Consts.tMBJoinSTriples => mbJoinSTriples
+    case Consts.tMBJoinLLLTriples => mbJoinLLLTriples
+    case Consts.tAJoinLLLTriples => aJoinLLLTriples
+    case Consts.tABJoinLLLTriples => abJoinLLLTriples
+    case _ => throw new Exception("JoinTriples trait not found")
+  }
 
   private def pickDictionaryPlanBasedOnRules: TDictionary = AppConfig.getString(qfpDictionaryTrait) match {
-      case Consts.tRedisDictionary => rdsDictionary
-      case Consts.tRedisBatchDictionary => rdsBatchDictionary
-      case _ => throw new Exception("Dictionary trait not found")
-    }
+    case Consts.tRedisDictionary => rdsDictionary
+    case Consts.tRedisBatchDictionary => rdsBatchDictionary
+    case _ => throw new Exception("Dictionary trait not found")
+  }
 
   override def filterByColumn(params: filterByColumnParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByColumn(params), params)
@@ -81,7 +81,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
     doBenchmark[DataFrame](() => properties.filterNullProperties(params), params)
 
   override def dropColumns(params: dropColumnsParams): DataFrame =
-  doBenchmark[DataFrame](() => projection.dropColumns(params), params)
+    doBenchmark[DataFrame](() => projection.dropColumns(params), params)
 
   override def renameColumns(params: renameColumnsParams): DataFrame =
     doBenchmark[DataFrame](() => projection.renameColumns(params), params)

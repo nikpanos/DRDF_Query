@@ -1,10 +1,10 @@
 package gr.unipi.datacron.plans.physical.dictionary
 
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
-import gr.unipi.datacron.common.Consts._
 
 abstract private[dictionary] class BaseRdsDictionary extends BasePhysicalPlan with TDictionary {
   override def decodeSingleKey(params: decodeSingleKeyParams): Option[String] = DataStore.dictionaryRedis.getDecodedValue(params.key)

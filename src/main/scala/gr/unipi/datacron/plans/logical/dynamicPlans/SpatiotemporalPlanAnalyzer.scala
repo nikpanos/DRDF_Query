@@ -1,6 +1,6 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans
 
-import gr.unipi.datacron.common.Consts.{qfpEnableFilterByEncodedInfo, qfpEnableRefinementPushdown}
+import gr.unipi.datacron.common.Consts.qfpEnableFilterByEncodedInfo
 import gr.unipi.datacron.common.{AppConfig, SpatioTemporalRange}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.commonOperators.BaseOperator
 

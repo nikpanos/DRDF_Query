@@ -14,14 +14,16 @@ public class OperandPair {
 
     private final BaseOperand leftOperand;
     private final BaseOperand rightOperand;
+    private final ConditionType conditionType;
 
-    private OperandPair(BaseOperand leftOperand, BaseOperand rightOperand) {
+    private OperandPair(BaseOperand leftOperand, BaseOperand rightOperand, ConditionType conditionType) {
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
+        this.conditionType = conditionType;
     }
 
-    public static OperandPair newOperandPair(BaseOperand leftOperand, BaseOperand rightOperand) {
-        return new OperandPair(leftOperand, rightOperand);
+    public static OperandPair newOperandPair(BaseOperand leftOperand, BaseOperand rightOperand, ConditionType conditionType) {
+        return new OperandPair(leftOperand, rightOperand, conditionType);
     }
 //
 //    @Override
@@ -35,5 +37,9 @@ public class OperandPair {
 
     public BaseOperand getRightOperand() {
         return rightOperand;
+    }
+
+    public ConditionType getConditionType() {
+        return conditionType;
     }
 }

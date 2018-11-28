@@ -1,8 +1,6 @@
 package gr.unipi.datacron.plans.logical.staticPlans.starSTRange
 
 import gr.unipi.datacron.plans.logical.staticPlans.sptRefinement.TriplesRefinement
-import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.filterBySubSpatioTemporalInfoParams
 import gr.unipi.datacron.store.DataStore
 
 case class StarRdfFirstBest() extends BaseStar() {

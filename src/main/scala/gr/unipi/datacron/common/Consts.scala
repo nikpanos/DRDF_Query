@@ -123,22 +123,22 @@ object Consts {
   final val tMBJoinLLLTriples = "MBJoinLLLTriples"
   final val tAJoinLLLTriples = "AJoinLLLTriples"
   final val tABJoinLLLTriples = "ABJoinLLLTriples"
-  
+
   //field separators
   final val tripleFieldsSeparator = " "
   final val dicFieldsSeparator = "\t"
   final val lonLatSeparator = ' '
-  
+
   //RDF URIs
   final val uriMBR = ":hasWKT"
   final val uriTimeStart = ":TimeStart"
 
   final val uriHasGeometry = ":hasGeometry"
-  final val uriHasTemporalFeature  = ":hasTemporalFeature"
+  final val uriHasTemporalFeature = ":hasTemporalFeature"
 
   //final val uriTemporalShortcut = ":hasShortcutTemporal"
   //final val uriSpatialShortcut = ":hasShortcutSpatial"
-  
+
   //Triples fields
   final val datacronOntologyNamespace = "http://www.datacron-project.eu/datAcron#"
   final val rdfOntologyNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -158,7 +158,7 @@ object Consts {
   final val tripleTemporalField = "temporalFeature"
 
   final val tripleTemporaryRefinementField = "temporaryRefinement"
-  
+
   //Dictionary fields
   final val dicLineStrField = "lineStr"
   final val dicKeyLongField = "keyLong"

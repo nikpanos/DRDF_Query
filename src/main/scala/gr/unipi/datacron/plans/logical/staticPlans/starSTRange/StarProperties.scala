@@ -1,8 +1,8 @@
 package gr.unipi.datacron.plans.logical.staticPlans.starSTRange
 
-import gr.unipi.datacron.plans.logical.staticPlans.sptRefinement.{PropertiesRefinement, PropertiesRefinement2}
+import gr.unipi.datacron.plans.logical.staticPlans.sptRefinement.PropertiesRefinement2
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.{filterByColumnParams, filterBySubSpatioTemporalInfoParams, filterNullPropertiesParams}
+import gr.unipi.datacron.plans.physical.traits.{filterByColumnParams, filterBySubSpatioTemporalInfoParams}
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 

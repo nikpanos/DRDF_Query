@@ -9,8 +9,6 @@ import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
-import scala.collection.immutable.Map
-
 case class JoinSpatialFirst() extends StaticLogicalPlan() {
   override private[logical] def doExecutePlan(): DataFrame = {
     val transJoinKey = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(AppConfig.getString(qfpJoinKey)))

@@ -1,17 +1,17 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans
 
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
-import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
-import gr.unipi.datacron.store.DataStore
-import org.apache.spark.sql.DataFrame
-
-import collection.JavaConverters._
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOperators.{DatasourceOperator, SortEnums}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.{BooleanTrait, ConditionEnums, LogicalAggregateEnums}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
+import gr.unipi.datacron.plans.physical.PhysicalPlanner
+import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
+import gr.unipi.datacron.store.DataStore
+import org.apache.spark.sql.DataFrame
+
+import scala.collection.JavaConverters._
 
 
 class PlanAnalyzer {
@@ -20,7 +20,7 @@ class PlanAnalyzer {
 
   private def getEncodedStr(decodedColumnName: String): String = {
     val result = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName))
-    if (result.isEmpty){
+    if (result.isEmpty) {
       throw new Exception("Could not find encoded value for column name: " + decodedColumnName)
     }
     else {
@@ -119,7 +119,7 @@ class PlanAnalyzer {
   private def findFirstDatasourceOperator(bo: analyzedOperators.commonOperators.BaseOperator): DatasourceOperator = {
     bo match {
       case ds: DatasourceOperator => ds
-      case _=> findFirstDatasourceOperator(bo)
+      case _ => findFirstDatasourceOperator(bo)
     }
   }
 

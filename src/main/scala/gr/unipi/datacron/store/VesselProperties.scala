@@ -1,11 +1,12 @@
 package gr.unipi.datacron.store
 
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.{AppConfig, Consts, TriplesTokenizer}
 import gr.unipi.datacron.common.schema.SemanticObject
+import gr.unipi.datacron.common.{AppConfig, Consts, TriplesTokenizer}
 import org.apache.spark.sql.DataFrame
 
 private[store] class VesselProperties() extends BaseHDFSStore {
+
   import DataStore.spark.implicits._
 
   protected def configPropertyForDataPath: String = qfpVesselsPath
@@ -44,6 +45,6 @@ private[store] class VesselProperties() extends BaseHDFSStore {
         semObject.getValues match {
           case Array(a, b, c, d, e, f, g, h) => (semObject.subj, a, b, c, d, e, f, g, h)
         }
-      }).toDF(schema:_*)
+      }).toDF(schema: _*)
   }
 }

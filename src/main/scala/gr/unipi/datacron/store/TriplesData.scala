@@ -1,14 +1,11 @@
 package gr.unipi.datacron.store
 
-import java.lang.Exception
-
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common._
 import org.apache.spark.sql.DataFrame
 
-import scala.util.control.Exception
-
 private[store] class TriplesData() extends BaseHDFSStore {
+
   import DataStore.spark.implicits._
 
   protected def configPropertyForDataPath: String = qfpTriplesPath
@@ -26,7 +23,7 @@ private[store] class TriplesData() extends BaseHDFSStore {
       val obj = tokenizer.getNextToken
 
       (sub.get, pred.get, obj.get)
-      }).toDF(tripleSubLongField, triplePredLongField, tripleObjLongField)
+    }).toDF(tripleSubLongField, triplePredLongField, tripleObjLongField)
     case _ => throw new Exception("Triples parsing setting not found")
   }
 }

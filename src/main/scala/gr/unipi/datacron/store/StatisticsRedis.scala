@@ -1,8 +1,8 @@
 package gr.unipi.datacron.store
 
 import gr.unipi.datacron.common.AppConfig
-import redis.clients.jedis.{Jedis, JedisPool}
 import gr.unipi.datacron.common.Consts._
+import redis.clients.jedis.{Jedis, JedisPool}
 
 class StatisticsRedis {
 

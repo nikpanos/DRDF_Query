@@ -4,11 +4,9 @@ import java.io.File
 import java.util
 
 import com.typesafe.config.{Config, ConfigFactory, ConfigObject, ConfigRenderOptions}
-import gr.unipi.datacron.common.AppConfig.config
 import gr.unipi.datacron.common.Consts.qfpSparkMaster
 
-import collection.JavaConverters._
-import scala.collection.mutable.Buffer
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 object AppConfig extends Serializable {

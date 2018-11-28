@@ -1,6 +1,5 @@
 package gr.unipi.datacron.plans.logical.staticPlans.chainSTRange
 
-import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.staticPlans.StaticLogicalPlan
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._

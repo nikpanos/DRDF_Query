@@ -5,8 +5,10 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.*;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.OperandPair;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,13 +19,12 @@ import java.util.logging.Logger;
 public class SelectOperator extends BaseOpW1Child {
 
     private final OperandPair[] operandPairList;//columns with values only
-    private final ConditionType conditionType;
 
-    private SelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, ConditionType conditionType, long outputSize) {
+
+    private SelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, long outputSize) {
         this.addChild(bo);
         setArrayColumns(c);
         this.operandPairList = operandPairList;
-        this.conditionType = conditionType;
         setOutputSize(outputSize);
     }
 
@@ -42,8 +43,8 @@ public class SelectOperator extends BaseOpW1Child {
         return null;
     }
 
-    public static SelectOperator newSelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, ConditionType conditionType, long outputSize) {
-        return new SelectOperator(bo, c, operandPairList, conditionType, outputSize);
+    public static SelectOperator newSelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, long outputSize) {
+        return new SelectOperator(bo, c, operandPairList, outputSize);
     }
 
     public boolean isSubjectVariable() {
@@ -82,7 +83,7 @@ public class SelectOperator extends BaseOpW1Child {
         s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
 
         for (OperandPair b : operandPairList) {
-            s.append(margin).append("OperandPair: ").append(this.getClass().getSimpleName()).append(" Left Operand: " + b.getLeftOperand().getClass().getSimpleName() + " - ").append("Right Operand: " + b.getRightOperand().getClass().getSimpleName()).append("\n");
+            s.append(margin).append("OperandPair: ").append(this.getClass().getSimpleName()).append(" Left Operand: " + b.getLeftOperand().getClass().getSimpleName() + " - ").append("Right Operand: " + b.getRightOperand().getClass().getSimpleName()).append(", ConditionType: " + b.getConditionType().toString()).append("\n");
         }
 
         s.append(margin).append("Array Columns: \n");
@@ -109,7 +110,4 @@ public class SelectOperator extends BaseOpW1Child {
         return operandPairList;
     }
 
-    public ConditionType getConditionType() {
-        return conditionType;
-    }
 }

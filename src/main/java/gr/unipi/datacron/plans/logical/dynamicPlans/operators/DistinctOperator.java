@@ -5,14 +5,14 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
 public class DistinctOperator extends BaseOpW1Child {
 
-    private DistinctOperator(BaseOperator bop, long outputSize){
+    private DistinctOperator(BaseOperator bop, long outputSize) {
         this.addChild(bop);
         this.fillAndFormArrayColumns();
         setOutputSize(outputSize);
     }
 
-    public static DistinctOperator newDistinctOperator(){
-        return new DistinctOperator();
+    public static DistinctOperator newDistinctOperator(BaseOperator bop, long outputSize) {
+        return new DistinctOperator(bop, outputSize);
     }
 
     @Override

@@ -4,7 +4,7 @@ object Test {
 
   def printArray(arr: Array[(Long, Long)]): Unit = arr.foreach(println(_))
 
-  def main(args : Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
     /*val obj = new SemanticObject("a", Array(2L, 1L))
     //printArray(obj.getValues)
 

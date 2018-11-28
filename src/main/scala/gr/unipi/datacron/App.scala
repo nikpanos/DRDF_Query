@@ -1,11 +1,11 @@
 package gr.unipi.datacron
 
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.queries._
-import gr.unipi.datacron.common.Consts._
 
 object App {
-  def main(args : Array[String]) {
+  def main(args: Array[String]) {
     AppConfig.init(args(0))
 
     val query = AppConfig.getString(Consts.qfpQueryType) match {

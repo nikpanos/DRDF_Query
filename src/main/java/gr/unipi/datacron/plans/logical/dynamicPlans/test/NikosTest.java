@@ -5,14 +5,10 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
-import gr.unipi.datacron.common.AppConfig;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author nicholaskoutroumanis

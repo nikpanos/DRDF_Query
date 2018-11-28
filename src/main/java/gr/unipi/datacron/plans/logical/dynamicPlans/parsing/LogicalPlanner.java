@@ -12,16 +12,20 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ColumnOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ValueOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
+import gr.unipi.datacron.store.DataStore;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.SortCondition;
-import org.apache.jena.sparql.algebra.*;
-import org.apache.jena.sparql.algebra.op.*;
-import gr.unipi.datacron.store.DataStore;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.OpVisitorBase;
+import org.apache.jena.sparql.algebra.OpWalker;
+import org.apache.jena.sparql.algebra.op.OpBGP;
+import org.apache.jena.sparql.algebra.op.OpFilter;
+import org.apache.jena.sparql.algebra.op.OpProject;
 import org.apache.jena.sparql.expr.Expr;
 import scala.Option;
-
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -84,11 +88,6 @@ public class LogicalPlanner extends OpVisitorBase {
     public void visit(final OpProject opProject) {
         opProject.getVars().forEach(e -> selectVariables.add(e.toString()));
 
-    }
-
-    @Override
-    public void visit(OpUnion opUnion) {
-        opUnion.getName();
     }
 
     @Override
@@ -179,17 +178,20 @@ public class LogicalPlanner extends OpVisitorBase {
 
             for (Column c : p.getArrayColumns()) {
                 if (!(c instanceof ColumnWithVariable)) {
-                    k.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString())));
+                    k.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString()), ConditionType.EQ));
                 }
 
             }
 
-            listOfSelectOperators.add(SelectOperator.newSelectOperator(p, p.getArrayColumns(), k.stream().toArray(OperandPair[]::new), ConditionType.EQ, outputSize));
+            listOfSelectOperators.add(SelectOperator.newSelectOperator(p, p.getArrayColumns(), k.stream().toArray(OperandPair[]::new), outputSize));
 
         });
 
-        bop = formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
-
+        if (bop == null) {
+            bop = formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
+        } else {
+            bop = JoinOperator.newJoinOperator(bop, formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/)));
+        }
     }
 
 //    private void getTriples(String q) {
@@ -358,11 +360,11 @@ public class LogicalPlanner extends OpVisitorBase {
                             List<OperandPair> cwv = new ArrayList<>();
                             for (Column c : pop.getArrayColumns()) {
                                 if (!(c instanceof ColumnWithVariable)) {
-                                    cwv.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString())));
+                                    cwv.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString()), ConditionType.EQ));
                                 }
                             }
 
-                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(OperandPair[]::new), ConditionType.EQ, new java.util.Random().nextInt(2000) + 1));
+                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(OperandPair[]::new), new java.util.Random().nextInt(2000) + 1));
 
                             l.remove(list2.get(i));
 
@@ -406,12 +408,9 @@ public class LogicalPlanner extends OpVisitorBase {
 
         Query query = QueryFactory.create(builder.sparqlQuery);
 
-        //query.getProject().forEachVar((e)->System.out.println("AGGREGATOR: "+e.));
-
         Op op = Algebra.compile(query);
-        this.myOpVisitorWalker(op);
 
-        query.has
+        this.myOpVisitorWalker(op);
 
         if (filters != null) {
 
@@ -474,13 +473,15 @@ public class LogicalPlanner extends OpVisitorBase {
                     }
                 }
 
-                bop = SelectOperator.newSelectOperator(bop, bop.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2)}, ct, bop.getOutputSize());
+                bop = SelectOperator.newSelectOperator(bop, bop.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2, ct)}, bop.getOutputSize());
 
             }
 
         }
 
-        if(query.isDistinct()){
+        if (query.isDistinct()) {
+
+            bop = DistinctOperator.newDistinctOperator(bop, bop.getOutputSize());
 
         }
 
@@ -520,7 +521,6 @@ public class LogicalPlanner extends OpVisitorBase {
         if (query.hasLimit()) {
             bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit(), bop.getOutputSize());
         }
-
 
 
         System.out.println(query.getAggregators().size());

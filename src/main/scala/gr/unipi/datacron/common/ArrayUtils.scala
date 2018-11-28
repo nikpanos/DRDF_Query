@@ -18,7 +18,7 @@ object ArrayUtils {
       return -1
     }
   }
-  
+
   def binarySearch(a: Array[(String, Long)], x: String): Int = {
     if ((a.length == 0) || (a(0)._1 > x) || (a(a.length - 1)._1 < x)) {
       return -1;

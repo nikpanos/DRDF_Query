@@ -1,7 +1,5 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.operands;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
-
 public class ValueOperand extends BaseOperand {
 
 

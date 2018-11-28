@@ -1,4 +1,5 @@
 package gr.unipi.datacron.queries
+
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.logical.dynamicPlans.DynamicLogicalPlan
 

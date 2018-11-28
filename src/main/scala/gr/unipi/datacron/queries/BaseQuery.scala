@@ -1,11 +1,10 @@
 package gr.unipi.datacron.queries
 
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.{AppConfig, Benchmarks, Utils}
+import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
-import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.logical.BaseLogicalPlan
-import gr.unipi.datacron.store.DataStore.spark
 
 abstract class BaseQuery() {
   DataStore.init()

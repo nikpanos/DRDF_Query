@@ -1,11 +1,8 @@
 package gr.unipi.datacron.plans.logical.staticPlans.starSTRange
 
 import gr.unipi.datacron.plans.logical.staticPlans.sptRefinement.TriplesRefinement
-import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions._
 
 case class StarRdfFirst() extends BaseStar() {
   override def doExecutePlan(): DataFrame = {

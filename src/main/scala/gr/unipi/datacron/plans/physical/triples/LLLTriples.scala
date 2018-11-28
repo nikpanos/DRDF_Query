@@ -8,8 +8,8 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
-import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Column, DataFrame}
 
 case class LLLTriples() extends BasePhysicalPlan with TTriples {
 
@@ -37,7 +37,7 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
           val sp = spatialIds.get(components._2)
           if (sp.nonEmpty) {
             //not pruned by spatial
-            key = 3  //initially set to need both refinements
+            key = 3 //initially set to need both refinements
             if ((components._1 > intervalIds._1) && (components._1 < intervalIds._2)) {
               //does not need temporal refinement
               key -= 1
@@ -87,12 +87,12 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
         if (decodedAltitude.isDefined) {
           val alt = decodedAltitude.get.toDouble
           sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
-                      (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude) &&
-                      (alt >= lowerCorner.altitude.get) && (alt <= upperCorner.altitude.get)
+            (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude) &&
+            (alt >= lowerCorner.altitude.get) && (alt <= upperCorner.altitude.get)
         }
         else {
           sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
-                      (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude)
+            (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude)
         }
       }
 
@@ -224,6 +224,6 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
       if (x._2) asc(colName)
       else desc(colName)
     })
-    params.df.orderBy(sortExprs:_*)
+    params.df.orderBy(sortExprs: _*)
   }
 }

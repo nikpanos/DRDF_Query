@@ -5,7 +5,6 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
-import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
 private[logical] case class TriplesRefinement() extends BaseRefinement {

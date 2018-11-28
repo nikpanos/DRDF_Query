@@ -6,8 +6,6 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.ProjectOperator;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.SelectOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 /**

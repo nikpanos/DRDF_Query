@@ -1,13 +1,13 @@
 package gr.unipi.datacron.plans.physical.dictionary
 
 import gr.unipi.datacron.common.AppConfig
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.physical.traits.decodeColumnsParams
 import gr.unipi.datacron.store.{DataStore, DictionaryRedis}
-import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.catalyst.encoders.{ExpressionEncoder, RowEncoder}
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
-import gr.unipi.datacron.common.Consts._
+import org.apache.spark.sql.{DataFrame, Row}
 
 case class RdsBatchDictionary() extends BaseRdsDictionary {
   protected override def decodeColumn(df: DataFrame, columnName: String, newColumnName: String): DataFrame = {

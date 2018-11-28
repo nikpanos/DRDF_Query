@@ -1,11 +1,12 @@
 package gr.unipi.datacron.store
 
-import gr.unipi.datacron.common.{AppConfig, Consts, TriplesTokenizer}
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.schema.SemanticObject
+import gr.unipi.datacron.common.{AppConfig, Consts, TriplesTokenizer}
 import org.apache.spark.sql.DataFrame
 
 private[store] class NodeProperties() extends BaseHDFSStore {
+
   import DataStore.spark.implicits._
 
   protected def configPropertyForDataPath: String = qfpNodePath
@@ -46,7 +47,7 @@ private[store] class NodeProperties() extends BaseHDFSStore {
             semObject.getValues match {
               case Array(a, b, c, d, e, f, g, h) => (semObject.subj, a, b, c, d, e, f, g, h)
             }
-          }).toDF(schema:_*)
+          }).toDF(schema: _*)
         case `datasetAdsbNode` =>
           if (predicates.length != 10) {
             throw new Exception("Expected 10 columns in dataset")
@@ -68,7 +69,7 @@ private[store] class NodeProperties() extends BaseHDFSStore {
             semObject.getValues match {
               case Array(a, b, c, d, e, f, g, h, i, j) => (semObject.subj, a, b, c, d, e, f, g, h, i, j)
             }
-          }).toDF(schema:_*)
+          }).toDF(schema: _*)
         case "" =>
           throw new Exception("datasetType is not set")
       }

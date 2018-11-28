@@ -10,7 +10,7 @@ case class TriplesTokenizer(line: String) {
     val pos = nextPos.get
     val tmp = line.indexOf(tripleFieldsSeparator, pos)
     nextPos = if (tmp >= 0) Some(tmp + 1)
-              else None
+    else None
     if (nextPos.isDefined) {
       Some(line.substring(pos, nextPos.get - 1).toLong)
     }

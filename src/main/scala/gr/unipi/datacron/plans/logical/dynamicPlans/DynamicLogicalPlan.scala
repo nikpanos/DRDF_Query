@@ -2,20 +2,20 @@ package gr.unipi.datacron.plans.logical.dynamicPlans
 
 import java.text.SimpleDateFormat
 
+import gr.unipi.datacron.common.Consts._
+import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.common.{AppConfig, Consts, SpatioTemporalInfo, SpatioTemporalRange}
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
-import gr.unipi.datacron.common.Consts._
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
-import gr.unipi.datacron.store.DataStore
-import gr.unipi.datacron.common.DataFrameUtils._
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
+import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.Try
@@ -84,6 +84,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def getDecodedStr(encodedValue: Long): String = PhysicalPlanner.decodeSingleKey(decodeSingleKeyParams(encodedValue)).getOrElse("")
 
   private def getPrefix(s: String): String = s.substring(0, s.indexOf('.') + 1)
+
   private def getSuffix(s: String): String = s.substring(s.indexOf('.') + 1)
 
   private def getNewJoinOrOperator(node: JoinSubjectOperator, preds: Array[String]): JoinSubjectOperator = {
@@ -196,7 +197,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     (incl, excl)
   }
 
-  private def processSelectOperator(filter: SelectOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {
+  private def processSelectOperator(filter: SelectOperator, dfO: Option[DataFrame]): Option[DataFrame] = {
     val sub = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.SUBJECT)
     val pred = filter.getFilters.find(_.getColumn.getColumnTypes == PREDICATE)
     val obj = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
@@ -253,7 +254,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def processJoinSubjectOperator(joinOr: JoinSubjectOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {
+  private def processJoinSubjectOperator(joinOr: JoinSubjectOperator, dfO: Option[DataFrame]): Option[DataFrame] = {
     val dfs = guessDataFrame(dfO, joinOr)
 
     if (dfs.length > 1) {
@@ -349,9 +350,9 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def processJoinOperator(joinOp: JoinOperator) : Option[DataFrame] = executeJoin(joinOp, joinOp.getColumnJoinPredicate, None)
+  private def processJoinOperator(joinOp: JoinOperator): Option[DataFrame] = executeJoin(joinOp, joinOp.getColumnJoinPredicate, None)
 
-  private def processProjectOperator(selectOp: ProjectOperator) : Option[DataFrame] = {
+  private def processProjectOperator(selectOp: ProjectOperator): Option[DataFrame] = {
     val dfO = recursivelyExecuteNode(selectOp.getChild, None)
     if (dfO.isDefined) {
       projectResults(filterFinalResults(dfO), selectOp)

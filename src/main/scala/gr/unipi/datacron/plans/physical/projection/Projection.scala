@@ -1,9 +1,9 @@
 package gr.unipi.datacron.plans.physical.projection
 
+import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits._
 import org.apache.spark.sql.DataFrame
-import gr.unipi.datacron.common.DataFrameUtils._
 
 case class Projection() extends BasePhysicalPlan with TProjection {
   override def dropColumns(params: dropColumnsParams): DataFrame = params.df.drop(params.colNames: _*)
@@ -24,5 +24,5 @@ case class Projection() extends BasePhysicalPlan with TProjection {
 
   override def prefixColumns(params: prefixColumnsParams): DataFrame = params.df.prefixColumns(params.prefix)
 
-  override def selectColumns(params: selectColumnsParams): DataFrame = params.df.select(params.cols.head, params.cols.tail :_*)
+  override def selectColumns(params: selectColumnsParams): DataFrame = params.df.select(params.cols.head, params.cols.tail: _*)
 }

@@ -1,12 +1,5 @@
 package gr.unipi.datacron
 
-import com.typesafe.config.ConfigObject
-import gr.unipi.datacron.common.AppConfig
-import gr.unipi.datacron.common.Consts._
-
-import scala.collection.mutable
-import scala.io.Source
-
 object TextToRedis {
 
   /*private def getClusterConnection(configParam: String): RedisCluster = {
@@ -23,7 +16,7 @@ object TextToRedis {
     }
   }*/
 
-  def main(args : Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
     /*AppConfig.init(args(0))
 
     val filename = "input/star/dictionarySimple32_8_4.txt"

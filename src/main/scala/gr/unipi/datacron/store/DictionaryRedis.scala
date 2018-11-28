@@ -3,12 +3,12 @@ package gr.unipi.datacron.store
 import com.typesafe.config.ConfigObject
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
-import redis.clients.jedis._
 import gr.unipi.datacron.store.utils.MyRedisCluster
+import redis.clients.jedis._
 
-import scala.util.Try
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.util.Try
 
 class DictionaryRedis() {
   private def getClusterConnection(configParam: String, dbIndex: Int): MyRedisCluster = {
@@ -39,6 +39,7 @@ class DictionaryRedis() {
   def getDynamicSetting(key: String): Option[String] = Try(dynamicIdToUri.getNow(key)).toOption
 
   def getLowerTimestampIdx(timestamp: Long): Int = getUpperTimestampIdx(timestamp)
+
   def getUpperTimestampIdx(timestamp: Long): Int = Try(dynamicIdToUri.findInSetLowerNow(redisKeyTimestamps, timestamp).toInt).getOrElse(0)
 
   def getEncodedValue(key: String): Option[Long] = Try(staticUriToId.getNow(key).toLong).toOption

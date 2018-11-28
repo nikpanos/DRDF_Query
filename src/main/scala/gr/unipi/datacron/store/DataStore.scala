@@ -3,10 +3,10 @@ package gr.unipi.datacron.store
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object DataStore {
   //IMPORTANT: all DataStore fields should be lazy evaluated because DataStore is being initialized on each node
@@ -21,8 +21,8 @@ object DataStore {
   lazy val sc: SparkContext = spark.sparkContext
 
   lazy val propertyData: Array[DataFrame] = if ((AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) || (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 2)) Array(nodeData, vesselData)
-                                            else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 1) Array(nodeData)
-                                            else Array.empty[DataFrame]
+  else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 1) Array(nodeData)
+  else Array.empty[DataFrame]
   lazy val allData: Array[DataFrame] = propertyData :+ triplesData
 
   lazy val spatialGrid: SpatialGrid = new SpatialGrid()
@@ -33,7 +33,7 @@ object DataStore {
 
   lazy val node: NodeProperties = new NodeProperties()
   lazy val nodeData: DataFrame = getCached(node.data)
-  var nodeDatasetType: String = ""  //only used for TextToParquet
+  var nodeDatasetType: String = "" //only used for TextToParquet
 
   lazy val vessels: VesselProperties = new VesselProperties()
   lazy val vesselData: DataFrame = getCached(vessels.data)

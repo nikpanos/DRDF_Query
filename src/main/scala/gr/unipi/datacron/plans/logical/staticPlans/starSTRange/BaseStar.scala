@@ -1,12 +1,11 @@
 package gr.unipi.datacron.plans.logical.staticPlans.starSTRange
 
 
-import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.AppConfig
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.staticPlans.StaticLogicalPlan
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
-import org.apache.spark.sql.DataFrame
 
 import scala.util.Try
 
