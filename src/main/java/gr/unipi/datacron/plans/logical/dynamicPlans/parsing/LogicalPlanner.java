@@ -423,7 +423,6 @@ public class LogicalPlanner extends OpVisitorBase {
                 String s = expr.toString().substring(1, expr.toString().length() - 1);
 
                 String[] elements = s.split(" ");
-                System.out.println(elements[2]);
                 switch (elements[0]) {
                     case "=":
                         ct = ConditionType.EQ;
@@ -521,9 +520,6 @@ public class LogicalPlanner extends OpVisitorBase {
         if (query.hasLimit()) {
             bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit(), bop.getOutputSize());
         }
-
-
-        System.out.println(query.getAggregators().size());
 
         bop = ProjectOperator.newProjectOperator(bop, selectVariables, bop.getOutputSize());
 
