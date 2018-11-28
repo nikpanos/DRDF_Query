@@ -9,6 +9,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ import java.util.List;
 public abstract class BaseOperator {
 
 
-    private final List<BaseOperator> bopChildren = new ArrayList<>();//list with base operators children
+    private BaseOperator[] bopChildren;//list with base operators children
     private BaseOperator parent;
     private long outputSize;
     private long realOutputSize;
@@ -30,14 +31,11 @@ public abstract class BaseOperator {
     }
 
     protected void addChild(BaseOperator... bop) {
-        for (BaseOperator b : bop) {
-            if (this.getNumberOfBopChildren() < getMaxNumberOfChildren()) {
-                bopChildren.add(b);
-            } else {
-                throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
-            }
-        }
+        bopChildren = bop;
 
+        if (!(this.getNumberOfBopChildren() <= getMaxNumberOfChildren())) {
+            throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
 
     protected void fillAndFormArrayColumns() {
@@ -54,12 +52,12 @@ public abstract class BaseOperator {
 
     abstract protected int getMaxNumberOfChildren();
 
-    public List<BaseOperator> getBopChildren() {
-        return bopChildren;
+    public BaseOperator[] getBopChildren() {
+        return bopChildren.clone();
     }
 
     public int getNumberOfBopChildren() {
-        return bopChildren.size();
+        return bopChildren.length;
 
     }
 

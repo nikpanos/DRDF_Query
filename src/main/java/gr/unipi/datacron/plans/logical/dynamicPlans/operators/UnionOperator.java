@@ -29,9 +29,10 @@ public class UnionOperator extends BaseOpW2Child {
             }
         }
 
-        this.getBopChildren().forEach((b) -> {
-            s.append(b.toString(margin + "|"));
-        });
+        for(BaseOperator bop : getBopChildren()){
+            s.append(bop.toString(margin + "|"));
+        }
+
         return s.toString();
     }
 

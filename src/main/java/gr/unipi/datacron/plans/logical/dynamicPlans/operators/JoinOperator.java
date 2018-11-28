@@ -43,16 +43,16 @@ public class JoinOperator extends BaseOpW2Child {
         int b;
         int c = 0;
         //find the common variable of the first two child operators        
-        for (Column i : getBopChildren().get(0).getArrayColumns()) {
+        for (Column i : getBopChildren()[0].getArrayColumns()) {
             if (c == 1) {
                 break;
             }
             if (i instanceof ColumnWithVariable) {
                 b = 0;
-                for (Column k : getBopChildren().get(1).getArrayColumns()) {
+                for (Column k : getBopChildren()[1].getArrayColumns()) {
                     if (k instanceof ColumnWithVariable) {
                         if (((ColumnWithVariable) i).getVariableName().equals(((ColumnWithVariable) k).getVariableName())) {
-                            elementsToBeDeleted.add(getBopChildren().get(0).getArrayColumns().length + b);
+                            elementsToBeDeleted.add(getBopChildren()[0].getArrayColumns().length + b);
 
                             columnJoinPredicateList.add(i);
                             columnJoinPredicateList.add(k);
@@ -104,9 +104,9 @@ public class JoinOperator extends BaseOpW2Child {
             }
         }
 
-        this.getBopChildren().forEach((b) -> {
-            s.append(b.toString(margin + "|"));
-        });
+        for(BaseOperator bop : getBopChildren()){
+            s.append(bop.toString(margin + "|"));
+        }
         return s.toString();
     }
 

@@ -17,10 +17,10 @@ public class BaseOpW2Child extends BaseOperator {
     }
 
     public BaseOperator getLeftChild() {
-        return getBopChildren().get(0);
+        return getBopChildren()[0];
     }
 
     public BaseOperator getRightChild() {
-        return getBopChildren().get(1);
+        return getBopChildren()[1];
     }
 }

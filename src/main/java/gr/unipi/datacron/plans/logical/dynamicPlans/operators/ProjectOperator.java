@@ -7,12 +7,12 @@ import java.util.List;
 
 public class ProjectOperator extends BaseOpW1Child {
 
-    private List<String> variables;
+    private String[] variables;
 
     private ProjectOperator(BaseOperator bop, List<String> variables, long outputSize) {
         this.addChild(bop);
         this.fillAndFormArrayColumns();
-        this.variables = variables;
+        this.variables = variables.stream().toArray(String[]::new);
         setOutputSize(outputSize);
     }
 
@@ -21,8 +21,8 @@ public class ProjectOperator extends BaseOpW1Child {
 
     }
 
-    public List<String> getVariables() {
-        return variables;
+    public String[] getVariables() {
+        return variables.clone();
     }
 
     @Override
@@ -40,9 +40,10 @@ public class ProjectOperator extends BaseOpW1Child {
             }
         }
 
-        this.getBopChildren().forEach((b) -> {
-            s.append(b.toString(margin + "|"));
-        });
+        for(BaseOperator bop : getBopChildren()){
+            s.append(bop.toString(margin + "|"));
+        }
+
         return s.toString();
     }
 

@@ -24,7 +24,6 @@ public class TestUnion {
                         "WHERE  { { ?book dc10:title  ?title } " +
                         "UNION" +
                         " { ?textbook dc11:title  ?title } }").build().getBop();
-        bop.getBopChildren().get(0);
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());

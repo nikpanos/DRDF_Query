@@ -43,9 +43,8 @@ public class SortOperator extends BaseOpW1Child {
             }
         }
 
-        this.getBopChildren().forEach((b) -> {
-            s.append(b.toString(margin + "|"));
-        });
+
+
         return s.toString();
     }
 

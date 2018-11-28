@@ -5,8 +5,6 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
@@ -43,22 +41,6 @@ public class NikosTest {
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());
-
-
-        for (Column c : bop.getArrayColumns()) {
-            if (c instanceof ColumnWithVariable) {
-                System.out.println(c.getQueryString());
-//                if(c.getQueryString().equals("?zx")){
-//                    break;
-//                }
-
-            }
-
-        }
-
-//        List<Integer> l = Arrays.asList(50,40,70,80,30,10,20,90,60);
-//        l.sort((bo1,bo2)->Long.compare(bo1.intValue(), bo2.intValue()));
-//        System.out.println(l.toString());
 
     }
 }

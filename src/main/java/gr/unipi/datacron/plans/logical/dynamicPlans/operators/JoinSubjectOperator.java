@@ -34,14 +34,14 @@ public class JoinSubjectOperator extends BaseOpWnChild {
         List<Column> columnJoinPredicateList = new ArrayList<>();
 
         //first child elements
-        ColumnWithVariable a = (ColumnWithVariable) getBopChildren().get(0).getArrayColumns()[0];
+        ColumnWithVariable a = (ColumnWithVariable) getBopChildren()[0].getArrayColumns()[0];
         columnJoinPredicateList.add(a);
 
         //other child
-        int j = getBopChildren().get(0).getArrayColumns().length;
-        for (int i = 1; i < getBopChildren().size(); i++) {
+        int j = getBopChildren()[0].getArrayColumns().length;
+        for (int i = 1; i < getBopChildren().length; i++) {
 
-            ColumnWithVariable c = (ColumnWithVariable) getBopChildren().get(i).getArrayColumns()[0];
+            ColumnWithVariable c = (ColumnWithVariable) getBopChildren()[i].getArrayColumns()[0];
 
             //check if subjects of all triplets are the same. if not then throw error
             if (!a.getVariableName().equals(c.getVariableName())) {
@@ -53,7 +53,7 @@ public class JoinSubjectOperator extends BaseOpWnChild {
             }
             columnJoinPredicateList.add(c);
             elementsToBeDeleted.add(j);
-            j = j + getBopChildren().get(i).getArrayColumns().length;
+            j = j + getBopChildren()[i].getArrayColumns().length;
         }
 
         columnJoinPredicate = columnJoinPredicateList.stream().toArray(Column[]::new);
@@ -92,9 +92,9 @@ public class JoinSubjectOperator extends BaseOpWnChild {
             }
         }
 
-        this.getBopChildren().forEach((b) -> {
-            s.append(b.toString(margin + "|"));
-        });
+        for(BaseOperator bop : getBopChildren()){
+            s.append(bop.toString(margin + "|"));
+        }
         return s.toString();
     }
 
