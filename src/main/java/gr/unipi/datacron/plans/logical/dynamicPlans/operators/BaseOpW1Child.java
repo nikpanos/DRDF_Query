@@ -10,11 +10,7 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
  */
 public abstract class BaseOpW1Child extends BaseOperator {
 
-    @Override
-    protected int getMaxNumberOfChildren() {
-        return 1;
 
-    }
 
     public BaseOperator getChild() {
         return getBopChildren()[0];
@@ -22,6 +18,10 @@ public abstract class BaseOpW1Child extends BaseOperator {
 
     protected BaseOpW1Child(BaseOperator bop) {
         super(bop);
+    }
+
+    protected BaseOpW1Child(long outputSize, BaseOperator bop) {
+        super(outputSize, bop);
     }
 
 }

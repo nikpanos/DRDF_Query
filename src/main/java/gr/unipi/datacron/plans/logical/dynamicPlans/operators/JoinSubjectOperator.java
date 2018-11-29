@@ -24,7 +24,6 @@ public class JoinSubjectOperator extends BaseOpWnChild {
     private JoinSubjectOperator(BaseOperator... bo) {
         super(bo);
         this.fillAndFormArrayColumns();
-        setOutputSize(this.estimateOutputSize(bo));
     }
 
     @Override
@@ -104,10 +103,10 @@ public class JoinSubjectOperator extends BaseOpWnChild {
     }
 
     @Override
-    protected long estimateOutputSize(BaseOperator... bo) {
+    protected long estimateOutputSize() {
 
         Long i = Long.MAX_VALUE;
-        for (BaseOperator b : bo) {
+        for (BaseOperator b : getBopChildren()) {
             if (b.getOutputSize() < i) {
                 i = b.getOutputSize();
             }

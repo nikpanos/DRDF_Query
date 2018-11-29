@@ -15,6 +15,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 public class TripleOperator extends BaseOpW0Child {
 
     private TripleOperator(String subject, String predicate, String object) {
+        super();
 
         Column[] c = new Column[3];
 
@@ -46,6 +47,11 @@ public class TripleOperator extends BaseOpW0Child {
     @Override
     protected String toString(String margin) {
         return "";
+    }
+
+    @Override
+    protected long estimateOutputSize() {
+        return -1;
     }
 
     @Override

@@ -7,18 +7,11 @@ public class LimitOperator extends BaseOpW1Child {
 
     private final int limit;
 
-    private LimitOperator(BaseOperator baseOperator, int limit, long outputSize) {
-
+    private LimitOperator(BaseOperator baseOperator, int limit) {
 
         super(baseOperator);
         this.fillAndFormArrayColumns();
         this.limit = limit;
-
-        if (limit <= outputSize) {
-            setOutputSize(limit);
-        } else {
-            setOutputSize(outputSize);
-        }
 
     }
 
@@ -26,8 +19,8 @@ public class LimitOperator extends BaseOpW1Child {
         return limit;
     }
 
-    public static LimitOperator newLimitOperator(BaseOperator baseOperator, int limit, long outputSize) {
-        return new LimitOperator(baseOperator, limit, outputSize);
+    public static LimitOperator newLimitOperator(BaseOperator baseOperator, int limit) {
+        return new LimitOperator(baseOperator, limit);
 
     }
 
@@ -52,6 +45,18 @@ public class LimitOperator extends BaseOpW1Child {
         }
 
         return s.toString();
+    }
+
+    @Override
+    protected long estimateOutputSize() {
+
+        long i = getChild().getOutputSize();
+
+        if (limit <= i) {
+            return limit;
+        }
+
+        return i;
     }
 
     @Override

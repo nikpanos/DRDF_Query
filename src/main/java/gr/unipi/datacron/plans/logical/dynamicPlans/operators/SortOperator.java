@@ -9,15 +9,14 @@ public class SortOperator extends BaseOpW1Child {
     private final ColumnWithDirection[] columnWithDirection;
     //Query.ORDER_ASCENDING = 1, Query.ORDER_DESCENDING = -1
 
-    private SortOperator(BaseOperator bop, ColumnWithDirection[] columnWithDirection, long outputSize) {
+    private SortOperator(BaseOperator bop, ColumnWithDirection[] columnWithDirection) {
         super(bop);
         this.fillAndFormArrayColumns();
         this.columnWithDirection = columnWithDirection;
-        setOutputSize(outputSize);
     }
 
-    public static SortOperator newSortOperator(BaseOperator baseOperator, ColumnWithDirection[] columnWithDirection, long outputSize) {
-        return new SortOperator(baseOperator, columnWithDirection, outputSize);
+    public static SortOperator newSortOperator(BaseOperator baseOperator, ColumnWithDirection[] columnWithDirection) {
+        return new SortOperator(baseOperator, columnWithDirection);
     }
 
     public ColumnWithDirection[] getColumnWithDirection() {
@@ -47,6 +46,12 @@ public class SortOperator extends BaseOpW1Child {
 
         return s.toString();
     }
+
+    @Override
+    protected long estimateOutputSize() {
+        return getChild().getOutputSize();
+    }
+
 
     @Override
     public String toString() {

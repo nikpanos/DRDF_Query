@@ -30,7 +30,6 @@ public class JoinOperator extends BaseOpW2Child {
 
         super(bo1, bo2);
         this.fillAndFormArrayColumns();
-        setOutputSize(this.estimateOutputSize(bo1, bo2));
 
     }
 
@@ -116,14 +115,9 @@ public class JoinOperator extends BaseOpW2Child {
     }
 
     @Override
-    protected long estimateOutputSize(BaseOperator... bo) {
+    protected long estimateOutputSize() {
 
-        Long i = 1L;
-        for (BaseOperator b : bo) {
-            i = i * b.getOutputSize();
-        }
-
-        return i;
+        return getLeftChild().getOutputSize() * getRightChild().getOutputSize();
 
     }
 

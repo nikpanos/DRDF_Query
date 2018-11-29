@@ -5,14 +5,13 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
 public class DistinctOperator extends BaseOpW1Child {
 
-    private DistinctOperator(BaseOperator bop, long outputSize) {
+    private DistinctOperator(BaseOperator bop) {
         super(bop);
         this.fillAndFormArrayColumns();
-        setOutputSize(outputSize);
     }
 
-    public static DistinctOperator newDistinctOperator(BaseOperator bop, long outputSize) {
-        return new DistinctOperator(bop, outputSize);
+    public static DistinctOperator newDistinctOperator(BaseOperator bop) {
+        return new DistinctOperator(bop);
     }
 
     @Override
@@ -34,6 +33,11 @@ public class DistinctOperator extends BaseOpW1Child {
         }
 
         return s.toString();
+    }
+
+    @Override
+    protected long estimateOutputSize() {
+        return getChild().getOutputSize();
     }
 
     @Override

@@ -5,14 +5,13 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
 public class UnionOperator extends BaseOpW2Child {
 
-    private UnionOperator(BaseOperator bop1, BaseOperator bop2, long outputSize) {
+    private UnionOperator(BaseOperator bop1, BaseOperator bop2) {
         super(bop1, bop2);
         this.fillAndFormArrayColumns();
-        setOutputSize(outputSize);
     }
 
-    public static UnionOperator newUnionOperator(BaseOperator bop1, BaseOperator bop2, long outputSize) {
-        return new UnionOperator(bop1, bop2, outputSize);
+    public static UnionOperator newUnionOperator(BaseOperator bop1, BaseOperator bop2) {
+        return new UnionOperator(bop1, bop2);
     }
 
     @Override
@@ -34,6 +33,11 @@ public class UnionOperator extends BaseOpW2Child {
         }
 
         return s.toString();
+    }
+
+    @Override
+    protected long estimateOutputSize() {
+        return getLeftChild().getOutputSize() + getRightChild().getOutputSize();
     }
 
     @Override

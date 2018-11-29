@@ -480,7 +480,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
         if (query.isDistinct()) {
 
-            bop = DistinctOperator.newDistinctOperator(bop, bop.getOutputSize());
+            bop = DistinctOperator.newDistinctOperator(bop);
 
         }
 
@@ -512,16 +512,16 @@ public class LogicalPlanner extends OpVisitorBase {
                 }
             }
 
-            bop = SortOperator.newSortOperator(bop, cwd.stream().toArray(ColumnWithDirection[]::new), bop.getOutputSize());
+            bop = SortOperator.newSortOperator(bop, cwd.stream().toArray(ColumnWithDirection[]::new));
 
 
         }
 
         if (query.hasLimit()) {
-            bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit(), bop.getOutputSize());
+            bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit());
         }
 
-        bop = ProjectOperator.newProjectOperator(bop, selectVariables, bop.getOutputSize());
+        bop = ProjectOperator.newProjectOperator(bop, selectVariables);
 
     }
 

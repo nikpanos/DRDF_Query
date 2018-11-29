@@ -20,7 +20,7 @@ public abstract class BaseOperator {
 
     private final BaseOperator[] bopChildren;//list with base operators children
     //private BaseOperator parent;
-    private long outputSize;
+    private final long outputSize;
     private long realOutputSize;
 
 
@@ -31,11 +31,19 @@ public abstract class BaseOperator {
     }
 
     protected BaseOperator(BaseOperator... bop) {
-        bopChildren = bop;
+        this(-1, bop);
 
-        if (!(this.getNumberOfBopChildren() <= getMaxNumberOfChildren())) {
-            throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    protected BaseOperator(long outputSize, BaseOperator... bop) {
+        this.bopChildren = bop;
+        if (outputSize == -1) {
+            this.outputSize = this.estimateOutputSize();
         }
+        else {
+            this.outputSize = outputSize;
+        }
+
     }
 
     /*protected void addChild(BaseOperator... bop) {
@@ -54,10 +62,10 @@ public abstract class BaseOperator {
         arrayColumns = formArrayColumns(listColumns).stream().toArray(Column[]::new);
     }
 
-    abstract protected int getMaxNumberOfChildren();
+
 
     public BaseOperator[] getBopChildren() {
-        return bopChildren.clone();
+        return bopChildren;
     }
 
     public int getNumberOfBopChildren() {
@@ -100,18 +108,18 @@ public abstract class BaseOperator {
     }
 
 
-    protected long estimateOutputSize(BaseOperator... bo) {
-        return 0;
-    }
+    abstract protected long estimateOutputSize(); //{
+        //return 0;
+    //}
 
 
     public long getOutputSize() {
         return outputSize;
     }
 
-    protected void setOutputSize(long outputSize) {
-        this.outputSize = outputSize;
-    }
+    //protected void setOutputSize(long outputSize) {
+    //    this.outputSize = outputSize;
+    //}
 
     public long getRealOutputSize() {
         return realOutputSize;

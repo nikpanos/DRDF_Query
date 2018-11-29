@@ -9,15 +9,14 @@ public class ProjectOperator extends BaseOpW1Child {
 
     private String[] variables;
 
-    private ProjectOperator(BaseOperator bop, List<String> variables, long outputSize) {
+    private ProjectOperator(BaseOperator bop, List<String> variables) {
         super(bop);
         this.fillAndFormArrayColumns();
         this.variables = variables.stream().toArray(String[]::new);
-        setOutputSize(outputSize);
     }
 
-    public static ProjectOperator newProjectOperator(BaseOperator bop, List<String> variables, long outputSize) {
-        return new ProjectOperator(bop, variables, outputSize);
+    public static ProjectOperator newProjectOperator(BaseOperator bop, List<String> variables) {
+        return new ProjectOperator(bop, variables);
 
     }
 
@@ -46,6 +45,12 @@ public class ProjectOperator extends BaseOpW1Child {
 
         return s.toString();
     }
+
+    @Override
+    protected long estimateOutputSize() {
+        return getChild().getOutputSize();
+    }
+
 
     @Override
     public String toString() {

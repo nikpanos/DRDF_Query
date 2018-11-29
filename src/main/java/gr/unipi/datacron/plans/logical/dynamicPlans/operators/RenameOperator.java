@@ -32,6 +32,11 @@ public class RenameOperator extends BaseOpW1Child {
     }
 
     @Override
+    protected long estimateOutputSize() {
+        return -1;
+    }
+
+    @Override
     public String toString() {
         return "";
     }

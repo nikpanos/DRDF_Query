@@ -22,10 +22,9 @@ public class SelectOperator extends BaseOpW1Child {
 
 
     private SelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, long outputSize) {
-        super(bo);
+        super(outputSize, bo);
         setArrayColumns(c);
         this.operandPairList = operandPairList;
-        setOutputSize(outputSize);
     }
 
     private Column getColumn(ColumnTypes ct) {
@@ -100,6 +99,11 @@ public class SelectOperator extends BaseOpW1Child {
         }
 
         return s.toString();
+    }
+
+    @Override
+    protected long estimateOutputSize() {
+        return -1;
     }
 
     @Override
