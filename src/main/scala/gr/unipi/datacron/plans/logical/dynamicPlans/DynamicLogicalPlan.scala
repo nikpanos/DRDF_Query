@@ -45,7 +45,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     executeTree(logicalPlan).get
   }
 
-  /*private[dynamicPlans] val constraints = Try(SpatioTemporalRange(
+  private[dynamicPlans] val constraints = Try(SpatioTemporalRange(
     SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), AppConfig.getOptionalDouble(qfpAltLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
     SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), AppConfig.getOptionalDouble(qfpAltUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
 

@@ -24,6 +24,14 @@ public class JoinOperator extends BaseOpW2Child {
         return columnJoinPredicate;
     }
 
+    public Column getLeftColumn() {
+        return columnJoinPredicate[0];
+    }
+
+    public Column getRightColumn() {
+        return columnJoinPredicate[1];
+    }
+
     private Column[] columnJoinPredicate;
 
     private JoinOperator(BaseOperator bo1, BaseOperator bo2) {

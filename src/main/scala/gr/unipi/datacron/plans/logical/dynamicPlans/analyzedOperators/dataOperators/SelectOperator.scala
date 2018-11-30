@@ -3,5 +3,5 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOpera
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.commonOperators.{Base1ChildOperator, BaseOperator}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.BooleanTrait
 
-case class SelectOperator(child: BaseOperator, condition: BooleanTrait) extends Base1ChildOperator(child) {
+case class SelectOperator(child: BaseOperator, condition: BooleanTrait, prefixed: Boolean) extends Base1ChildOperator(child, prefixed) {
 }

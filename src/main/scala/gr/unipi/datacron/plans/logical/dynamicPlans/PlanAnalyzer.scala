@@ -15,9 +15,10 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.common.{AppConfig, SpatioTemporalInfo, SpatioTemporalRange}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOperators.{DatasourceOperator, SortEnums}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.{BooleanTrait, ConditionOperator, LogicalAggregateEnums}
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{ColumnTypes, ConditionType, OperandPair}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes, ConditionType, OperandPair}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.{BaseOperand, ColumnOperand, ValueOperand}
 
+import scala.collection.mutable
 import scala.util.Try
 
 
@@ -27,11 +28,16 @@ class PlanAnalyzer() {
 
   private var shouldApplyExactSpatioTemporalFilterLater = false
 
+  private val prefixMappings: mutable.HashMap[String, String] = mutable.HashMap[String, String]()
+
   private val constraints = Try(SpatioTemporalRange(
     SpatioTemporalInfo(AppConfig.getDouble(qfpLatLower), AppConfig.getDouble(qfpLonLower), AppConfig.getOptionalDouble(qfpAltLower), dateFormat.parse(AppConfig.getString(qfpTimeLower)).getTime),
     SpatioTemporalInfo(AppConfig.getDouble(qfpLatUpper), AppConfig.getDouble(qfpLonUpper), AppConfig.getOptionalDouble(qfpAltUpper), dateFormat.parse(AppConfig.getString(qfpTimeUpper)).getTime))).toOption
 
   private def getChildren(bop: BaseOperator): Array[BaseOperator] = bop.getBopChildren
+
+  private def getPrefix(s: String): String = s.substring(0, s.indexOf('.') + 1)
+  private def getSuffix(s: String): String = s.substring(s.indexOf('.') + 1)
 
   private def getEncodedStr(decodedColumnName: String): String = {
     val result = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName))
@@ -163,19 +169,19 @@ class PlanAnalyzer() {
       val ds = findFirstDatasourceOperator(bo)
       if (ds.isPropertyTableSource) {
         val colName = getEncodedStr(findSelectOperator(so, PREDICATE).get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-        analyzedOperators.columnOperators.ProjectOperator(bo, Array(tripleSubLongField, colName))
+        analyzedOperators.columnOperators.ProjectOperator(bo, Array(tripleSubLongField, colName), false)
       }
       else {
         bo
       }
     })
-    analyzedOperators.dataOperators.UnionOperator(selOps)
+    analyzedOperators.dataOperators.UnionOperator(selOps, false)
   }
 
   private def refineBySpatioTemporalInfo(child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.commonOperators.BaseOperator = {
     if (shouldApplyExactSpatioTemporalFilterLater) {
       shouldApplyExactSpatioTemporalFilterLater = false
-      analyzedOperators.spatiotemporalOperators.ExactBoxOperator(child, constraints.get)
+      analyzedOperators.spatiotemporalOperators.ExactBoxOperator(child, constraints.get, child.isPrefixed)
     }
     else {
       child
@@ -186,7 +192,7 @@ class PlanAnalyzer() {
     if (constraints.isDefined && df.hasSpatialAndTemporalShortcutCols) {
       val newOp = if (AppConfig.getOptionalBoolean(qfpEnableFilterByEncodedInfo).getOrElse(true)) {
         shouldApplyExactSpatioTemporalFilterLater = true
-        analyzedOperators.spatiotemporalOperators.ApproximateBoxOperator(child, constraints.get)
+        analyzedOperators.spatiotemporalOperators.ApproximateBoxOperator(child, constraints.get, child.isPrefixed)
       } else { child }
       if (AppConfig.getBoolean(qfpEnableRefinementPushdown)) {
         refineBySpatioTemporalInfo(child)
@@ -209,9 +215,9 @@ class PlanAnalyzer() {
 
           val selOp = createSelectOperator(so, spto)
           if (!dso.isPropertyTableSource) {
-            val po = analyzedOperators.columnOperators.ProjectOperator(selOp, Array(tripleSubLongField, tripleObjLongField))
+            val po = analyzedOperators.columnOperators.ProjectOperator(selOp, Array(tripleSubLongField, tripleObjLongField), false)
             val newColName = getEncodedStr(findSelectOperator(so, PREDICATE).get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-            analyzedOperators.columnOperators.RenameOperator(po, Array((tripleObjLongField, newColName)))
+            analyzedOperators.columnOperators.RenameOperator(po, Array((tripleObjLongField, newColName)), false)
           }
           else {
             selOp
@@ -221,7 +227,6 @@ class PlanAnalyzer() {
         val child = processNode(so.getChild, dfO)
         createSelectOperator(so, child)
     }
-
   }
 
   private def getOperandStr(op: BaseOperand): String = {
@@ -252,7 +257,7 @@ class PlanAnalyzer() {
         analyzedOperators.logicalOperators.LogicalAggregateOperator(conditionLeft, conditionRight, LogicalAggregateEnums.And)
       })
     }
-    analyzedOperators.dataOperators.SelectOperator(child, condition)
+    analyzedOperators.dataOperators.SelectOperator(child, condition, child.isPrefixed)
   }
 
   def processSortOperator(so: SortOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.SortOperator = {
@@ -266,7 +271,7 @@ class PlanAnalyzer() {
       (cwd.getColumn.getColumnName, sortEnum)
     })
 
-    analyzedOperators.dataOperators.SortOperator(child, colWithDirections)
+    analyzedOperators.dataOperators.SortOperator(child, colWithDirections, child.isPrefixed)
   }
 
   def processUnionOperator(uo: UnionOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.UnionOperator = {
@@ -277,14 +282,51 @@ class PlanAnalyzer() {
 
   def processLimitOperator(lo: LimitOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.LimitOperator = {
     val child = refineBySpatioTemporalInfo(processNode(lo.getChild, dfO))
-    analyzedOperators.dataOperators.LimitOperator(child, lo.getLimit)
+    analyzedOperators.dataOperators.LimitOperator(child, lo.getLimit, child.isPrefixed)
+  }
+
+  private def getColumnNameForOperation(op: BaseOperator, c: Column): String = {
+    val prefix = prefixMappings(getPrefix(c.getColumnName))
+    val suffix = c.getColumnTypes match {
+      case ColumnTypes.SUBJECT => tripleSubLongField
+      case PREDICATE => throw new Exception("Does not support join predicates on Predicate columns")
+      case _ =>
+        val fil = c.getColumnName.substring(0, c.getColumnName.indexOf('.')) + ".Predicate"
+        val colName = op.getArrayColumns.find(c => c.getColumnName.equals(fil)).get.getQueryString
+        getEncodedStr(colName)
+    }
+    prefix + '.' + suffix
+  }
+
+  /*private def getPrefixForColumn(df: DataFrame, op: BaseOperator, col: Column): (String, DataFrame) = {
+
+    if (!df.isPrefixed) {
+      op.getArrayColumns.foreach(c => prefixMappings.put(getPrefix(c.getColumnName), pref))
+      (pref, PhysicalPlanner.prefixColumns(prefixColumnsParams(df, pref)))
+    }
+    else {
+      (prefixMappings(pref), df)
+    }
+  }*/
+
+  private def prefixChild(child: analyzedOperators.commonOperators.BaseOperator, col: Column, op: BaseOperator): analyzedOperators.commonOperators.BaseOperator = {
+    if (child.isPrefixed) {
+      child
+    }
+    else {
+      val pref = getPrefix(col.getColumnName)
+      op.getArrayColumns.foreach(c => { prefixMappings.put(getPrefix(c.getColumnName), pref) })
+      analyzedOperators.columnOperators.PrefixOperator(child, pref)
+    }
   }
 
   def processJoinOperator(jo: JoinOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.JoinOperator = {
-    val leftChild = processNode(jo.getLeftChild, dfO)
-    val rightChild = processNode(jo.getRightChild, dfO)
+    val leftChild = prefixChild(processNode(jo.getLeftChild, dfO), jo.getLeftColumn, jo)
+    val rightChild = prefixChild(processNode(jo.getRightChild, dfO), jo.getRightColumn, jo)
 
-    val cols = jo.getColumnJoinPredicate
+    //val cols = jo.getColumnJoinPredicate
+    val leftCol = getColumnNameForOperation(jo, jo.getLeftColumn)
+    val rightCol = getColumnNameForOperation(jo, jo.getRightColumn)
     val condition = if (cols.isEmpty) {
       None
     }
@@ -340,12 +382,12 @@ class PlanAnalyzer() {
 
   private def processProjectOperator(po: ProjectOperator, dfO: Option[DataFrame]): analyzedOperators.columnOperators.ProjectOperator = {
     val child = refineBySpatioTemporalInfo(processNode(po.getChild, dfO))
-    analyzedOperators.columnOperators.ProjectOperator(child, po.getVariables)
+    analyzedOperators.columnOperators.ProjectOperator(child, po.getVariables, child.isPrefixed)
   }
 
   private def processRenameOperator(ro: RenameOperator, dfO: Option[DataFrame]): analyzedOperators.columnOperators.RenameOperator = {
     val child = processNode(ro.getChild, dfO)
-    analyzedOperators.columnOperators.RenameOperator(child, ro.getColumnMapping.asScala.toArray.map(x => (x._1.getColumnName, x._2.getColumnName)))
+    analyzedOperators.columnOperators.RenameOperator(child, ro.getColumnMapping.asScala.toArray.map(x => (x._1.getColumnName, x._2.getColumnName)), child.isPrefixed)
   }
 
   private def processNode(node: BaseOperator, dfO: Option[DataFrame]): analyzedOperators.commonOperators.BaseOperator = {
