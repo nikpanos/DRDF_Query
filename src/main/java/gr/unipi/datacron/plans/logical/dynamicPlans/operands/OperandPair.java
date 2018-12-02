@@ -31,6 +31,7 @@ public class OperandPair extends BaseOperand {
 //        return "COLUMN: " + " VALUE: " + value;
 //    }
 
+
     public BaseOperand getLeftOperand() {
         return leftOperand;
     }
