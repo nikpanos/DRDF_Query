@@ -108,7 +108,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
           preds ++ getPredicateList(child)
         })
       case filter: SelectOperator =>
-        filter.getFilters.filter(column => {
+        filter.getOperands.filter(column => {
           column.getColumn.getColumnTypes == PREDICATE
         }).map(column => getEncodedStr(column.getValue))
       case _ => throw new Exception("Only support JoinOr and FilterOfLogicalOperator under JoinOr")
@@ -118,7 +118,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def findObjectOfRdfType(node: BaseOperator): Option[String] = {
     node match {
       case fNode: SelectOperator =>
-        val objFilter = fNode.getFilters.find(_.getColumn.getColumnTypes == OBJECT)
+        val objFilter = fNode.getOperands.find(_.getColumn.getColumnTypes == OBJECT)
         if (objFilter.isDefined) {
           Some(getEncodedStr(objFilter.get.getValue))
         }
@@ -139,7 +139,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
       if ((predicates.length == 1) && (predicates(0) == rdfTypeEnc)) {
         if (node.isInstanceOf[SelectOperator]) {
-          val objFilter = node.asInstanceOf[SelectOperator].getFilters.find(_.getColumn.getColumnTypes == OBJECT)
+          val objFilter = node.asInstanceOf[SelectOperator].getOperands.find(_.getColumn.getColumnTypes == OBJECT)
           if (objFilter.isDefined) {
             val encodedObjFilter = getEncodedStr(objFilter.get.getValue)
             return DataStore.findDataframeBasedOnRdfType(encodedObjFilter)
@@ -198,15 +198,15 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   }
 
   private def processSelectOperator(filter: SelectOperator, dfO: Option[DataFrame]): Option[DataFrame] = {
-    val sub = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.SUBJECT)
-    val pred = filter.getFilters.find(_.getColumn.getColumnTypes == PREDICATE)
-    val obj = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
+    val sub = filter.getOperands.find(_.getColumn.getColumnTypes == ColumnTypes.SUBJECT)
+    val pred = filter.getOperands.find(_.getColumn.getColumnTypes == PREDICATE)
+    val obj = filter.getOperands.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
 
     if (pred.isEmpty) {
       throw new Exception("A predicate filter should be provided!")
     }
 
-    //filter.getFilters.foreach(println)
+    //filter.getOperands.foreach(println)
 
     val dfs = guessDataFrame(dfO, filter)
 

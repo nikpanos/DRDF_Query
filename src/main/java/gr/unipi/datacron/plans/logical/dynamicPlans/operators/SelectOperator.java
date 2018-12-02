@@ -8,7 +8,8 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.OperandPair;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.OperandPair;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,13 +19,13 @@ import java.util.logging.Logger;
  */
 public class SelectOperator extends BaseOpW1Child {
 
-    private final OperandPair[] operandPairList;//columns with values only
+    private final BaseOperand[] operands;//columns with values only
 
 
-    private SelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, long outputSize) {
+    private SelectOperator(BaseOperator bo, Column[] c, BaseOperand[] operands, long outputSize) {
         super(outputSize, bo);
         setArrayColumns(c);
-        this.operandPairList = operandPairList;
+        this.operands = operands;
     }
 
     private Column getColumn(ColumnTypes ct) {
@@ -111,8 +112,8 @@ public class SelectOperator extends BaseOpW1Child {
         return this.toString("");
     }
 
-    public OperandPair[] getFilters() {
-        return operandPairList;
+    public BaseOperand[] getOperands() {
+        return operands;
     }
 
 }

@@ -17,7 +17,7 @@ public class TestFunction {
                         "        ?b aGeo:location ?bxLoc .\n" +
                         "        ?b aGeo:location ?byLoc .\n" +
                         "\n" +
-                        "        FILTER ( aGeo:distance(?axLoc, ?ayLoc, ?bxLoc, ?byLoc) < 10 ) .\n" +
+                        "        FILTER ( aGeo:distance(?axLoc, ?ayLoc, ?bxLoc, ?byLoc) + aGeo:distance(?axLoc, ?ayLoc, ?bxLoc, ?byLoc) < 10 ) .\n" +
                         "      }").build().getBop();
 
 

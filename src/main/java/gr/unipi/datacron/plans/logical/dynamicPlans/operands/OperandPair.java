@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gr.unipi.datacron.plans.logical.dynamicPlans.columns;
+package gr.unipi.datacron.plans.logical.dynamicPlans.operands;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType;
 
 /**
  * @author nicholaskoutroumanis
  */
-public class OperandPair {
+public class OperandPair extends BaseOperand {
 
     private final BaseOperand leftOperand;
     private final BaseOperand rightOperand;

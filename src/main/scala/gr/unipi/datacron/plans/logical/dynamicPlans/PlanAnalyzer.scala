@@ -15,8 +15,8 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.common.{AppConfig, SpatioTemporalInfo, SpatioTemporalRange}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOperators.{DatasourceOperator, SortEnums}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.{BooleanTrait, ConditionOperator, LogicalAggregateEnums}
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{ColumnTypes, ConditionType, OperandPair}
-import gr.unipi.datacron.plans.logical.dynamicPlans.operands.{BaseOperand, ColumnOperand, ValueOperand}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{ColumnTypes, ConditionType}
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.{BaseOperand, ColumnOperand, OperandPair, ValueOperand}
 
 import scala.util.Try
 
@@ -44,7 +44,7 @@ class PlanAnalyzer() {
   }
 
   private def getSelectOperators(so: SelectOperator, columnType: ColumnTypes): Array[OperandPair] = {
-    so.getFilters.filter(operandPair => {
+    so.getOperands.filter(operandPair => {
       operandPair.getLeftOperand match {
         case column: ColumnOperand =>
           column.getColumn.getColumnTypes == columnType
@@ -54,7 +54,7 @@ class PlanAnalyzer() {
   }
 
   private def findSelectOperator(so: SelectOperator, columnType: ColumnTypes): Option[OperandPair] = {
-    so.getFilters.find(operandPair => {
+    so.getOperands.find(operandPair => {
       operandPair.getLeftOperand match {
         case column: ColumnOperand =>
           column.getColumn.getColumnTypes == columnType
@@ -239,7 +239,7 @@ class PlanAnalyzer() {
   }
 
   private def createSelectOperator(so: SelectOperator, child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.dataOperators.SelectOperator = {
-    val filters = so.getFilters
+    val filters = so.getOperands
     val condition = if (filters.length == 1) {
       getConditionOperatorFromOperandPair(filters(0))
     }

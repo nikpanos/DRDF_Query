@@ -10,6 +10,7 @@ import gr.unipi.datacron.common.Consts;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ColumnOperand;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.OperandPair;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ValueOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.store.DataStore;
@@ -412,6 +413,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
         this.myOpVisitorWalker(op);
 
+
         if (filters != null) {
 
             for (Expr expr : filters) {
@@ -471,6 +473,9 @@ public class LogicalPlanner extends OpVisitorBase {
                         e.printStackTrace();
                     }
                 }
+
+                System.out.println(expr.toString());
+                System.out.println("ddddddddddddddddd"+((ColumnOperand) bo2).getColumn().getQueryString() );
 
                 bop = SelectOperator.newSelectOperator(bop, bop.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2, ct)}, bop.getOutputSize());
 
