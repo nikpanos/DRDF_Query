@@ -473,8 +473,9 @@ public class LogicalPlanner extends OpVisitorBase {
                         e.printStackTrace();
                     }
                 }
-
                 System.out.println(expr.toString());
+
+                System.out.println(filters.get(0).getFunction().getArgs());
                 System.out.println("ddddddddddddddddd"+((ColumnOperand) bo2).getColumn().getQueryString() );
 
                 bop = SelectOperator.newSelectOperator(bop, bop.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2, ct)}, bop.getOutputSize());

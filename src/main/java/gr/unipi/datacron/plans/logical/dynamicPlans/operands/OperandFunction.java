@@ -5,9 +5,13 @@ public class OperandFunction extends BaseOperand {
     private final String functionName;
     private final BaseOperand[] arguments;
 
-    public OperandFunction(String functionName, BaseOperand[] arguments) {
+    private OperandFunction(String functionName, BaseOperand[] arguments) {
         this.functionName = functionName;
         this.arguments = arguments;
+    }
+
+    public static OperandFunction newOperandFunction(String functionName, BaseOperand... arguments){
+        return newOperandFunction(functionName, arguments);
     }
 
     public String getFunctionName() {
