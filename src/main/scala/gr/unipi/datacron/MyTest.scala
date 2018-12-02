@@ -16,11 +16,11 @@ object MyTest {
     Logger.getLogger("akka").setLevel(Level.OFF)
 
     val spark: SparkSession = SparkSession.builder
-      .master("local[1]")
+      .master("local[*]")
       .appName("test")
       .getOrCreate()
     import spark.implicits._
-    val df = spark.read.csv("C:\\Users\\Panagiotis\\Desktop\\Spatio-textual-Query-master\\Dataset\\partitiondata.csv").toDF("Id", "Text", "Latitude", "Longitude")
+    val df = spark.read.csv("/home/panagiotis/git/students/Spatio-textual-Query/Dataset/partitiondata.csv").toDF("Id", "Text", "Latitude", "Longitude")
     //convert latitude and longitude to float type
 
     val dataset = df.withColumn("Latitude", regexp_replace(df("Latitude"), "[\"(]", "").cast(DoubleType))
@@ -43,31 +43,32 @@ object MyTest {
 
     //retain the distinct values of the cells which correspond the points
     val mapping = df2.select(df2("gridID")).distinct().rdd.map(x => x(0)).collect().zipWithIndex.map(x => (x._1.asInstanceOf[Int], x._2)).toMap
-    val mapToId = udf((gridId: Int) => mapping(gridId))
+    mapping.foreach(println)
+    println("\n\n")
+
+    val mapToId = udf((gridId: Int) => mapping(gridId) * 10000)
     val df3 = df2.withColumn("partitionID", mapToId(df2("gridID")))
 
     //partition by the distinct cell id of the grid
-    /*val result = df3.select(df3("partitionID"), df3("Id")).rdd.map(x => (x.getAs[Int](0), x.getAs[Int](1))).partitionBy(new Partitioner {
+    val result = df3.select(df3("partitionID"), df3("Id")).rdd.map(x => (x.getAs[Int](0), x.getAs[Int](1))).partitionBy(new Partitioner {
       override def numPartitions: Int = mapping.size
 
-      override def getPartition(key: Any): Int = {
+      /*override def getPartition(key: Any): Int = {
         val k = Murmur3_x86_32.hashInt(key.asInstanceOf[Int], 42)
         val r = k % numPartitions
         if (r < 0) {
           (r + numPartitions) % numPartitions
         } else r
-      }
-      //override def getPartition(key: Any): Int = mapping(key.asInstanceOf[Int])
-    }).toDF("partitionID", "Id")*/
-    //result.show
-    //val result = df2.select("gridID", df2.columns:_*).rdd.partitionBy(mapping.size, lambda k: mapping(k).values().toDF(df2.schema))
+      }*/
+      override def getPartition(key: Any): Int = key.asInstanceOf[Int] / 10000
+    }).toDF("partitionID", "Id")
 
     def printResults(df: DataFrame): Unit = {
       val rdd = df.rdd
       println("Number of partitions: %d".format(rdd.getNumPartitions))
-      val counts = df.rdd.mapPartitions(rows => {
+      val counts = df.rdd.mapPartitionsWithIndex((idx, rows) => {
         //Iterator(rows.count(_ => true))
-        Iterator(rows.toArray.length)//map(x => x.getAs[Int]("partitionID")).toSet.toIterator
+        Iterator(rows.length)//map(x => x.getAs[Int]("partitionID")).toSet.toIterator
       }).collect()
 
       println("Total sum of all counts: %d\n".format(counts.sum))
@@ -78,10 +79,18 @@ object MyTest {
     //printResults(result)
     println("\n\n")
 
-    val newDf = df3.repartition(mapping.size, col("partitionID"))
+    println(mapping.size)
+    //val newDf = df3.repartitionByRange(col("partitionID"))
+
+    printResults(result)
+
+    println("\n\n")
+    //val newDf = df3.repartition(mapping.size, col("partitionID"))
     //newDf.explain()
     //printResults(newDf)
 
+    val newDf = df3.repartitionByRange(mapping.size, col("partitionID").desc_nulls_first)
+    println(newDf.count())
     printResults(newDf)
   }
 }

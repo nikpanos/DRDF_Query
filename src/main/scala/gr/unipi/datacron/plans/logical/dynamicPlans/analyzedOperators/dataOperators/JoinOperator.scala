@@ -3,6 +3,6 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOpera
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.commonOperators.{Base2ChildOperator, BaseOperator}
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.BooleanTrait
 
-case class JoinOperator(leftChild: BaseOperator, rightChild: BaseOperator, condition: Option[BaseOperator with BooleanTrait]) extends Base2ChildOperator(leftChild, rightChild) {
+case class JoinOperator(leftChild: BaseOperator, rightChild: BaseOperator, condition: Option[BaseOperator with BooleanTrait]) extends Base2ChildOperator(leftChild, rightChild, true) {
 
 }

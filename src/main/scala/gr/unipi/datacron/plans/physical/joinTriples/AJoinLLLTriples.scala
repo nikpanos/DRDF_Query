@@ -18,7 +18,7 @@ case class AJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
     val df2 = if (params.df2Alias.isDefined) params.df2.prefixColumns(alias2)
               else params.df2*/
 
-    val thres = AppConfig.getOptionalLong(qfpBroadcastThreshold)
+    /*val thres = AppConfig.getOptionalLong(qfpBroadcastThreshold)
     if (thres.isDefined && (params.df1EstimatedSize <= thres.get)) {
       //println("Forcing broadcast join on df1: " + params.df1EstimatedSize)
       params.df2.join(broadcast(params.df1), params.df1(sanitize(params.df1JoinColumn)) === params.df2(sanitize(params.df2JoinColumn)))
@@ -30,7 +30,8 @@ case class AJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
     else {
       //println("No forced broadcast join")
       params.df1.join(params.df2, params.df1(sanitize(params.df1JoinColumn)) === params.df2(sanitize(params.df2JoinColumn)))
-    }
+    }*/
+    params.df1.join(params.df2, params.df1(sanitize(params.df1JoinColumn)) === params.df2(sanitize(params.df2JoinColumn)))
     //df1
   }
 }

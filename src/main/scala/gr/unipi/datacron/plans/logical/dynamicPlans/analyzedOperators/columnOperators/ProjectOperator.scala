@@ -2,6 +2,6 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.columnOpe
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.commonOperators.{Base1ChildOperator, BaseOperator}
 
-case class ProjectOperator(child: BaseOperator, columnNames: Array[String]) extends Base1ChildOperator(child) {
+case class ProjectOperator(child: BaseOperator, columnNames: Array[String], prefixed: Boolean) extends Base1ChildOperator(child, prefixed) {
 
 }

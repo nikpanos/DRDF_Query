@@ -2,6 +2,6 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.columnOpe
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.commonOperators.{Base1ChildOperator, BaseOperator}
 
-case class RenameOperator(child: BaseOperator, columnMapping: Array[(String, String)], prefixed: Boolean) extends Base1ChildOperator(child, prefixed) {
+case class PrefixOperator(child: BaseOperator, prefix: String) extends Base1ChildOperator(child, true) {
 
 }
