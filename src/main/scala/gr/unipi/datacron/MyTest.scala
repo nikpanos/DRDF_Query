@@ -89,8 +89,8 @@ object MyTest {
     //newDf.explain()
     //printResults(newDf)
 
-    val newDf = df3.repartitionByRange(mapping.size, col("partitionID").desc_nulls_first)
-    println(newDf.count())
-    printResults(newDf)
+    //val newDf = df3.repartitionByRange(mapping.size, col("partitionID").desc_nulls_first)
+    //println(newDf.count())
+    //printResults(newDf)
   }
 }

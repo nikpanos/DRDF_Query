@@ -277,7 +277,7 @@ class PlanAnalyzer() {
   def processUnionOperator(uo: UnionOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.UnionOperator = {
     val leftChild = refineBySpatioTemporalInfo(processNode(uo.getLeftChild, dfO))
     val rightChild = refineBySpatioTemporalInfo(processNode(uo.getRightChild, dfO))
-    analyzedOperators.dataOperators.UnionOperator(Array(leftChild, rightChild))
+    analyzedOperators.dataOperators.UnionOperator(Array(leftChild, rightChild), true)
   }
 
   def processLimitOperator(lo: LimitOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.LimitOperator = {
@@ -285,17 +285,20 @@ class PlanAnalyzer() {
     analyzedOperators.dataOperators.LimitOperator(child, lo.getLimit, child.isPrefixed)
   }
 
-  private def getColumnNameForOperation(op: BaseOperator, c: Column): String = {
-    val prefix = prefixMappings(getPrefix(c.getColumnName))
+  private def getColumnNameForOperation(op: BaseOperator, c: Column, child: analyzedOperators.commonOperators.BaseOperator): String = {
+    val prefix = if (child.isPrefixed) {
+      prefixMappings(getPrefix(c.getColumnName)) + '.'
+    }
+    else { "" }
     val suffix = c.getColumnTypes match {
-      case ColumnTypes.SUBJECT => tripleSubLongField
-      case PREDICATE => throw new Exception("Does not support join predicates on Predicate columns")
+      case SUBJECT => tripleSubLongField
+      case PREDICATE => throw new Exception("Does not support operation on Predicate columns")
       case _ =>
         val fil = c.getColumnName.substring(0, c.getColumnName.indexOf('.')) + ".Predicate"
         val colName = op.getArrayColumns.find(c => c.getColumnName.equals(fil)).get.getQueryString
         getEncodedStr(colName)
     }
-    prefix + '.' + suffix
+    prefix + suffix
   }
 
   /*private def getPrefixForColumn(df: DataFrame, op: BaseOperator, col: Column): (String, DataFrame) = {
