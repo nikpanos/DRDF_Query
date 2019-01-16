@@ -36,6 +36,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
     //println(sparqlQuery)
     logicalPlan = MyOpVisitorBase.newMyOpVisitorBase(sparqlQuery).getBop()(0)
+    //println(logicalPlan.getBopChildren.get(0).toString)
   }
 
   override def doAfterPrepare(): Unit = println(logicalPlan.getBopChildren.get(0))
@@ -328,21 +329,33 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       (PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, Option(joinOp))), dfAndCol1._2)
     })._1)*/
 
-    if (joinOp.getBopChildren.size() > 2) {
+    /*if (joinOp.getBopChildren.size() > 2) {
       throw new Exception("Not supported join between more than 2 operators")
     }
-    else if (joinOp.getBopChildren.size() == 1) {
+    else*/ if (joinOp.getBopChildren.size() == 1) {
       val child1 = joinOp.getBopChildren.get(0)
       Option(getDfAndColNameForJoin(child1, joinCols(0), df)._1)
     }
     else {
-      val child1 = joinOp.getBopChildren.get(0)
+
+      val children = joinOp.getBopChildren.asScala.zipWithIndex
+      val dfAndCol1 = getDfAndColNameForJoin(children.head._1, joinCols(0), df)
+
+      Option(children.tail.foldLeft(dfAndCol1)((dfAndCol1: (DataFrame, String), child: (BaseOperator, Int)) => {
+        val dfAndCol2 = getDfAndColNameForJoin(child._1, joinCols(child._2), df)
+        (PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, 0, 0, Option(joinOp))), dfAndCol1._2)
+      })._1)
+
+      //res.get.show(10, false)
+      //res
+
+      /*val child1 = joinOp.getBopChildren.get(0)
       val child2 = joinOp.getBopChildren.get(1)
       val dfAndCol1 = getDfAndColNameForJoin(child1, joinCols(0), df)
       val dfAndCol2 = getDfAndColNameForJoin(child2, joinCols(1), df)
       val child1Size = if (child1.getOutputSize >= 0) child1.getOutputSize else Long.MaxValue
       val child2Size = if (child2.getOutputSize >= 0) child2.getOutputSize else Long.MaxValue
-      Option(PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, child1Size, child2Size, Option(joinOp))))
+      Option(PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, child1Size, child2Size, Option(joinOp))))*/
     }
   }
 

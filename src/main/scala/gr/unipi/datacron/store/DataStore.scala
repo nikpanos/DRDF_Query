@@ -21,7 +21,7 @@ object DataStore {
   lazy val sc: SparkContext = spark.sparkContext
 
   lazy val propertyData: Array[DataFrame] = if ((AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) || (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 2)) Array(nodeData, vesselData)
-                                            else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 1) Array(nodeData)
+                                            else if ((AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 1) || (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 3) || (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 4)) Array(nodeData)
                                             else Array.empty[DataFrame]
   lazy val allData: Array[DataFrame] = propertyData :+ triplesData
 
