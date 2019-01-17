@@ -2,20 +2,20 @@ package gr.unipi.datacron.plans.logical.dynamicPlans
 
 import java.text.SimpleDateFormat
 
-import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.common.{AppConfig, Consts, SpatioTemporalInfo, SpatioTemporalRange}
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
+import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner
+import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
-import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner
+import gr.unipi.datacron.store.DataStore
+import gr.unipi.datacron.common.DataFrameUtils._
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
-import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
-import scala.collection.JavaConverters._
+import collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.Try
@@ -35,11 +35,11 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       q
     }
     //println(sparqlQuery)
-    //logicalPlan = LogicalPlanner.newMyOpVisitorBase(sparqlQuery).getBop
-    logicalPlan = LogicalPlanner.setSparqlQuery(sparqlQuery).optimized().build().getBop
+    logicalPlan = LogicalPlanner.setSparqlQuery(sparqlQuery).build().getRoot
+    //println(logicalPlan.getBopChildren.get(0).toString)
   }
 
-  override def doAfterPrepare(): Unit = println(logicalPlan.getBopChildren()(0))
+  override def doAfterPrepare(): Unit = println(logicalPlan)
 
   override private[logical] def doExecutePlan(): DataFrame = {
     executeTree(logicalPlan).get
@@ -73,8 +73,6 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def getChildren(bop: BaseOperator) = bop.getBopChildren.asScala
-
   private val prefixMappings: mutable.HashMap[String, String] = mutable.HashMap[String, String]()
 
   private def getEncodedStr(decodedColumnName: String): String = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName)).getOrElse(0).toString
@@ -84,17 +82,16 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def getDecodedStr(encodedValue: Long): String = PhysicalPlanner.decodeSingleKey(decodeSingleKeyParams(encodedValue)).getOrElse("")
 
   private def getPrefix(s: String): String = s.substring(0, s.indexOf('.') + 1)
-
   private def getSuffix(s: String): String = s.substring(s.indexOf('.') + 1)
 
-  private def getNewJoinOrOperator(node: JoinSubjectOperator, preds: Array[String]): JoinSubjectOperator = {
-    val filters = getChildren(node).filter(op => {
-      preds.contains(op.asInstanceOf[SelectOperator].getPredicate)
+  private def getNewJoinOrOperator(node: JoinOrOperator, preds: Array[String]): JoinOrOperator = {
+    val filters = node.getBopChildren.asScala.toArray.filter(op => {
+      preds.contains(op.asInstanceOf[FilterOf].getPredicate)
     })
-    JoinSubjectOperator.newJoinOrOperator(filters: _*)
+    JoinOrOperator.newJoinOrOperator(filters: _*)
   }
 
-  private def convertJoinOr(joinOrOperator: JoinSubjectOperator, incl: Array[String], excl: Array[String]): JoinOperator = {
+  private def convertJoinOr(joinOrOperator: JoinOrOperator, incl: Array[String], excl: Array[String]): JoinOperator = {
     val joinOr1 = getNewJoinOrOperator(joinOrOperator, incl)
     val joinOr2 = getNewJoinOrOperator(joinOrOperator, excl)
 
@@ -103,12 +100,12 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def getPredicateList(node: BaseOperator): Array[String] = {
     node match {
-      case _: JoinSubjectOperator =>
+      case _: JoinOrOperator =>
         node.getBopChildren.asScala.foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
           preds ++ getPredicateList(child)
         })
-      case filter: SelectOperator =>
-        filter.getOperands.filter(column => {
+      case filter: FilterOf =>
+        filter.getFilters.filter(column => {
           column.getColumn.getColumnTypes == PREDICATE
         }).map(column => getEncodedStr(column.getValue))
       case _ => throw new Exception("Only support JoinOr and FilterOfLogicalOperator under JoinOr")
@@ -117,13 +114,13 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def findObjectOfRdfType(node: BaseOperator): Option[String] = {
     node match {
-      case fNode: SelectOperator =>
-        val objFilter = fNode.getOperands.find(_.getColumn.getColumnTypes == OBJECT)
+      case fNode: FilterOf =>
+        val objFilter = fNode.getFilters.find(_.getColumn.getColumnTypes == OBJECT)
         if (objFilter.isDefined) {
           Some(getEncodedStr(objFilter.get.getValue))
         }
         else None
-      case jNode: JoinSubjectOperator =>
+      case jNode: JoinOrOperator =>
         jNode.getBopChildren.asScala.foreach(child => {
           val res = findObjectOfRdfType(child)
           if (res.isDefined) return res
@@ -138,8 +135,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       var predicates = getPredicateList(node)
 
       if ((predicates.length == 1) && (predicates(0) == rdfTypeEnc)) {
-        if (node.isInstanceOf[SelectOperator]) {
-          val objFilter = node.asInstanceOf[SelectOperator].getOperands.find(_.getColumn.getColumnTypes == OBJECT)
+        if (node.isInstanceOf[FilterOf]) {
+          val objFilter = node.asInstanceOf[FilterOf].getFilters.find(_.getColumn.getColumnTypes == OBJECT)
           if (objFilter.isDefined) {
             val encodedObjFilter = getEncodedStr(objFilter.get.getValue)
             return DataStore.findDataframeBasedOnRdfType(encodedObjFilter)
@@ -197,27 +194,27 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     (incl, excl)
   }
 
-  private def processSelectOperator(filter: SelectOperator, dfO: Option[DataFrame]): Option[DataFrame] = {
-    val sub = filter.getOperands.find(_.getColumn.getColumnTypes == ColumnTypes.SUBJECT)
-    val pred = filter.getOperands.find(_.getColumn.getColumnTypes == PREDICATE)
-    val obj = filter.getOperands.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
+  private def processFilterOf(filter: FilterOf, dfO: Option[DataFrame]) : Option[DataFrame] = {
+    val sub = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.SUBJECT)
+    val pred = filter.getFilters.find(_.getColumn.getColumnTypes == PREDICATE)
+    val obj = filter.getFilters.find(_.getColumn.getColumnTypes == ColumnTypes.OBJECT)
 
     if (pred.isEmpty) {
       throw new Exception("A predicate filter should be provided!")
     }
 
-    //filter.getOperands.foreach(println)
+    //filter.getFilters.foreach(println)
 
     val dfs = guessDataFrame(dfO, filter)
 
     val encodedFilterPred = getEncodedStr(pred.get.getValue)
 
     if (dfs.length > 1) {
-      var dfHead = processSelectOperator(filter, Option(dfs.head)).get
+      var dfHead = processFilterOf(filter, Option(dfs.head)).get
       dfHead = PhysicalPlanner.selectColumns(selectColumnsParams(dfHead, Array(tripleSubLongField, encodedFilterPred)))
 
       Option(dfs.tail.foldLeft(dfHead)((df1, df2) => {
-        var df = processSelectOperator(filter, Option(df2)).get
+        var df = processFilterOf(filter, Option(df2)).get
         df = PhysicalPlanner.selectColumns(selectColumnsParams(df, Array(tripleSubLongField, encodedFilterPred)))
         PhysicalPlanner.unionDataframes(unionDataframesParams(df1, df, Option(filter)))
       }))
@@ -254,7 +251,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def processJoinSubjectOperator(joinOr: JoinSubjectOperator, dfO: Option[DataFrame]): Option[DataFrame] = {
+  private def processJoinOr(joinOr: JoinOrOperator, dfO: Option[DataFrame]) : Option[DataFrame] = {
     val dfs = guessDataFrame(dfO, joinOr)
 
     if (dfs.length > 1) {
@@ -332,49 +329,52 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       (PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, Option(joinOp))), dfAndCol1._2)
     })._1)*/
 
-    if (joinOp.getBopChildren.size() > 2) {
+    /*if (joinOp.getBopChildren.size() > 2) {
       throw new Exception("Not supported join between more than 2 operators")
     }
-    else if (joinOp.getBopChildren.size() == 1) {
+    else*/ if (joinOp.getBopChildren.size() == 1) {
       val child1 = joinOp.getBopChildren.get(0)
       Option(getDfAndColNameForJoin(child1, joinCols(0), df)._1)
     }
     else {
-      val childLeft = joinOp.getBopChildren.get(0)
-      val childRight = joinOp.getBopChildren.get(1)
-      val dfAndCol1 = getDfAndColNameForJoin(childLeft, joinCols(0), df)
-      val dfAndCol2 = getDfAndColNameForJoin(childRight, joinCols(1), df)
-      val child1Size = if (childLeft.getOutputSize >= 0) childLeft.getOutputSize else Long.MaxValue
-      val child2Size = if (childRight.getOutputSize >= 0) childRight.getOutputSize else Long.MaxValue
-      Option(PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, child1Size, child2Size, Option(joinOp))))
+
+      val children = joinOp.getBopChildren.asScala.zipWithIndex
+      val dfAndCol1 = getDfAndColNameForJoin(children.head._1, joinCols(0), df)
+
+      Option(children.tail.foldLeft(dfAndCol1)((dfAndCol1: (DataFrame, String), child: (BaseOperator, Int)) => {
+        val dfAndCol2 = getDfAndColNameForJoin(child._1, joinCols(child._2), df)
+        (PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, 0, 0, Option(joinOp))), dfAndCol1._2)
+      })._1)
+
+      //res.get.show(10, false)
+      //res
+
+      /*val child1 = joinOp.getBopChildren.get(0)
+      val child2 = joinOp.getBopChildren.get(1)
+      val dfAndCol1 = getDfAndColNameForJoin(child1, joinCols(0), df)
+      val dfAndCol2 = getDfAndColNameForJoin(child2, joinCols(1), df)
+      val child1Size = if (child1.getOutputSize >= 0) child1.getOutputSize else Long.MaxValue
+      val child2Size = if (child2.getOutputSize >= 0) child2.getOutputSize else Long.MaxValue
+      Option(PhysicalPlanner.joinDataframes(joinDataframesParams(dfAndCol1._1, dfAndCol2._1, dfAndCol1._2, dfAndCol2._2, child1Size, child2Size, Option(joinOp))))*/
     }
   }
 
-  private def processJoinOperator(joinOp: JoinOperator): Option[DataFrame] = executeJoin(joinOp, joinOp.getColumnJoinPredicate, None)
+  private def processJoin(joinOp: JoinOperator) : Option[DataFrame] = executeJoin(joinOp, joinOp.getColumnJoinPredicate, None)
 
-  private def processProjectOperator(selectOp: ProjectOperator): Option[DataFrame] = {
-    val dfO = recursivelyExecuteNode(selectOp.getChild, None)
+  private def processSelect(selectOp: SelectOperator) : Option[DataFrame] = {
+    val dfO = recursivelyExecuteNode(selectOp.getBopChildren.get(0), None)
     if (dfO.isDefined) {
       projectResults(filterFinalResults(dfO), selectOp)
     }
     else None
   }
 
-  private def processLimitOperator(limitOp: LimitOperator): Option[DataFrame] = {
-    val dfO = recursivelyExecuteNode(limitOp.getChild, None)
-    if (dfO.isDefined) {
-      Option(PhysicalPlanner.limitResults(limitResultsParams(dfO.get, limitOp.getLimit)))
-    }
-    else None
-  }
-
   private def recursivelyExecuteNode(node: BaseOperator, df: Option[DataFrame]): Option[DataFrame] = {
     node match {
-      case so: SelectOperator => processSelectOperator(so, df)
-      case js: JoinSubjectOperator => processJoinSubjectOperator(js, df)
-      case jo: JoinOperator => processJoinOperator(jo)
-      case po: ProjectOperator => processProjectOperator(po)
-      case lo: LimitOperator => processLimitOperator(lo)
+      case f: FilterOf => processFilterOf(f, df)
+      case jo: JoinOrOperator => processJoinOr(jo, df)
+      case j: JoinOperator => processJoin(j)
+      case s: SelectOperator => processSelect(s)
       case _ => None
     }
   }
@@ -389,7 +389,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def projectResults(dfO: Option[DataFrame], s: ProjectOperator): Option[DataFrame] = {
+  private def projectResults(dfO: Option[DataFrame], s: SelectOperator): Option[DataFrame] = {
     if (dfO.isEmpty) {
       None
     }
@@ -429,10 +429,9 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
       }
       else Option(newDf)
     }
-  }*/
+  }
 
   private def executeTree(root: BaseOperator): Option[DataFrame] = {
-    //recursivelyExecuteNode(root, None)
-    None
+    recursivelyExecuteNode(root, None)
   }
 }

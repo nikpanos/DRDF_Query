@@ -24,7 +24,7 @@ public class TestLimit {
                         "{" +
                         " ?x rdf:type ?y" +
                         "}" + "" +
-                        " LIMIT 10").build().getBop();
+                        " LIMIT 10").build().getRoot();
 
 
         System.out.println("--------------------------");

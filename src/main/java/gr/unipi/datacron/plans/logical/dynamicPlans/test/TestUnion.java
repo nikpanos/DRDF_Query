@@ -23,7 +23,7 @@ public class TestUnion {
                         "SELECT ?title\n" +
                         "WHERE  { { ?book dc10:title  ?title } " +
                         "UNION" +
-                        " { ?textbook dc11:title  ?title } }").build().getBop();
+                        " { ?textbook dc11:title  ?title } }").build().getRoot();
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());

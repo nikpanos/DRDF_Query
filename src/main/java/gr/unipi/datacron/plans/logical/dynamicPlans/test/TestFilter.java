@@ -25,7 +25,7 @@ public class TestFilter {
                         " ?x rdf:type ?y ." +
                         "FILTER (?x < 123) ." +
                         "FILTER (30 < ?x) ." +
-                        "}").build().getBop();
+                        "}").build().getRoot();
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());

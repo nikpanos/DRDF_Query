@@ -24,4 +24,8 @@ public abstract class BaseOpW1Child extends BaseOperator {
         super(outputSize, bop);
     }
 
+    public void setNewChild(BaseOperator newChild) {
+        super.setNewChild(newChild, 0);
+    }
+
 }

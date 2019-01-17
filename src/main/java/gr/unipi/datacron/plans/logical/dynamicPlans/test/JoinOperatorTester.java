@@ -21,7 +21,7 @@ public class JoinOperatorTester {
                 + " ?k <tr> 45 ."
                 + " ?x <hg> ?w ."
                 + " ?q <g> ?z ."
-                + "}").build().getBop();
+                + "}").build().getRoot();
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());

@@ -26,7 +26,7 @@ public class TestOrderBy {
                         "FILTER (?x < 123) ." +
                         "FILTER (30 < ?x) ." +
                         "}" +
-                        "ORDER BY ASC (?x) DESC(?y)").build().getBop();
+                        "ORDER BY ASC (?x) DESC(?y)").build().getRoot();
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());

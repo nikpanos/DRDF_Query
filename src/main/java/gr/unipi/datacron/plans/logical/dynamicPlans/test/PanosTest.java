@@ -5,7 +5,6 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
-import gr.unipi.datacron.common.AppConfig;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
@@ -40,7 +39,7 @@ public class PanosTest {
                         "    ?event :occurs ?n .\n" +
                         "    ?n :hasWeatherCondition ?w.\n" +
                         "    ?w :windDirectionMin \"77.13083\"\n" +
-                        "}\n").optimized().build().getBop();
+                        "}\n").optimized().build().getRoot();
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());

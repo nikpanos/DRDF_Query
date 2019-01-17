@@ -23,7 +23,7 @@ public class TestDistinct {
                         "WHERE" +
                         "{" +
                         " ?x rdf:type ?y" +
-                        "}").build().getBop();
+                        "}").build().getRoot();
 
 
         System.out.println("--------------------------");

@@ -22,7 +22,7 @@ public class JoinSubjectOperatorTester {
                 + " ?x <hg> 'mm' ."
                 + " ?x <fd> ?y ."
                 + " ?x <fv> 'nn' ."
-                + "}").build().getBop();
+                + "}").build().getRoot();
 
 
         System.out.println("--------------------------");

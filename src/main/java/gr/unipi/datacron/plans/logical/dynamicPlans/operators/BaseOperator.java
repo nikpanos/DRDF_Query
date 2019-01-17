@@ -128,4 +128,8 @@ public abstract class BaseOperator {
     public void setRealOutputSize(long realOutputSize) {
         this.realOutputSize = realOutputSize;
     }
+
+    protected void setNewChild(BaseOperator child, int childNo) {
+        this.bopChildren[childNo] = child;
+    }
 }

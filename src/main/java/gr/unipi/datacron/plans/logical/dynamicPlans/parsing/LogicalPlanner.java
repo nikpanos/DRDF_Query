@@ -36,11 +36,11 @@ import java.util.stream.Collectors;
  */
 public class LogicalPlanner extends OpVisitorBase {
 
-    public BaseOperator getBop() {
-        return bop;
+    public BaseOperator getRoot() {
+        return root;
     }
 
-    private BaseOperator bop;
+    private BaseOperator root;
 
     private final boolean optimized;
 
@@ -188,10 +188,10 @@ public class LogicalPlanner extends OpVisitorBase {
 
         });
 
-        if (bop == null) {
-            bop = formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
+        if (root == null) {
+            root = formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
         } else {
-            bop = JoinOperator.newJoinOperator(bop, formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/)));
+            root = JoinOperator.newJoinOperator(root, formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/)));
         }
     }
 
@@ -445,7 +445,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
 
                 if (elements[1].startsWith("?")) {
-                    for (Column c : bop.getArrayColumns()) {
+                    for (Column c : root.getArrayColumns()) {
                         if (c.getQueryString().equals(elements[1])) {
                             bo1 = ColumnOperand.newColumnOperand(c);
                             break;
@@ -456,7 +456,7 @@ public class LogicalPlanner extends OpVisitorBase {
                 }
 
                 if (elements[2].startsWith("?")) {
-                    for (Column c : bop.getArrayColumns()) {
+                    for (Column c : root.getArrayColumns()) {
                         if (c.getQueryString().equals(elements[2])) {
                             bo2 = ColumnOperand.newColumnOperand(c);
                             break;
@@ -478,7 +478,7 @@ public class LogicalPlanner extends OpVisitorBase {
                 System.out.println(filters.get(0).getFunction().getArgs());
                 System.out.println("ddddddddddddddddd"+((ColumnOperand) bo2).getColumn().getQueryString() );
 
-                bop = SelectOperator.newSelectOperator(bop, bop.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2, ct)}, bop.getOutputSize());
+                root = SelectOperator.newSelectOperator(root, root.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2, ct)}, root.getOutputSize());
 
             }
 
@@ -486,7 +486,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
         if (query.isDistinct()) {
 
-            bop = DistinctOperator.newDistinctOperator(bop);
+            root = DistinctOperator.newDistinctOperator(root);
 
         }
 
@@ -496,7 +496,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
             for (SortCondition sc : query.getOrderBy()) {
 
-                for (Column c : bop.getArrayColumns()) {
+                for (Column c : root.getArrayColumns()) {
                     if (c instanceof ColumnWithVariable) {
                         if (c.getQueryString().equals(sc.expression.getExprVar().toString())) {
                             int direction = sc.direction;
@@ -518,16 +518,16 @@ public class LogicalPlanner extends OpVisitorBase {
                 }
             }
 
-            bop = SortOperator.newSortOperator(bop, cwd.stream().toArray(ColumnWithDirection[]::new));
+            root = SortOperator.newSortOperator(root, cwd.stream().toArray(ColumnWithDirection[]::new));
 
 
         }
 
         if (query.hasLimit()) {
-            bop = LimitOperator.newLimitOperator(bop, (int) query.getLimit());
+            root = LimitOperator.newLimitOperator(root, (int) query.getLimit());
         }
 
-        bop = ProjectOperator.newProjectOperator(bop, selectVariables);
+        root = ProjectOperator.newProjectOperator(root, selectVariables);
 
     }
 

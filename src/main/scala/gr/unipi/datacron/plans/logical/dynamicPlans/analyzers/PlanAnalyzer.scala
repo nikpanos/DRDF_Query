@@ -1,28 +1,25 @@
-package gr.unipi.datacron.plans.logical.dynamicPlans
+package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 
 import java.text.SimpleDateFormat
 
 import gr.unipi.datacron.common.Consts._
+import gr.unipi.datacron.common.DataFrameUtils._
+import gr.unipi.datacron.common.{AppConfig, SpatioTemporalInfo, SpatioTemporalRange}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes, ConditionType}
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.{BaseOperand, ColumnOperand, OperandPair, ValueOperand}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
-import collection.JavaConverters._
-import gr.unipi.datacron.common.DataFrameUtils._
-import gr.unipi.datacron.common.{AppConfig, SpatioTemporalInfo, SpatioTemporalRange}
-import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.dataOperators.{DatasourceOperator, SortEnums}
-import gr.unipi.datacron.plans.logical.dynamicPlans.analyzedOperators.logicalOperators.{BooleanTrait, ConditionOperator, LogicalAggregateEnums}
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes, ConditionType, OperandPair}
-import gr.unipi.datacron.plans.logical.dynamicPlans.operands.{BaseOperand, ColumnOperand, ValueOperand}
-
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.Try
 
 
-class PlanAnalyzer() {
+object PlanAnalyzer {
 
   private val dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 
@@ -39,144 +36,8 @@ class PlanAnalyzer() {
   private def getPrefix(s: String): String = s.substring(0, s.indexOf('.') + 1)
   private def getSuffix(s: String): String = s.substring(s.indexOf('.') + 1)
 
-  private def getEncodedStr(decodedColumnName: String): String = {
-    val result = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName))
-    if (result.isEmpty){
-      throw new Exception("Could not find encoded value for column name: " + decodedColumnName)
-    }
-    else {
-      result.get.toString
-    }
-  }
-
-  private def getSelectOperators(so: SelectOperator, columnType: ColumnTypes): Array[OperandPair] = {
-    so.getFilters.filter(operandPair => {
-      operandPair.getLeftOperand match {
-        case column: ColumnOperand =>
-          column.getColumn.getColumnTypes == columnType
-        case _ => throw new Exception("Should be ColumnOperand")
-      }
-    })
-  }
-
-  private def findSelectOperator(so: SelectOperator, columnType: ColumnTypes): Option[OperandPair] = {
-    so.getFilters.find(operandPair => {
-      operandPair.getLeftOperand match {
-        case column: ColumnOperand =>
-          column.getColumn.getColumnTypes == columnType
-        case _ => throw new Exception("Should be ColumnOperand")
-      }
-    })
-  }
-
-  private def getPredicateList(node: BaseOperator): Array[String] = {
-    node match {
-      case _: JoinSubjectOperator =>
-        getChildren(node).foldLeft(Array[String]())((preds: Array[String], child: BaseOperator) => {
-          preds ++ getPredicateList(child)
-        })
-      case so: SelectOperator =>
-        getSelectOperators(so, PREDICATE).map(operandPair => getEncodedStr(operandPair.getRightOperand.asInstanceOf[ValueOperand].getValue))
-      case _ => throw new Exception("Only support JoinOr and FilterOfLogicalOperator under JoinOr")
-    }
-  }
-
-  private def findObjectOfRdfType(node: BaseOperator): Option[String] = {
-    node match {
-      case sNode: SelectOperator =>
-        val objFilter = findSelectOperator(sNode, OBJECT)
-        if (objFilter.isDefined) {
-          Some(getEncodedStr(objFilter.get.getRightOperand.asInstanceOf[ValueOperand].getValue))
-        }
-        else None
-      case jsNode: JoinSubjectOperator =>
-        getChildren(jsNode).foreach(child => {
-          val res = findObjectOfRdfType(child)
-          if (res.isDefined) return res
-        })
-        None
-    }
-  }
-
-  private def guessDataFrame(dfO: Option[DataFrame], node: BaseOperator): Array[DataFrame] = {
-    if (dfO.isEmpty) {
-      val rdfTypeEnc = getEncodedStr(rdfType)
-      var predicates = getPredicateList(node)
-
-      if ((predicates.length == 1) && (predicates(0) == rdfTypeEnc)) {
-        node match {
-          case so: SelectOperator =>
-            val objFilter = findSelectOperator(so, OBJECT)
-            if (objFilter.isDefined) {
-              val encodedObjFilter = getEncodedStr(objFilter.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-              return DataStore.findDataframeBasedOnRdfType(encodedObjFilter)
-            }
-        }
-        DataStore.propertyData.filter(df => {
-          df.getIncludingColumns(predicates).length > 0
-        }) :+ DataStore.triplesData
-      }
-      else {
-        if (predicates.contains(rdfTypeEnc)) {
-          val objFilter = findObjectOfRdfType(node)
-          if (objFilter.isDefined) {
-            val dfA = DataStore.findDataframeBasedOnRdfType(objFilter.get)
-            if (!dfA.contains(DataStore.nodeData)) {
-              return dfA
-            }
-          }
-        }
-        predicates = predicates.filter(!_.equals(rdfTypeEnc))
-
-        val result = DataStore.propertyData.filter(df => {
-          df.getIncludingColumns(predicates).length > 0
-        })
-
-        if (result.length == 0) {
-          Array(DataStore.triplesData)
-        }
-        else if (result.length == 1) {
-          val df = result(0)
-          val excl = df.getExcludingColumns(predicates)
-          if (excl.length > 0) {
-            Array(df, DataStore.triplesData)
-          }
-          else {
-            Array(df)
-          }
-        }
-        else {
-          throw new Exception("Does not support more than one dataframes")
-        }
-      }
-    }
-    else {
-      Array(dfO.get)
-    }
-  }
-
-  private def findFirstDatasourceOperator(bo: analyzedOperators.commonOperators.BaseOperator): DatasourceOperator = {
-    bo match {
-      case ds: DatasourceOperator => ds
-      case _=> findFirstDatasourceOperator(bo)
-    }
-  }
 
 
-  private def convertSelectToUnionOperator(so: SelectOperator, dfs: Array[DataFrame]): analyzedOperators.dataOperators.UnionOperator = {
-    val selOps = dfs.map(df => {
-      val bo = processNode(so, Some(df))
-      val ds = findFirstDatasourceOperator(bo)
-      if (ds.isPropertyTableSource) {
-        val colName = getEncodedStr(findSelectOperator(so, PREDICATE).get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-        analyzedOperators.columnOperators.ProjectOperator(bo, Array(tripleSubLongField, colName), false)
-      }
-      else {
-        bo
-      }
-    })
-    analyzedOperators.dataOperators.UnionOperator(selOps, false)
-  }
 
   private def refineBySpatioTemporalInfo(child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.commonOperators.BaseOperator = {
     if (shouldApplyExactSpatioTemporalFilterLater) {
@@ -243,24 +104,7 @@ class PlanAnalyzer() {
     analyzedOperators.logicalOperators.ConditionOperator(leftStr, operandPair.getConditionType, rightStr)
   }
 
-  private def createSelectOperator(so: SelectOperator, child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.dataOperators.SelectOperator = {
-    val filters = so.getFilters
-    val condition = if (filters.length == 1) {
-      getConditionOperatorFromOperandPair(filters(0))
-    }
-    else {
-      val first = filters.head
-
-      val conditionFirst: analyzedOperators.commonOperators.BaseOperator with BooleanTrait = getConditionOperatorFromOperandPair(first)
-      filters.tail.foldLeft(conditionFirst)((conditionLeft, op) => {
-        val conditionRight = getConditionOperatorFromOperandPair(op)
-        analyzedOperators.logicalOperators.LogicalAggregateOperator(conditionLeft, conditionRight, LogicalAggregateEnums.And)
-      })
-    }
-    analyzedOperators.dataOperators.SelectOperator(child, condition, child.isPrefixed)
-  }
-
-  def processSortOperator(so: SortOperator, dfO: Option[DataFrame]): analyzedOperators.dataOperators.SortOperator = {
+  def processSortOperator(so: SortOperator, dfO: Option[DataFrame]): analyzedOperators.dataOphttps://www.google.com/search?client=ubuntu&channel=fs&q=spark+row_number&ie=utf-8&oe=utf-8erators.SortOperator = {
     val child = refineBySpatioTemporalInfo(processNode(so.getChild, dfO))
     val colWithDirections = so.getColumnWithDirection.map(cwd => {
       val sortEnum: SortEnums.SortEnum = cwd.getDirection match {

@@ -24,7 +24,7 @@ public class ShortcutsTest {
                 + " ?b <:hasGeometry> ?r ."
                 + " ?r <:hasWKT> ?c ."
                 + " ?c <:hasGeometry> ?ds ."
-                + "}").build().getBop();
+                + "}").build().getRoot();
 
 
         System.out.println("--------------------------");

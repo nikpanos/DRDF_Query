@@ -37,7 +37,7 @@ public class NikosTest {
                 + " ?c <:irtui> ?k ."
                 + " ?x <:wrtwr> 48 ."
                 + " ?z <:qwerf> ?zx ."
-                + "}").build().getBop();
+                + "}").build().getRoot();
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());

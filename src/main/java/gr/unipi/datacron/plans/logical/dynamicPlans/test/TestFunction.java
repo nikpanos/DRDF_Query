@@ -18,7 +18,7 @@ public class TestFunction {
                         "        ?b aGeo:location ?byLoc .\n" +
                         "\n" +
                         "        FILTER ( aGeo:distance(?axLoc, ?ayLoc, ?bxLoc, ?byLoc) + aGeo:distance(?axLoc, ?ayLoc, ?bxLoc, ?byLoc) = ?b || ?b >?a ) .\n" +
-                        "      }").build().getBop();
+                        "      }").build().getRoot();
 
 
         System.out.println("--------------------------");
