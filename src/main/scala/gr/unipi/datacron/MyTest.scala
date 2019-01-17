@@ -1,27 +1,14 @@
 package gr.unipi.datacron
 
 import java.text.SimpleDateFormat
-
-import gr.unipi.datacron.store.DataStore
-import org.apache.spark.sql.functions._
+import java.util.Date
 
 object MyTest {
 
   def main(args : Array[String]): Unit = {
-    val spark = DataStore.spark
-    val sc = DataStore.sc
-
-    import spark.implicits._
-
-
-    val df = spark.read.parquet("/unipi_datasets/maritime/aisMediterranean/oneTriplesTables/parquet").filter(col("predLong") === -17)
-    df.groupBy(col("objLong")).agg(count("*").alias("cnt")).orderBy(desc("cnt")).show
-
-    val colu = "-17"
-    val df1 = spark.read.parquet("/unipi_datasets/maritime/aisMediterranean/oneTriplesTables/parquet").na.drop(Array(colu))
-    df1.groupBy(col(colu)).agg(count("*").alias("cnt")).orderBy(desc("cnt")).show
-
-    val df2 = spark.read.parquet("/unipi_datasets/maritime/static/oneTriplesTables/parquet")
-    df2.filter(col("subLong") === -1906).filter(col("predLong") === -58323307).show
+    val dt = new Date()
+    val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    dt.setTime(1460926796000L)
+    println(df.format(dt))
   }
 }
