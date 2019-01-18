@@ -4,7 +4,7 @@ import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common.{AppConfig, Benchmarks, Utils}
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.store.DataStore
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, SaveMode}
 
 abstract class BaseQuery() {
   DataStore.init()
@@ -30,9 +30,9 @@ abstract class BaseQuery() {
 
     if (plan.isDefined) {
 
-      if (AppConfig.stringListContains(qfpQueryOutputDevices, outputDeviceDir) && AppConfig.getBoolean(qfpQueryOutputFolderRemoveExisting)) {
+      /*if (AppConfig.stringListContains(qfpQueryOutputDevices, outputDeviceDir) && AppConfig.getBoolean(qfpQueryOutputFolderRemoveExisting)) {
         DataStore.deleteHdfsDirectory(AppConfig.getString(qfpQueryOutputFolderPath))
-      }
+      }*/
 
 
       //plan.get.preparePlan()
@@ -90,10 +90,16 @@ abstract class BaseQuery() {
           spark.sql("set spark.sql.parquet.compression.codec=gzip")
           result = result.repartition(1)
         }*/
+        val mode = if (AppConfig.stringListContains(qfpQueryOutputDevices, outputDeviceDir) && AppConfig.getBoolean(qfpQueryOutputFolderRemoveExisting)) {
+          SaveMode.Overwrite
+        }
+        else {
+          SaveMode.ErrorIfExists
+        }
         AppConfig.getString(qfpQueryOutputFolderFormat) match {
-          case `outputFormatParquet` => result.write.parquet(Utils.resolveHdfsPath(qfpQueryOutputFolderPath))
-          case `outputFormatText` => result.write.text(Utils.resolveHdfsPath(qfpQueryOutputFolderPath))
-          case `outputFormatCSV` => result.write.csv(Utils.resolveHdfsPath(qfpQueryOutputFolderPath))
+          case `outputFormatParquet` => result.write.mode(mode).parquet(Utils.resolveHdfsPath(qfpQueryOutputFolderPath))
+          case `outputFormatText` => result.write.mode(mode).text(Utils.resolveHdfsPath(qfpQueryOutputFolderPath))
+          case `outputFormatCSV` => result.write.mode(mode).csv(Utils.resolveHdfsPath(qfpQueryOutputFolderPath))
         }
       case `outputDeviceWeb` =>
         1 to 10 foreach { _ => print("*/") }

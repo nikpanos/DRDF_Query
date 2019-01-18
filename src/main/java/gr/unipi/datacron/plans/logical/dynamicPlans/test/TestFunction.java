@@ -1,6 +1,5 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.test;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator;
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 public class TestFunction {

@@ -1,20 +1,21 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 
-import gr.unipi.datacron.common.Consts.{rdfType, tripleObjLongField, tripleSubLongField}
-import gr.unipi.datacron.common.DataFrameUtils._
-import gr.unipi.datacron.plans.logical.dynamicPlans.analyzers.PlanAnalyzer._
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes.{OBJECT, PREDICATE}
-import gr.unipi.datacron.plans.logical.dynamicPlans.operands.{ColumnOperand, OperandPair, ValueOperand}
+import java.util
+
+import gr.unipi.datacron.common.Consts.{rdfType, tripleObjLongField, triplePredLongField, tripleSubLongField}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes, ConditionType}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes.{OBJECT, PREDICATE, SUBJECT}
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
-import gr.unipi.datacron.store.DataStore
-import org.apache.spark.sql.DataFrame
+
+import scala.collection.mutable
+import scala.util.Try
 
 abstract class LowLevelAnalyzer extends BaseAnalyzer {
 
-  val datasources: Array[DatasourceOperator] = DataStore.allData.map(DatasourceOperator)
+  private val rdfTypeEnc = getEncodedStr(rdfType)
 
   private def getEncodedStr(decodedColumnName: String): String = {
     val result = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName))
@@ -73,60 +74,36 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     }
   }
 
-  private def guessDataFrame(dsO: Option[DatasourceOperator], node: BaseOperator): Array[DatasourceOperator] = {
+  private def guessDatasource(dsO: Option[DatasourceOperator], node: BaseOperator): Array[DatasourceOperator] = {
     if (dsO.isEmpty) {
-      val rdfTypeEnc = getEncodedStr(rdfType)
-      var predicates = getPredicateList(node)
-
+      val predicates = getPredicateList(node)
       if ((predicates.length == 1) && (predicates(0) == rdfTypeEnc)) {
         node match {
           case so: SelectOperator =>
             val objFilter = findSelectOperator(so, OBJECT)
             if (objFilter.isDefined) {
               val encodedObjFilter = getEncodedStr(objFilter.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-              return DataStore.findDataframeBasedOnRdfType(encodedObjFilter)
+              return Datasources.findDatasourceBasedOnRdfType(encodedObjFilter)
             }
         }
-        DataStore.propertyData.filter(df => {
-          df.getIncludingColumns(predicates).length > 0
-        }) :+ DataStore.triplesData
+        Datasources.getDatasourcesByPredicates(predicates)
       }
       else {
         if (predicates.contains(rdfTypeEnc)) {
           val objFilter = findObjectOfRdfType(node)
           if (objFilter.isDefined) {
-            val dfA = DataStore.findDataframeBasedOnRdfType(objFilter.get)
+            /*val dfA = Datasources.findDatasourceBasedOnRdfType(objFilter.get)
             if (!dfA.contains(DataStore.nodeData)) {
               return dfA
-            }
+            }*/
+            Datasources.findDatasourceBasedOnRdfType(objFilter.get)
           }
         }
-        predicates = predicates.filter(!_.equals(rdfTypeEnc))
-
-        val result = DataStore.propertyData.filter(df => {
-          df.getIncludingColumns(predicates).length > 0
-        })
-
-        if (result.length == 0) {
-          Array(DataStore.triplesData)
-        }
-        else if (result.length == 1) {
-          val df = result(0)
-          val excl = df.getExcludingColumns(predicates)
-          if (excl.length > 0) {
-            Array(df, DataStore.triplesData)
-          }
-          else {
-            Array(df)
-          }
-        }
-        else {
-          throw new Exception("Does not support more than one dataframes")
-        }
+        Datasources.getAllDatasourcesByIncludingAndExcludingPredicates(predicates.filter(!_.equals(rdfTypeEnc)))
       }
     }
     else {
-      Array(dfO.get)
+      Array(dsO.get)
     }
   }
 
@@ -137,7 +114,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     }
   }
 
-  private def convertSelectToUnionOperator(so: SelectOperator, dfs: Array[DataFrame]): UnionOperator = {
+  private def convertSelectToUnionOperator(so: SelectOperator, dfs: Array[DatasourceOperator]): UnionOperator = {
     val selOps = dfs.map(df => {
       val bo = processNode(so, Some(df))
       val ds = findFirstDatasourceOperator(bo)
@@ -152,24 +129,62 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     analyzedOperators.dataOperators.UnionOperator(selOps, false)
   }
 
-  private def processLowLevelSelectOperator(so: SelectOperator, dfO: Option[DataFrame]): BaseOperator = {
-    val dfs = guessDataFrame(dfO, so)
-    if (dfs.length > 1) {
-      convertSelectToUnionOperator(so, dfs)
+  private def getOperandPairOfColumn(so: SelectOperator, cType: ColumnTypes): Option[OperandPair] = {
+    Try(so.getOperands.find({
+      case op: OperandPair =>
+        op.getLeftOperand match {
+          case co: ColumnOperand =>
+            co.getColumn.getColumnTypes == cType
+        }
+    }).get.asInstanceOf[OperandPair]).toOption
+  }
+
+  protected def processLowLevelSelectOperator(so: SelectOperator, dsO: Option[DatasourceOperator]): BaseOperator = {
+    val dss = guessDatasource(dsO, so)
+    if (dss.length > 1) {
+      convertSelectToUnionOperator(so, dss)
     }
     else {
-      val dso = DatasourceOperator(dfs(0))
+      val ds = dss(0)
+      val subOp = getOperandPairOfColumn(so, SUBJECT)
+      val predOp = getOperandPairOfColumn(so, PREDICATE)
+      val objOp = getOperandPairOfColumn(so, OBJECT)
 
-      //val spto = getPushedDownSpatioTemporalOperator(dfs(0), dso)
+      val operands = mutable.ListBuffer[BaseOperand]()
+      if (subOp.isDefined) {
+        val encodedValue = getEncodedStr(subOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
+        val operand = OperandPair.newOperandPair(ColumnNameOperand(tripleSubLongField), ValueOperand.newValueOperand(encodedValue), ConditionType.EQ)
+        operands.append(operand)
+      }
 
-      val selOp = createSelectOperator(so, dso)
-      if (!dso.isPropertyTableSource) {
-        val po = analyzedOperators.columnOperators.ProjectOperator(selOp, Array(tripleSubLongField, tripleObjLongField), false)
-        val newColName = getEncodedStr(findSelectOperator(so, PREDICATE).get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-        analyzedOperators.columnOperators.RenameOperator(po, Array((tripleObjLongField, newColName)), false)
+      val encodedFilterPred = getEncodedStr(predOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
+
+      if (ds.isPropertyTableSource) {
+        if (objOp.isDefined) {
+          val encodedFilterObj = getEncodedStr(objOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
+          val operand = OperandPair.newOperandPair(ColumnNameOperand(encodedFilterPred), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
+          operands.append(operand)
+        }
+        else {
+          operands.append(NotNullOperand(encodedFilterPred))
+        }
+        so.setOperands(operands.toArray)
+        so
       }
       else {
-        selOp
+        val operand = OperandPair.newOperandPair(ColumnNameOperand(triplePredLongField), ValueOperand.newValueOperand(encodedFilterPred), ConditionType.EQ)
+        operands.append(operand)
+        //df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, triplePredLongField, encodedFilterPred, Option(filter)))
+        if (objOp.isDefined) {
+          val encodedFilterObj = getEncodedStr(objOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
+          val operand = OperandPair.newOperandPair(ColumnNameOperand(tripleObjLongField), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
+        }
+        ProjectOperator.newProjectOperator(so, Array(tripleSubLongField, tripleObjLongField))
+        val map = new util.HashMap[Column, Column]()
+        map.put(Column.newColumn(tripleObjLongField, "", ColumnTypes.OBJECT), Column.newColumn(encodedFilterPred, "", ColumnTypes.OBJECT))
+        RenameOperator.newRenameOperator(so, map)
+        //df = PhysicalPlanner.dropColumns(dropColumnsParams(df, Array(triplePredLongField)))
+        //df = PhysicalPlanner.renameColumns(renameColumnsParams(df, Map((tripleObjLongField, encodedFilterPred))))
       }
     }
   }

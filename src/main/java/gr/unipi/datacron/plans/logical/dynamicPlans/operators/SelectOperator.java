@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class SelectOperator extends BaseOpW1Child {
 
-    private final BaseOperand[] operands;//columns with values only
+    private BaseOperand[] operands;//columns with values only
 
 
     private SelectOperator(BaseOperator bo, Column[] c, BaseOperand[] operands, long outputSize) {
@@ -69,12 +69,10 @@ public class SelectOperator extends BaseOpW1Child {
 
     public String getPredicate() {
         return getColumn(ColumnTypes.PREDICATE).getQueryString();
-
     }
 
     public String getObject() {
         return getColumn(ColumnTypes.OBJECT).getQueryString();
-
     }
 
     @Override
@@ -114,6 +112,10 @@ public class SelectOperator extends BaseOpW1Child {
 
     public BaseOperand[] getOperands() {
         return operands;
+    }
+
+    public void setOperands(BaseOperand[] operands) {
+        this.operands = operands;
     }
 
 }

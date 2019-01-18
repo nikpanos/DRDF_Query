@@ -9,15 +9,18 @@ public class ProjectOperator extends BaseOpW1Child {
 
     private String[] variables;
 
-    private ProjectOperator(BaseOperator bop, List<String> variables) {
+    private ProjectOperator(BaseOperator bop, String[] variables) {
         super(bop);
         this.fillAndFormArrayColumns();
-        this.variables = variables.stream().toArray(String[]::new);
+        this.variables = variables;
     }
 
     public static ProjectOperator newProjectOperator(BaseOperator bop, List<String> variables) {
-        return new ProjectOperator(bop, variables);
+        return new ProjectOperator(bop, variables.stream().toArray(String[]::new));
+    }
 
+    public static ProjectOperator newProjectOperator(BaseOperator bop, String[] variables) {
+        return new ProjectOperator(bop, variables);
     }
 
     public String[] getVariables() {

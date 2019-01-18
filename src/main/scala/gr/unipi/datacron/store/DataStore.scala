@@ -20,11 +20,6 @@ object DataStore {
 
   lazy val sc: SparkContext = spark.sparkContext
 
-  lazy val propertyData: Array[DataFrame] = if ((AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) || (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 2)) Array(nodeData, vesselData)
-  else if (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 1) Array(nodeData)
-  else Array.empty[DataFrame]
-  lazy val allData: Array[DataFrame] = propertyData :+ triplesData
-
   lazy val spatialGrid: SpatialGrid = new SpatialGrid()
   lazy val temporalGrid: TemporalGrid = new TemporalGrid()
 
@@ -50,39 +45,6 @@ object DataStore {
   private def getCached(df: DataFrame): DataFrame = {
     if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) df.cache
     else df
-  }
-
-  private def convertDecodedArrayToEncodedSet(arr: Array[String]): Set[Long] = arr.map(dictionaryRedis.getEncodedValue(_).get).toSet
-
-  private lazy val nodeTypesEncoded: Set[Long] = convertDecodedArrayToEncodedSet(nodeTypes)
-  private lazy val weatherConditionTypesEncoded: Set[Long] = convertDecodedArrayToEncodedSet(weatherConditionTypes)
-
-  def findDataframeBasedOnRdfType(encodedRdfType: String): Array[DataFrame] = {
-    val encodedRdfTypeL = encodedRdfType.toLong
-    if (nodeTypesEncoded.contains(encodedRdfTypeL)) Array(nodeData)
-    else if (weatherConditionTypesEncoded.contains(encodedRdfTypeL)) Array(triplesData)
-    else if ((AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 0) || (AppConfig.getInt(qfpDicRedisDynamicDatabaseID) == 2)) Array(vesselData, triplesData)
-    else Array(triplesData)
-  }
-
-  def hdfsDirectoryExists(directory: String): Boolean = {
-    val hdfs = FileSystem.get(sc.hadoopConfiguration)
-    try {
-      hdfs.exists(new Path(directory))
-    }
-    finally {
-      hdfs.close()
-    }
-  }
-
-  def deleteHdfsDirectory(directory: String): Boolean = {
-    val hdfs = FileSystem.get(sc.hadoopConfiguration)
-    try {
-      hdfs.delete(new Path(directory), true)
-    }
-    finally {
-      hdfs.close()
-    }
   }
 
   lazy val spatialAndTemporalShortcutCols: Array[String] = if (dictionaryRedis.getDynamicSetting(redisKeyDimensions).get.toInt == 2) {

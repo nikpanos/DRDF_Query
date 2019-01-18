@@ -1,11 +1,10 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.analyzers.PlanAnalyzer.getConditionOperatorFromOperandPair
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.{BaseOperator, SelectOperator}
-import org.apache.spark.sql.DataFrame
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.{BaseOperator, DatasourceOperator, SelectOperator}
 
 abstract class BaseAnalyzer {
-  protected def processNode(node: BaseOperator, dfO: Option[DataFrame]): BaseOperator
+  protected def processNode(node: BaseOperator, dfO: Option[DatasourceOperator]): BaseOperator
 
   protected def createSelectOperator(so: SelectOperator, child: BaseOperator): SelectOperator = {
     val filters = so.getFilters
