@@ -1,25 +1,35 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.analyzers.PlanAnalyzer.getConditionOperatorFromOperandPair
-import gr.unipi.datacron.plans.logical.dynamicPlans.operators.{BaseOperator, DatasourceOperator, SelectOperator}
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 
 abstract class BaseAnalyzer {
-  protected def processNode(node: BaseOperator, dfO: Option[DatasourceOperator]): BaseOperator
-
-  protected def createSelectOperator(so: SelectOperator, child: BaseOperator): SelectOperator = {
-    val filters = so.getFilters
-    val condition = if (filters.length == 1) {
-      getConditionOperatorFromOperandPair(filters(0))
-    }
-    else {
-      val first = filters.head
-
-      val conditionFirst: analyzedOperators.commonOperators.BaseOperator with BooleanTrait = getConditionOperatorFromOperandPair(first)
-      filters.tail.foldLeft(conditionFirst)((conditionLeft, op) => {
-        val conditionRight = getConditionOperatorFromOperandPair(op)
-        analyzedOperators.logicalOperators.LogicalAggregateOperator(conditionLeft, conditionRight, LogicalAggregateEnums.And)
-      })
-    }
-    analyzedOperators.dataOperators.SelectOperator(child, condition, child.isPrefixed)
+  def analyzePlan(root: BaseOperator): BaseOperator = {
+    processNode(root)
   }
+
+  protected def processNode(node: BaseOperator): BaseOperator = {
+    node match {
+      case to: DistinctOperator => processDistinctOperator(to)
+      case jo: JoinOperator => processJoinOperator(jo)
+      case js: JoinSubjectOperator => processJoinSubjectOperator(js)
+      case lo: LimitOperator => processLimitOperator(lo)
+      case po: ProjectOperator => processProjectOperator(po)
+      case ro: RenameOperator => processRenameOperator(ro)
+      case so: SelectOperator => if (so.getChild.isInstanceOf[TripleOperator]) processLowLevelSelectOperator(so) else processSelectOperator(so)
+      case so: SortOperator => processSortOperator(so)
+      case uo: UnionOperator => processUnionOperator(uo)
+      case _ => throw new Exception("Not supported operator")
+    }
+  }
+
+  protected def processDistinctOperator(to: DistinctOperator): BaseOperator
+  protected def processJoinOperator(jo: JoinOperator): BaseOperator
+  protected def processJoinSubjectOperator(js: JoinSubjectOperator): BaseOperator
+  protected def processLimitOperator(lo: LimitOperator): BaseOperator
+  protected def processLowLevelSelectOperator(so: SelectOperator): BaseOperator
+  protected def processProjectOperator(po: ProjectOperator): BaseOperator
+  protected def processRenameOperator(ro: RenameOperator): BaseOperator
+  protected def processSelectOperator(so: SelectOperator): BaseOperator
+  protected def processSortOperator(so: SortOperator): BaseOperator
+  protected def processUnionOperator(uo: UnionOperator): BaseOperator
 }

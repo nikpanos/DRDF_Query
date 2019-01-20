@@ -30,7 +30,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
   private def filterSelectOperators(so: SelectOperator, columnType: ColumnTypes): Array[OperandPair] = {
     so.getOperands.flatMap({case op: OperandPair =>
       op.getLeftOperand match {
-        case column: ColumnOperand => Some(op)
+        case _: ColumnOperand => Some(op)
       }
     })
   }
@@ -107,26 +107,21 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     }
   }
 
-  private def findFirstDatasourceOperator(bo: BaseOperator): DatasourceOperator = {
-    bo match {
-      case ds: DatasourceOperator => ds
-      case _=> findFirstDatasourceOperator(bo)
-    }
-  }
-
-  private def convertSelectToUnionOperator(so: SelectOperator, dfs: Array[DatasourceOperator]): UnionOperator = {
-    val selOps = dfs.map(df => {
-      val bo = processNode(so, Some(df))
-      val ds = findFirstDatasourceOperator(bo)
+  private def convertSelectToUnionOperator(so: SelectOperator, dss: Array[DatasourceOperator]): BaseOperator = {
+    val selOps = dss.map(ds => {
+      val bo = processLowLevelSelectOperator(so, ds, ds.isPropertyTableSource)
+      //val ds = findFirstDatasourceOperator(bo)
       if (ds.isPropertyTableSource) {
         val colName = getEncodedStr(findSelectOperator(so, PREDICATE).get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-        analyzedOperators.columnOperators.ProjectOperator(bo, Array(tripleSubLongField, colName), false)
+        ProjectOperator.newProjectOperator(bo, Array(tripleSubLongField, colName))
       }
       else {
         bo
       }
     })
-    analyzedOperators.dataOperators.UnionOperator(selOps, false)
+    selOps.tail.foldLeft(selOps.head)((left, right) => {
+      UnionOperator.newUnionOperator(left, right)
+    })
   }
 
   private def getOperandPairOfColumn(so: SelectOperator, cType: ColumnTypes): Option[OperandPair] = {
@@ -139,52 +134,99 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     }).get.asInstanceOf[OperandPair]).toOption
   }
 
-  protected def processLowLevelSelectOperator(so: SelectOperator, dsO: Option[DatasourceOperator]): BaseOperator = {
-    val dss = guessDatasource(dsO, so)
+  private def processLowLevelSelectOperator(so: SelectOperator, ch: BaseOperator, isPropertyTableSource: Boolean): BaseOperator = {
+    val subOp = getOperandPairOfColumn(so, SUBJECT)
+    val predOp = getOperandPairOfColumn(so, PREDICATE)
+    val objOp = getOperandPairOfColumn(so, OBJECT)
+
+    val operands = mutable.ListBuffer[BaseOperand]()
+    if (subOp.isDefined) {
+      val encodedValue = getEncodedStr(subOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
+      val operandSub = OperandPair.newOperandPair(ColumnNameOperand(tripleSubLongField), ValueOperand.newValueOperand(encodedValue), ConditionType.EQ)
+      operands.append(operandSub)
+    }
+
+    val encodedFilterPred = getEncodedStr(predOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
+
+    if (isPropertyTableSource) {
+      if (objOp.isDefined) {
+        val encodedFilterObj = getEncodedStr(objOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
+        val operand = OperandPair.newOperandPair(ColumnNameOperand(encodedFilterPred), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
+        operands.append(operand)
+      }
+      else {
+        operands.append(NotNullOperand(encodedFilterPred))
+      }
+      SelectOperator.newSelectOperator(ch, so.getArrayColumns, operands.toArray, so.getOutputSize)
+    }
+    else {
+      val operandPred = OperandPair.newOperandPair(ColumnNameOperand(triplePredLongField), ValueOperand.newValueOperand(encodedFilterPred), ConditionType.EQ)
+      operands.append(operandPred)
+      //df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, triplePredLongField, encodedFilterPred, Option(filter)))
+      if (objOp.isDefined) {
+        val encodedFilterObj = getEncodedStr(objOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
+        val operandObj = OperandPair.newOperandPair(ColumnNameOperand(tripleObjLongField), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
+        operands.append(operandObj)
+      }
+      val newSo = SelectOperator.newSelectOperator(ch, so.getArrayColumns, operands.toArray, so.getOutputSize)
+      val po = ProjectOperator.newProjectOperator(newSo, Array(tripleSubLongField, tripleObjLongField))
+      val map = new util.HashMap[Column, Column]()
+      map.put(Column.newColumn(tripleObjLongField, "", ColumnTypes.OBJECT), Column.newColumn(encodedFilterPred, "", ColumnTypes.OBJECT))
+      RenameOperator.newRenameOperator(po, map)
+      //df = PhysicalPlanner.dropColumns(dropColumnsParams(df, Array(triplePredLongField)))
+      //df = PhysicalPlanner.renameColumns(renameColumnsParams(df, Map((tripleObjLongField, encodedFilterPred))))
+    }
+  }
+
+  override protected def processLowLevelSelectOperator(so: SelectOperator): BaseOperator = {
+    val dss = guessDatasource(None, so)
     if (dss.length > 1) {
       convertSelectToUnionOperator(so, dss)
     }
     else {
       val ds = dss(0)
-      val subOp = getOperandPairOfColumn(so, SUBJECT)
-      val predOp = getOperandPairOfColumn(so, PREDICATE)
-      val objOp = getOperandPairOfColumn(so, OBJECT)
+      processLowLevelSelectOperator(so, ds, ds.isPropertyTableSource)
+    }
+  }
 
-      val operands = mutable.ListBuffer[BaseOperand]()
-      if (subOp.isDefined) {
-        val encodedValue = getEncodedStr(subOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-        val operand = OperandPair.newOperandPair(ColumnNameOperand(tripleSubLongField), ValueOperand.newValueOperand(encodedValue), ConditionType.EQ)
-        operands.append(operand)
+  override protected def processJoinSubjectOperator(js: JoinSubjectOperator): BaseOperator = {
+
+    def processPropertyTable(selectOps: Array[SelectOperator], ds: DatasourceOperator): BaseOperator = {
+      val firstSo = processLowLevelSelectOperator(selectOps.head, ds, ds.isPropertyTableSource)
+      selectOps.tail.foldLeft(firstSo)((child, so) => {
+        processLowLevelSelectOperator(so, child, ds.isPropertyTableSource)
+      })
+    }
+
+    def processTriplesTable(selectOps: Array[SelectOperator], ds: DatasourceOperator): BaseOperator = {
+      val firstSo = processLowLevelSelectOperator(selectOps.head, ds, ds.isPropertyTableSource)
+      selectOps.tail.foldLeft(firstSo)((left, so) => {
+        val right = processLowLevelSelectOperator(so, ds, ds.isPropertyTableSource)
+        JoinOperator.newJoinOperator(left, right)
+      })
+    }
+
+    val dss = guessDatasource(None, js)
+    if (dss.length > 1) {
+      if (dss.length > 2) {
+        throw new Exception("More than 2 datasources are not expected here")
       }
-
-      val encodedFilterPred = getEncodedStr(predOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-
-      if (ds.isPropertyTableSource) {
-        if (objOp.isDefined) {
-          val encodedFilterObj = getEncodedStr(objOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-          val operand = OperandPair.newOperandPair(ColumnNameOperand(encodedFilterPred), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
-          operands.append(operand)
-        }
-        else {
-          operands.append(NotNullOperand(encodedFilterPred))
-        }
-        so.setOperands(operands.toArray)
-        so
+      val propertyDs = dss.find(_.isPropertyTableSource).get
+      val triplesDs = dss.find(!_.isPropertyTableSource).get
+      val (propertySo, triplesSo) = js.getBopChildren.map(_.asInstanceOf[SelectOperator]).partition(so => {
+        val encPred = getEncodedStr(so.getPredicate)
+        propertyDs.hasColumn(encPred)
+      })
+      val propertyTree = processPropertyTable(propertySo, propertyDs)
+      val triplesTree = processTriplesTable(triplesSo, triplesDs)
+      JoinOperator.newJoinOperator(propertyTree, triplesTree)
+    }
+    else {
+      if (dss(0).isPropertyTableSource) {
+        processPropertyTable(js.getBopChildren.map(_.asInstanceOf[SelectOperator]), dss(0))
       }
       else {
-        val operand = OperandPair.newOperandPair(ColumnNameOperand(triplePredLongField), ValueOperand.newValueOperand(encodedFilterPred), ConditionType.EQ)
-        operands.append(operand)
-        //df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, triplePredLongField, encodedFilterPred, Option(filter)))
-        if (objOp.isDefined) {
-          val encodedFilterObj = getEncodedStr(objOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-          val operand = OperandPair.newOperandPair(ColumnNameOperand(tripleObjLongField), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
-        }
-        ProjectOperator.newProjectOperator(so, Array(tripleSubLongField, tripleObjLongField))
-        val map = new util.HashMap[Column, Column]()
-        map.put(Column.newColumn(tripleObjLongField, "", ColumnTypes.OBJECT), Column.newColumn(encodedFilterPred, "", ColumnTypes.OBJECT))
-        RenameOperator.newRenameOperator(so, map)
-        //df = PhysicalPlanner.dropColumns(dropColumnsParams(df, Array(triplePredLongField)))
-        //df = PhysicalPlanner.renameColumns(renameColumnsParams(df, Map((tripleObjLongField, encodedFilterPred))))
+        processTriplesTable(js.getBopChildren.map(_.asInstanceOf[SelectOperator]), dss(0))
       }
     }
   }

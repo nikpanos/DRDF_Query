@@ -19,8 +19,7 @@ import java.util.logging.Logger;
  */
 public class SelectOperator extends BaseOpW1Child {
 
-    private BaseOperand[] operands;//columns with values only
-
+    private final BaseOperand[] operands;//columns with values only
 
     private SelectOperator(BaseOperator bo, Column[] c, BaseOperand[] operands, long outputSize) {
         super(outputSize, bo);
@@ -43,8 +42,8 @@ public class SelectOperator extends BaseOpW1Child {
         return null;
     }
 
-    public static SelectOperator newSelectOperator(BaseOperator bo, Column[] c, OperandPair[] operandPairList, long outputSize) {
-        return new SelectOperator(bo, c, operandPairList, outputSize);
+    public static SelectOperator newSelectOperator(BaseOperator bo, Column[] c, BaseOperand[] operands, long outputSize) {
+        return new SelectOperator(bo, c, operands, outputSize);
     }
 
     public boolean isSubjectVariable() {
@@ -112,10 +111,6 @@ public class SelectOperator extends BaseOpW1Child {
 
     public BaseOperand[] getOperands() {
         return operands;
-    }
-
-    public void setOperands(BaseOperand[] operands) {
-        this.operands = operands;
     }
 
 }

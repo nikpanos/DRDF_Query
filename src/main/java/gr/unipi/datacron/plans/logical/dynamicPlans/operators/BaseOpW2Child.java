@@ -24,17 +24,4 @@ public abstract class BaseOpW2Child extends BaseOperator {
     protected BaseOpW2Child(BaseOperator bopLeft, BaseOperator bopRight) {
         super(bopLeft, bopRight);
     }
-
-    public void setNewLeftChild(BaseOperator newLeftChild) {
-        super.setNewChild(newLeftChild, left_child);
-    }
-
-    public void setNewRightChild(BaseOperator newRightChild) {
-        super.setNewChild(newRightChild, right_child);
-    }
-
-    public void setNewChildren(BaseOperator newLeftChild, BaseOperator newRightChild) {
-        setNewLeftChild(newLeftChild);
-        setNewRightChild(newRightChild);
-    }
 }

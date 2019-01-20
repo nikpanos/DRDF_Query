@@ -19,7 +19,7 @@ import scala.collection.mutable
 import scala.util.Try
 
 
-object PlanAnalyzer {
+object PlanAnalyzer extends LowLevelAnalyzer {
 
   private val dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 
@@ -39,7 +39,7 @@ object PlanAnalyzer {
 
 
 
-  private def refineBySpatioTemporalInfo(child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.commonOperators.BaseOperator = {
+  /*private def refineBySpatioTemporalInfo(child: analyzedOperators.commonOperators.BaseOperator): analyzedOperators.commonOperators.BaseOperator = {
     if (shouldApplyExactSpatioTemporalFilterLater) {
       shouldApplyExactSpatioTemporalFilterLater = false
       analyzedOperators.spatiotemporalOperators.ExactBoxOperator(child, constraints.get, child.isPrefixed)
@@ -60,7 +60,7 @@ object PlanAnalyzer {
       } else { newOp }
     }
     else { child }
-  }
+  }*/
 
   private def processSelectOperator(so: SelectOperator, dfO: Option[DataFrame]): analyzedOperators.commonOperators.BaseOperator = {
     so.getChild match {
@@ -183,75 +183,17 @@ object PlanAnalyzer {
     analyzedOperators.dataOperators.JoinOperator(leftChild, rightChild, condition)
   }
 
-  def processJoinSubjectOperator(jso: JoinSubjectOperator, dfO: Option[DataFrame]): analyzedOperators.commonOperators.BaseOperator = {
-
-    def processPropertyTable(selectOps: Array[SelectOperator], df: DataFrame): analyzedOperators.commonOperators.BaseOperator = {
-      val firstProperty = processNode(selectOps.head, Some(df))
-      selectOps.tail.foldLeft(firstProperty)((child, so) => {
-        createSelectOperator(so, child)
-      })
-    }
-
-    def processTriplesTable(selectOps: Array[SelectOperator], df: DataFrame): analyzedOperators.commonOperators.BaseOperator = {
-      val triples = selectOps.map(x => processNode(x, Some(df)))
-      val condition = Some(analyzedOperators.logicalOperators.ConditionOperator(tripleSubLongField, ConditionType.EQ, tripleSubLongField))
-      val firstJoin = analyzedOperators.dataOperators.JoinOperator(triples(0), triples(1), condition)
-      triples.slice(2, triples.length).foldLeft(firstJoin)((joinOp, bop) => {
-        analyzedOperators.dataOperators.JoinOperator(joinOp, bop, condition)
-      })
-    }
-
-    val dfs = guessDataFrame(dfO, jso)
-    if (dfs.length > 1) {
-      if (dfs.length > 2) {
-        throw new Exception("More than 2 dataframes are not expected here")
-      }
-      val propertyDf = dfs.find(_.isPropertyTable).get
-      val triplesDf = dfs.find(!_.isPropertyTable).get
-      val (inclSo, exclSo) = getChildren(jso).map(_.asInstanceOf[SelectOperator]).partition(so => {
-        val encPred = getEncodedStr(so.getPredicate)
-        propertyDf.hasColumn(encPred)
-      })
-      val propertyTree = processPropertyTable(inclSo, propertyDf)
-      val triplesTree = processTriplesTable(exclSo, triplesDf)
-      val condition = Some(analyzedOperators.logicalOperators.ConditionOperator(tripleSubLongField, ConditionType.EQ, tripleSubLongField))
-      analyzedOperators.dataOperators.JoinOperator(propertyTree, triplesTree, condition)
-    }
-    else {
-      if (dfs(0).isPropertyTable) {
-        processPropertyTable(getChildren(jso).map(_.asInstanceOf[SelectOperator]), dfs(0))
-      }
-      else {
-        processTriplesTable(getChildren(jso).map(_.asInstanceOf[SelectOperator]), dfs(0))
-      }
-    }
-  }
-
-  private def processProjectOperator(po: ProjectOperator, dfO: Option[DataFrame]): analyzedOperators.columnOperators.ProjectOperator = {
-    val child = refineBySpatioTemporalInfo(processNode(po.getChild, dfO))
+  private def processProjectOperator(po: ProjectOperator): analyzedOperators.columnOperators.ProjectOperator = {
+    //val child = refineBySpatioTemporalInfo(processNode(po.getChild, dfO))
     analyzedOperators.columnOperators.ProjectOperator(child, po.getVariables, child.isPrefixed)
   }
 
-  private def processRenameOperator(ro: RenameOperator, dfO: Option[DataFrame]): analyzedOperators.columnOperators.RenameOperator = {
-    val child = processNode(ro.getChild, dfO)
+  override protected def processRenameOperator(ro: RenameOperator): BaseOperator = {
+    val child = processNode(ro.getChild)
     analyzedOperators.columnOperators.RenameOperator(child, ro.getColumnMapping.asScala.toArray.map(x => (x._1.getColumnName, x._2.getColumnName)), child.isPrefixed)
   }
 
-  private def processNode(node: BaseOperator, dfO: Option[DataFrame]): analyzedOperators.commonOperators.BaseOperator = {
-    node match {
-      case so: SelectOperator => processSelectOperator(so, dfO)
-      case so: SortOperator => processSortOperator(so, dfO)
-      case uo: UnionOperator => processUnionOperator(uo, dfO)
-      case lo: LimitOperator => processLimitOperator(lo, dfO)
-      case jo: JoinOperator => processJoinOperator(jo, dfO)
-      case js: JoinSubjectOperator => processJoinSubjectOperator(js, dfO)
-      case po: ProjectOperator => processProjectOperator(po, dfO)
-      case ro: RenameOperator => processRenameOperator(ro, dfO)
-      case _ => throw new Exception("Not supported operator")
-    }
-  }
 
-  def analyzePlan(root: BaseOperator): analyzedOperators.commonOperators.BaseOperator = {
-    processNode(root, None)
-  }
+
+
 }

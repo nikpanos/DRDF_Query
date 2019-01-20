@@ -4,7 +4,6 @@ import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.common.Consts.{nodeTypes, qfpDicRedisDynamicDatabaseID, weatherConditionTypes}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.DatasourceOperator
-import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.store.DataStore._
 import org.apache.spark.sql.DataFrame
 

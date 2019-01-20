@@ -13,10 +13,4 @@ public abstract class BaseOpWnChild extends BaseOperator {
     protected BaseOpWnChild(BaseOperator... bop) {
         super(bop);
     }
-
-    public void setNewChildren(BaseOperator... newChildren) {
-        for (int i = 0; i < newChildren.length; i++) {
-            super.setNewChild(newChildren[i], i);
-        }
-    }
 }
