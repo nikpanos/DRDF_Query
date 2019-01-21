@@ -12,6 +12,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ColumnOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.OperandPair;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ValueOperand;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.store.DataStore;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;

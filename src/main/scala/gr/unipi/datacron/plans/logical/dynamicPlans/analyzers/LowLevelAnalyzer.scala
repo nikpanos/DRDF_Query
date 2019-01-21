@@ -7,8 +7,6 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes.{OBJECT, PREDICATE, SUBJECT}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
-import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
 
 import scala.collection.mutable
 import scala.util.Try
@@ -16,16 +14,6 @@ import scala.util.Try
 abstract class LowLevelAnalyzer extends BaseAnalyzer {
 
   private val rdfTypeEnc = getEncodedStr(rdfType)
-
-  private def getEncodedStr(decodedColumnName: String): String = {
-    val result = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName))
-    if (result.isEmpty){
-      throw new Exception("Could not find encoded value for column name: " + decodedColumnName)
-    }
-    else {
-      result.get.toString
-    }
-  }
 
   private def filterSelectOperators(so: SelectOperator, columnType: ColumnTypes): Array[OperandPair] = {
     so.getOperands.flatMap({case op: OperandPair =>
@@ -202,7 +190,8 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
       val firstSo = processLowLevelSelectOperator(selectOps.head, ds, ds.isPropertyTableSource)
       selectOps.tail.foldLeft(firstSo)((left, so) => {
         val right = processLowLevelSelectOperator(so, ds, ds.isPropertyTableSource)
-        JoinOperator.newJoinOperator(left, right)
+        val op = OperandPair.newOperandPair(ColumnNameOperand(tripleSubLongField), ColumnNameOperand(tripleSubLongField), ConditionType.EQ)
+        JoinOperator.newJoinOperator(left, right, op)
       })
     }
 
@@ -219,7 +208,8 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
       })
       val propertyTree = processPropertyTable(propertySo, propertyDs)
       val triplesTree = processTriplesTable(triplesSo, triplesDs)
-      JoinOperator.newJoinOperator(propertyTree, triplesTree)
+      val op = OperandPair.newOperandPair(ColumnNameOperand(tripleSubLongField), ColumnNameOperand(tripleSubLongField), ConditionType.EQ)
+      JoinOperator.newJoinOperator(propertyTree, triplesTree, op)
     }
     else {
       if (dss(0).isPropertyTableSource) {

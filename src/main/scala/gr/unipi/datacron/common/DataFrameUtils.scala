@@ -44,6 +44,4 @@ object DataFrameUtils {
     })
 
   }
-
-  def sanitize(input: String): String = s"`$input`"
 }

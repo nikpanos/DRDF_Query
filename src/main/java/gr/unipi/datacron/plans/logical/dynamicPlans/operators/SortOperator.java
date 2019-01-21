@@ -26,11 +26,11 @@ public class SortOperator extends BaseOpW1Child {
     @Override
     protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
-        s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
+        s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: ").append(this.getOutputSize()).append(" RealOutputSize: ").append(this.getRealOutputSize()).append("\n");
 
         s.append(margin).append("Sorting: ").append("\n");
         for (ColumnWithDirection c : columnWithDirection) {
-            s.append(margin).append("Column With Sorting: ").append(c.getColumn() + " " + ((c.getDirection() == 1) ? "Ascending" : "Descending")).append("\n");
+            s.append(margin).append("Column With Sorting: ").append(c.getColumn()).append(" ").append(c.getDirection()).append("\n");
         }
 
         s.append(margin).append("Array Columns: \n");

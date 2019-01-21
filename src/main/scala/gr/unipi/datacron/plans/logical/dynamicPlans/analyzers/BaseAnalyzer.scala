@@ -1,10 +1,22 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
+import gr.unipi.datacron.plans.physical.PhysicalPlanner
+import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
 
 abstract class BaseAnalyzer {
   def analyzePlan(root: BaseOperator): BaseOperator = {
     processNode(root)
+  }
+
+  protected def getEncodedStr(decodedColumnName: String): String = {
+    val result = PhysicalPlanner.encodeSingleValue(encodeSingleValueParams(decodedColumnName))
+    if (result.isEmpty){
+      throw new Exception("Could not find encoded value for column name: " + decodedColumnName)
+    }
+    else {
+      result.get.toString
+    }
   }
 
   protected def processNode(node: BaseOperator): BaseOperator = {

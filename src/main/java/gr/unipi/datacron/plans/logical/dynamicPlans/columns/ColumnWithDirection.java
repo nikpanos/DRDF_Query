@@ -3,9 +3,9 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.columns;
 public class ColumnWithDirection {
 
     private final Column column;
-    private final int direction;
+    private final SortDirection direction;
 
-    private ColumnWithDirection(Column column, int direction) {
+    private ColumnWithDirection(Column column, SortDirection direction) {
         this.column = column;
         this.direction = direction;
     }
@@ -14,11 +14,11 @@ public class ColumnWithDirection {
         return column;
     }
 
-    public int getDirection() {
+    public SortDirection getDirection() {
         return direction;
     }
 
-    public static ColumnWithDirection newColumnWithDirection(Column column, int direction) {
+    public static ColumnWithDirection newColumnWithDirection(Column column, SortDirection direction) {
         return new ColumnWithDirection(column, direction);
     }
 }

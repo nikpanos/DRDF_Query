@@ -9,4 +9,6 @@ object Utils {
   else {
     AppConfig.getString(directory)
   }
+
+  def sanitize(input: String): String = s"`$input`"
 }
