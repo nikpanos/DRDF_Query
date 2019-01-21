@@ -8,7 +8,7 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.columns;
 /**
  * @author nicholaskoutroumanis
  */
-public class ColumnWithVariable extends Column {
+public class ColumnWithVariable extends SparqlColumn {
 
     private final String variableName;
 
@@ -22,7 +22,7 @@ public class ColumnWithVariable extends Column {
     }
 
     @Override
-    public Column copyToNewObject(String prefix) {
+    public SparqlColumn copyToNewObject(String prefix) {
         return new ColumnWithVariable(prefix + "." + this.getColumnName(), this.variableName, this.getColumnTypes());
     }
 

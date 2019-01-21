@@ -5,7 +5,7 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 
 import java.util.Map;
 
@@ -14,15 +14,15 @@ import java.util.Map;
  */
 public class RenameOperator extends BaseOpW1Child {
 
-    private final Map<Column, Column> m;
+    private final Map<SparqlColumn, SparqlColumn> m;
 
-    private RenameOperator(BaseOperator bo, Map<Column, Column> m) {
+    private RenameOperator(BaseOperator bo, Map<SparqlColumn, SparqlColumn> m) {
         super(bo);
         this.m = m;
-        setArrayColumns(m.values().stream().toArray(Column[]::new));
+        setArrayColumns(m.values().stream().toArray(SparqlColumn[]::new));
     }
 
-    public static RenameOperator newRenameOperator(BaseOperator bo, Map<Column, Column> m) {
+    public static RenameOperator newRenameOperator(BaseOperator bo, Map<SparqlColumn, SparqlColumn> m) {
         return new RenameOperator(bo, m);
     }
 
@@ -41,7 +41,7 @@ public class RenameOperator extends BaseOpW1Child {
         return "";
     }
 
-    public Map<Column, Column> getColumnMapping() {
+    public Map<SparqlColumn, SparqlColumn> getColumnMapping() {
         return m;
     }
 

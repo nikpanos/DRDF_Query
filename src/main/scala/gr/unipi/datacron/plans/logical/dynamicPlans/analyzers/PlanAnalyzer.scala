@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ConditionType}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{SparqlColumn, ConditionType}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.common.Utils._
@@ -26,7 +26,7 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     }
   }
 
-  private def getColumnNameForOperation(oldTreeNode: BaseOperator, c: Column, newTreeNode: BaseOperator): String = {
+  private def getColumnNameForOperation(oldTreeNode: BaseOperator, c: SparqlColumn, newTreeNode: BaseOperator): String = {
     val prefix = if (isPrefixed(newTreeNode)) {
       prefixMappings(getPrefix(c.getColumnName)) + '.'
     }
@@ -42,7 +42,7 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     prefix + suffix
   }
 
-  /*private def getPrefixForColumn(df: DataFrame, op: BaseOperator, col: Column): (String, DataFrame) = {
+  /*private def getPrefixForColumn(df: DataFrame, op: BaseOperator, col: SparqlColumn): (String, DataFrame) = {
 
     if (!df.isPrefixed) {
       op.getArrayColumns.foreach(c => prefixMappings.put(getPrefix(c.getColumnName), pref))

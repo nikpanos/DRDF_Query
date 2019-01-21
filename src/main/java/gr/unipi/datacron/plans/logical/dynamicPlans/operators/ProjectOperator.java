@@ -1,6 +1,6 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public class ProjectOperator extends BaseOpW1Child {
 
         s.append("Array Columns: \n");
 
-        for (Column c : this.getArrayColumns()) {
+        for (SparqlColumn c : this.getArrayColumns()) {
             if (c instanceof ColumnWithVariable) {
                 s.append(margin).append("ColumnName:").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
             } else {

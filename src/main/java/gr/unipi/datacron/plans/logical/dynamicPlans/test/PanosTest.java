@@ -43,7 +43,7 @@ public class PanosTest {
 
         System.out.println("--------------------------");
         System.out.println(bop.toString());
-        /*Column[] cs = ((JoinOperator)bop[0]).getColumnJoinPredicate();
+        /*SparqlColumn[] cs = ((JoinOperator)bop[0]).getColumnJoinPredicate();
         System.out.println(cs.length);
         System.out.println();
         System.out.println(cs[0].getColumnName());
@@ -54,7 +54,7 @@ public class PanosTest {
         System.out.println();
         System.out.println();
 
-        /*for (Column c : bop[0].getArrayColumns()) {
+        /*for (SparqlColumn c : bop[0].getArrayColumns()) {
             System.out.println();
             System.out.println(c.getColumnName());
             System.out.println(c.getColumnTypes());

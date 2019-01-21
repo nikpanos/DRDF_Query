@@ -5,11 +5,10 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operands.OperandPair;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,20 +20,20 @@ public class SelectOperator extends BaseOpW1Child {
 
     private final BaseOperand[] operands;//columns with values only
 
-    private SelectOperator(BaseOperator bo, Column[] c, BaseOperand[] operands, long outputSize) {
+    private SelectOperator(BaseOperator bo, SparqlColumn[] c, BaseOperand[] operands, long outputSize) {
         super(outputSize, bo);
         setArrayColumns(c);
         this.operands = operands;
     }
 
-    private Column getColumn(ColumnTypes ct) {
-        for (Column c : this.getArrayColumns()) {
+    private SparqlColumn getColumn(ColumnTypes ct) {
+        for (SparqlColumn c : this.getArrayColumns()) {
             if (c.getColumnTypes() == ct) {
                 return c;
             }
         }
         try {
-            throw new Exception("Can not define Column Type");
+            throw new Exception("Can not define SparqlColumn Type");
         } catch (Exception ex) {
             Logger.getLogger(SelectOperator.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -42,22 +41,22 @@ public class SelectOperator extends BaseOpW1Child {
         return null;
     }
 
-    public static SelectOperator newSelectOperator(BaseOperator bo, Column[] c, BaseOperand[] operands, long outputSize) {
+    public static SelectOperator newSelectOperator(BaseOperator bo, SparqlColumn[] c, BaseOperand[] operands, long outputSize) {
         return new SelectOperator(bo, c, operands, outputSize);
     }
 
     public boolean isSubjectVariable() {
-        Column c = getColumn(ColumnTypes.SUBJECT);
+        SparqlColumn c = getColumn(ColumnTypes.SUBJECT);
         return (c instanceof ColumnWithVariable);
     }
 
     public boolean isPredicateVariable() {
-        Column c = getColumn(ColumnTypes.PREDICATE);
+        SparqlColumn c = getColumn(ColumnTypes.PREDICATE);
         return (c instanceof ColumnWithVariable);
     }
 
     public boolean isObjectVariable() {
-        Column c = getColumn(ColumnTypes.OBJECT);
+        SparqlColumn c = getColumn(ColumnTypes.OBJECT);
         return (c instanceof ColumnWithVariable);
     }
 
@@ -84,7 +83,7 @@ public class SelectOperator extends BaseOpW1Child {
 //        }
 
         s.append(margin).append("Array Columns: \n");
-        for (Column c : this.getArrayColumns()) {
+        for (SparqlColumn c : this.getArrayColumns()) {
             if (c instanceof ColumnWithVariable) {
                 s.append(margin).append("ColumnName: ").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
             } else {

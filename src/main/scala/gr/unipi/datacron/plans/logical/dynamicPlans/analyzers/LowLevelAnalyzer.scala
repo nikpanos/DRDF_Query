@@ -3,7 +3,7 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 import java.util
 
 import gr.unipi.datacron.common.Consts.{rdfType, tripleObjLongField, triplePredLongField, tripleSubLongField}
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes, ConditionType}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes, ConditionType, SparqlColumn}
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes.{OBJECT, PREDICATE, SUBJECT}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
@@ -158,8 +158,8 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
       }
       val newSo = SelectOperator.newSelectOperator(ch, so.getArrayColumns, operands.toArray, so.getOutputSize)
       val po = ProjectOperator.newProjectOperator(newSo, Array(tripleSubLongField, tripleObjLongField))
-      val map = new util.HashMap[Column, Column]()
-      map.put(Column.newColumn(tripleObjLongField, "", ColumnTypes.OBJECT), Column.newColumn(encodedFilterPred, "", ColumnTypes.OBJECT))
+      val map = new util.HashMap[SparqlColumn, SparqlColumn]()
+      map.put(SparqlColumn.newSparqlColumn(tripleObjLongField, "", ColumnTypes.OBJECT), SparqlColumn.newSparqlColumn(encodedFilterPred, "", ColumnTypes.OBJECT))
       RenameOperator.newRenameOperator(po, map)
       //df = PhysicalPlanner.dropColumns(dropColumnsParams(df, Array(triplePredLongField)))
       //df = PhysicalPlanner.renameColumns(renameColumnsParams(df, Map((tripleObjLongField, encodedFilterPred))))

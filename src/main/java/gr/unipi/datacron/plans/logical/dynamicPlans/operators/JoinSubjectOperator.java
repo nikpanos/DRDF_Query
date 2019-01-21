@@ -5,7 +5,7 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class JoinSubjectOperator extends BaseOpWnChild {
 
-    private Column[] columnJoinPredicate;
+    private SparqlColumn[] columnJoinPredicate;
 
     private JoinSubjectOperator(BaseOperator... bo) {
         super(bo);
@@ -27,10 +27,10 @@ public class JoinSubjectOperator extends BaseOpWnChild {
     }
 
     @Override
-    protected List<Column> formArrayColumns(List<Column> columnList) {
+    protected List<SparqlColumn> formArrayColumns(List<SparqlColumn> columnList) {
 
         List<Integer> elementsToBeDeleted = new ArrayList<>();
-        List<Column> columnJoinPredicateList = new ArrayList<>();
+        List<SparqlColumn> columnJoinPredicateList = new ArrayList<>();
 
         //first child elements
         ColumnWithVariable a = (ColumnWithVariable) getBopChildren()[0].getArrayColumns()[0];
@@ -55,7 +55,7 @@ public class JoinSubjectOperator extends BaseOpWnChild {
             j = j + getBopChildren()[i].getArrayColumns().length;
         }
 
-        columnJoinPredicate = columnJoinPredicateList.stream().toArray(Column[]::new);
+        columnJoinPredicate = columnJoinPredicateList.stream().toArray(SparqlColumn[]::new);
 
         Collections.reverse(elementsToBeDeleted);
         elementsToBeDeleted.forEach((Integer i) -> columnList.remove(i.intValue()));
@@ -70,7 +70,7 @@ public class JoinSubjectOperator extends BaseOpWnChild {
     /**
      * @return the columnJoinPredicate
      */
-    public Column[] getColumnJoinPredicate() {
+    public SparqlColumn[] getColumnJoinPredicate() {
         return columnJoinPredicate;
     }
 
@@ -79,11 +79,11 @@ public class JoinSubjectOperator extends BaseOpWnChild {
         StringBuilder s = new StringBuilder();
         s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
         s.append(margin).append("Join on Columns: \n");
-        for (Column c : getColumnJoinPredicate()) {
+        for (SparqlColumn c : getColumnJoinPredicate()) {
             s.append(margin).append("ColumnName: ").append(c.getColumnName()).append(" Variable: ").append(c.getQueryString()).append("\n");
         }
         s.append(margin).append("Array Columns: \n");
-        for (Column c : this.getArrayColumns()) {
+        for (SparqlColumn c : this.getArrayColumns()) {
             if (c instanceof ColumnWithVariable) {
                 s.append(margin).append("ColumnName: ").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
             } else {

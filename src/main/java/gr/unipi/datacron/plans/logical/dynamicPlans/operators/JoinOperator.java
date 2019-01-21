@@ -5,11 +5,10 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.*;
-import org.apache.spark.sql.ColumnName;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +39,7 @@ public class JoinOperator extends BaseOpW2Child {
     }
 
     @Override
-    protected List<Column> formArrayColumns(List<Column> columnList) {
+    protected List<SparqlColumn> formArrayColumns(List<SparqlColumn> columnList) {
 
         List<Integer> elementsToBeDeleted = new ArrayList<>();
         List<ColumnOperand> columnJoinPredicateList = new ArrayList<>();
@@ -48,13 +47,13 @@ public class JoinOperator extends BaseOpW2Child {
         int b;
         int c = 0;
         //find the common variable of the first two child operators        
-        for (Column i : getBopChildren()[0].getArrayColumns()) {
+        for (SparqlColumn i : getBopChildren()[0].getArrayColumns()) {
             if (c == 1) {
                 break;
             }
             if (i instanceof ColumnWithVariable) {
                 b = 0;
-                for (Column k : getBopChildren()[1].getArrayColumns()) {
+                for (SparqlColumn k : getBopChildren()[1].getArrayColumns()) {
                     if (k instanceof ColumnWithVariable) {
                         if (((ColumnWithVariable) i).getVariableName().equals(((ColumnWithVariable) k).getVariableName())) {
                             elementsToBeDeleted.add(getBopChildren()[0].getArrayColumns().length + b);
@@ -102,7 +101,7 @@ public class JoinOperator extends BaseOpW2Child {
             addOperandStringToStringBuilder(sb, pair.getRightOperand(), margin);
         }
         else if (op instanceof ColumnOperand) {
-            Column c = ((ColumnOperand)op).getColumn();
+            SparqlColumn c = ((ColumnOperand)op).getColumn();
             sb.append(margin).append("ColumnName: ").append(c.getColumnName()).append(" Variable: ").append(c.getQueryString()).append("\n");
         }
         else if (op instanceof ValueOperand) {
@@ -125,7 +124,7 @@ public class JoinOperator extends BaseOpW2Child {
         s.append(margin).append("Join on Columns: \n");
         addOperandStringToStringBuilder(s, joinOperand, margin);
         s.append(margin).append("Array Columns: \n");
-        for (Column c : this.getArrayColumns()) {
+        for (SparqlColumn c : this.getArrayColumns()) {
             if (c instanceof ColumnWithVariable) {
                 s.append(margin).append("ColumnName: ").append(c.getColumnName()).append(" ").append(((ColumnWithVariable) c).getVariableName()).append("\n");
             } else {

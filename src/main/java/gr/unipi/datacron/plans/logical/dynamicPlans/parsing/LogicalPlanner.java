@@ -167,9 +167,9 @@ public class LogicalPlanner extends OpVisitorBase {
             Long outputSize = getOutputSize(subject, predicate, object);
             TripleOperator to = TripleOperator.newTripleOperator(subject, predicate, object);
 
-            Map<Column, Column> hm = new LinkedHashMap<>();
+            Map<SparqlColumn, SparqlColumn> hm = new LinkedHashMap<>();
 
-            for (Column c : to.getArrayColumns()) {
+            for (SparqlColumn c : to.getArrayColumns()) {
                 hm.put(c, c.copyToNewObject(Integer.toString(to.hashCode())));
             }
 
@@ -177,7 +177,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
             List<OperandPair> k = new ArrayList<>();
 
-            for (Column c : p.getArrayColumns()) {
+            for (SparqlColumn c : p.getArrayColumns()) {
                 if (!(c instanceof ColumnWithVariable)) {
                     k.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString()), ConditionType.EQ));
                 }
@@ -350,16 +350,16 @@ public class LogicalPlanner extends OpVisitorBase {
 
                             TripleOperator to = TripleOperator.newTripleOperator(l1.getSubject(), v, list2.get(i).getObject());
 
-                            Map<Column, Column> hm = new LinkedHashMap<>();
+                            Map<SparqlColumn, SparqlColumn> hm = new LinkedHashMap<>();
 
-                            for (Column c : to.getArrayColumns()) {
+                            for (SparqlColumn c : to.getArrayColumns()) {
                                 hm.put(c, c.copyToNewObject(Integer.toString(to.hashCode())));
                             }
 
                             RenameOperator pop = RenameOperator.newRenameOperator(to, hm);
 
                             List<OperandPair> cwv = new ArrayList<>();
-                            for (Column c : pop.getArrayColumns()) {
+                            for (SparqlColumn c : pop.getArrayColumns()) {
                                 if (!(c instanceof ColumnWithVariable)) {
                                     cwv.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString()), ConditionType.EQ));
                                 }
@@ -445,7 +445,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
 
                 if (elements[1].startsWith("?")) {
-                    for (Column c : root.getArrayColumns()) {
+                    for (SparqlColumn c : root.getArrayColumns()) {
                         if (c.getQueryString().equals(elements[1])) {
                             bo1 = ColumnOperand.newColumnOperand(c);
                             break;
@@ -456,7 +456,7 @@ public class LogicalPlanner extends OpVisitorBase {
                 }
 
                 if (elements[2].startsWith("?")) {
-                    for (Column c : root.getArrayColumns()) {
+                    for (SparqlColumn c : root.getArrayColumns()) {
                         if (c.getQueryString().equals(elements[2])) {
                             bo2 = ColumnOperand.newColumnOperand(c);
                             break;
@@ -496,7 +496,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
             for (SortCondition sc : query.getOrderBy()) {
 
-                for (Column c : root.getArrayColumns()) {
+                for (SparqlColumn c : root.getArrayColumns()) {
                     if (c instanceof ColumnWithVariable) {
                         if (c.getQueryString().equals(sc.expression.getExprVar().toString())) {
                             int direction = sc.direction;

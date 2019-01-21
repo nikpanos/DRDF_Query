@@ -5,11 +5,10 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,9 +23,9 @@ public abstract class BaseOperator {
     private long realOutputSize;
 
 
-    private Column[] arrayColumns;//only column values
+    private SparqlColumn[] arrayColumns;//only column values
 
-    protected List<Column> formArrayColumns(List<Column> columnList) {
+    protected List<SparqlColumn> formArrayColumns(List<SparqlColumn> columnList) {
         return columnList;
     }
 
@@ -52,14 +51,14 @@ public abstract class BaseOperator {
 
     protected void fillAndFormArrayColumns() {
 
-        List<Column> listColumns = new ArrayList<>();
+        List<SparqlColumn> listColumns = new ArrayList<>();
 
         for (BaseOperator b : bopChildren) {
-            for (Column c : b.getArrayColumns()) {
+            for (SparqlColumn c : b.getArrayColumns()) {
                 listColumns.add(c);
             }
         }
-        arrayColumns = formArrayColumns(listColumns).stream().toArray(Column[]::new);
+        arrayColumns = formArrayColumns(listColumns).stream().toArray(SparqlColumn[]::new);
     }
 
 
@@ -76,21 +75,21 @@ public abstract class BaseOperator {
     /**
      * @return the arrayColumns
      */
-    public Column[] getArrayColumns() {
+    public SparqlColumn[] getArrayColumns() {
         return arrayColumns;
     }
 
     /**
      * @param arrayColumns the arrayColumns to set
      */
-    public void setArrayColumns(Column[] arrayColumns) {
+    public void setArrayColumns(SparqlColumn[] arrayColumns) {
         this.arrayColumns = arrayColumns;
     }
 
     public boolean hasCommonVariable(BaseOperator bop) {
-        for (Column c1 : this.arrayColumns) {
+        for (SparqlColumn c1 : this.arrayColumns) {
             if (c1 instanceof ColumnWithVariable) {
-                for (Column c2 : bop.arrayColumns) {
+                for (SparqlColumn c2 : bop.arrayColumns) {
                     if (c2 instanceof ColumnWithVariable) {
                         if (((ColumnWithVariable) c1).getVariableName().equals(((ColumnWithVariable) c2).getVariableName())) {
                             return true;

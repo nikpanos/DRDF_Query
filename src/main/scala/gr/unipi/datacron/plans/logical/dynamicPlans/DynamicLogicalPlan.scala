@@ -6,7 +6,7 @@ import gr.unipi.datacron.common.{AppConfig, Consts, SpatioTemporalInfo, SpatioTe
 import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{Column, ColumnTypes, SparqlColumn}
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.store.DataStore
 import gr.unipi.datacron.common.DataFrameUtils._
@@ -289,7 +289,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def getColumnNameForJoin(op: BaseOperator, c: Column, prefix: String): String = {
+  private def getColumnNameForJoin(op: BaseOperator, c: SparqlColumn, prefix: String): String = {
     prefix + (c.getColumnTypes match {
       case ColumnTypes.SUBJECT => Consts.tripleSubLongField
       case PREDICATE => throw new Exception("Does not support join predicates on Predicate columns")
@@ -300,7 +300,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     })
   }
 
-  private def getPrefixForColumn(df: DataFrame, op: BaseOperator, col: Column): (String, DataFrame) = {
+  private def getPrefixForColumn(df: DataFrame, op: BaseOperator, col: SparqlColumn): (String, DataFrame) = {
     val pref = getPrefix(col.getColumnName)
     if (!df.isPrefixed) {
       op.getArrayColumns.foreach(c => prefixMappings.put(getPrefix(c.getColumnName), pref))
@@ -311,7 +311,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     }
   }
 
-  private def getDfAndColNameForJoin(op: BaseOperator, col: Column, dfO: Option[DataFrame]): (DataFrame, String) = {
+  private def getDfAndColNameForJoin(op: BaseOperator, col: SparqlColumn, dfO: Option[DataFrame]): (DataFrame, String) = {
     val df1 = recursivelyExecuteNode(op, dfO).get
     //println("joinChild: " + op.getClass)
     val prefix1 = getPrefixForColumn(df1, op, col)
@@ -320,7 +320,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     (prefix1._2, columnName1)
   }
 
-  private def executeJoin(joinOp: BaseOperator, joinCols: Array[Column], df: Option[DataFrame]): Option[DataFrame] = {
+  private def executeJoin(joinOp: BaseOperator, joinCols: Array[SparqlColumn], df: Option[DataFrame]): Option[DataFrame] = {
     /*val children = joinOp.getBopChildren.asScala.zipWithIndex
     val dfAndCol1 = getDfAndColNameForJoin(children.head._1, joinCols(0), df)
 

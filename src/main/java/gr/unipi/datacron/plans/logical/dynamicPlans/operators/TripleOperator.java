@@ -5,7 +5,7 @@
  */
 package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.Column;
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 
@@ -17,22 +17,22 @@ public class TripleOperator extends BaseOpW0Child {
     private TripleOperator(String subject, String predicate, String object) {
         super();
 
-        Column[] c = new Column[3];
+        SparqlColumn[] c = new SparqlColumn[3];
 
         if (!subject.substring(0, 1).equals("?")) {
-            c[0] = Column.newColumn("Subject", subject, ColumnTypes.SUBJECT);
+            c[0] = SparqlColumn.newSparqlColumn("Subject", subject, ColumnTypes.SUBJECT);
         } else {
             c[0] = (ColumnWithVariable.newColumnWithVariable("Subject", subject, ColumnTypes.SUBJECT));
         }
 
         if (!predicate.substring(0, 1).equals("?")) {
-            c[1] = Column.newColumn("Predicate", predicate, ColumnTypes.PREDICATE);
+            c[1] = SparqlColumn.newSparqlColumn("Predicate", predicate, ColumnTypes.PREDICATE);
         } else {
             c[1] = (ColumnWithVariable.newColumnWithVariable("Predicate", predicate, ColumnTypes.PREDICATE));
         }
 
         if (!object.substring(0, 1).equals("?")) {
-            c[2] = Column.newColumn("Object", object, ColumnTypes.OBJECT);
+            c[2] = SparqlColumn.newSparqlColumn("Object", object, ColumnTypes.OBJECT);
         } else {
             c[2] = (ColumnWithVariable.newColumnWithVariable("Object", object, ColumnTypes.OBJECT));
         }
