@@ -1,12 +1,9 @@
 package gr.unipi.datacron.plans.physical.joinTriples
 
-import gr.unipi.datacron.common.AppConfig
-import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits.{TJoinTriples, joinDataframesParams}
+import gr.unipi.datacron.common.Utils._
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions._
 
 case class AJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
 

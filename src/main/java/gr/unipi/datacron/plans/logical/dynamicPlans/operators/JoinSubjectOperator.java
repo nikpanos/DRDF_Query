@@ -74,7 +74,7 @@ public class JoinSubjectOperator extends BaseOpWnChild {
         return columnJoinPredicate;
     }
 
-    @Override
+    /*@Override
     protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
         s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
@@ -100,6 +100,15 @@ public class JoinSubjectOperator extends BaseOpWnChild {
     @Override
     public String toString() {
         return this.toString("");
+    }*/
+
+    @Override
+    protected void addHeaderStringToStringBuilder(StringBuilder builder) {
+        builder.append("PREDICATES: [");
+        for (SparqlColumn c: columnJoinPredicate) {
+            builder.append(c).append(", ");
+        }
+        builder.append(']');
     }
 
     @Override

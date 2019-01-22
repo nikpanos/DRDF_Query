@@ -43,7 +43,7 @@ case class RdsBatchDictionary() extends BaseRdsDictionary {
   }
 
   override def decodeColumns(params: decodeColumnsParams): DataFrame = {
-    val df = params.dfTriples
+    val df = params.df
     val preserveColumnNames = params.preserveColumnNames
     val cols = params.columnNames.map(c => {
       val encodedFieldIndex = df.schema.fieldIndex(c)
@@ -103,4 +103,6 @@ case class RdsBatchDictionary() extends BaseRdsDictionary {
 
     df.mapPartitions(func)
   }
+
+
 }

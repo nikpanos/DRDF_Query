@@ -182,7 +182,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<executable>upload.cmd</executable>
+					<executable>upload.sh</executable>
 				</configuration>
 			</plugin>
 		</plugins>

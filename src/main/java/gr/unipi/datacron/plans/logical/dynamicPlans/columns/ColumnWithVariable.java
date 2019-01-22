@@ -34,7 +34,8 @@ public class ColumnWithVariable extends SparqlColumn {
     }
 
     @Override
-    public String toString() {
-        return super.toString() + " VARIABLE: " + variableName;
+    protected void addToStringContents(StringBuilder builder) {
+        super.addToStringContents(builder);
+        builder.append(' ').append("VARIABLE: ").append(variableName);
     }
 }

@@ -73,7 +73,7 @@ public class SelectOperator extends BaseOpW1Child {
         return getColumn(ColumnTypes.OBJECT).getQueryString();
     }
 
-    @Override
+    /*@Override
     protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
         s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
@@ -96,16 +96,25 @@ public class SelectOperator extends BaseOpW1Child {
         }
 
         return s.toString();
-    }
+    }*/
 
     @Override
     protected long estimateOutputSize() {
         return -1;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         return this.toString("");
+    }*/
+
+    @Override
+    protected void addHeaderStringToStringBuilder(StringBuilder builder) {
+        builder.append("OPERANDS: [");
+        for (BaseOperand op: operands) {
+            builder.append('(').append(op).append("), ");
+        }
+        builder.append(']');
     }
 
     public BaseOperand[] getOperands() {

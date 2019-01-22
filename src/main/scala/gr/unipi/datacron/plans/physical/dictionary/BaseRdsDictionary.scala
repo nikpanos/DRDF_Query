@@ -15,11 +15,11 @@ abstract private[dictionary] class BaseRdsDictionary extends BasePhysicalPlan wi
 
   override def decodeColumn(params: decodeColumnParams): DataFrame = {
     val newColName = if (params.preserveColumnName) params.columnName else params.columnName + tripleTranslateSuffix
-    decodeColumn(params.dfTriples, params.columnName, newColName)
+    decodeColumn(params.df, params.columnName, newColName)
   }
 
   override def decodeColumns(params: decodeColumnsParams): DataFrame = {
-    var result = params.dfTriples
+    var result = params.df
     params.columnNames.foreach(c => {
       val newColName = if (params.preserveColumnNames) c else c + tripleTranslateSuffix
       result = decodeColumn(result, c, newColName)
@@ -27,4 +27,7 @@ abstract private[dictionary] class BaseRdsDictionary extends BasePhysicalPlan wi
 
     result
   }
+
+  override def decodeAllColumns(params: decodeAllColumnsParams): DataFrame =
+    decodeColumns(decodeColumnsParams(params.df, params.df.columns, preserveColumnNames = true))
 }

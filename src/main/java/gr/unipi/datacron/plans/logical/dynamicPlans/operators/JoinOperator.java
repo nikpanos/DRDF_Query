@@ -9,6 +9,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.*;
+import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,7 @@ public class JoinOperator extends BaseOpW2Child {
     private JoinOperator(BaseOperator bo1, BaseOperator bo2, BaseOperand joinOperand) {
         super(bo1, bo2);
         this.joinOperand = joinOperand;
+        setArrayColumns(new SparqlColumn[0]);
     }
 
     @Override
@@ -78,6 +80,10 @@ public class JoinOperator extends BaseOpW2Child {
 //            }
 //        }
 
+        //COMMENT TO NIKOS (FROM PANOS): The joinOperand variable should be decoupled from the process of forming the arrayColumns.
+        //joinOperand is a COMPLETELY different variable than the arrayColumns, thus it should be initialized elsewhere!
+        //IDEALLY joinOperand should be calculated in the parsing procedure, and not inside the Operators classes.
+        //Take a look at the second constructor, to have an idea how it should be done.
         joinOperand = OperandPair.newOperandPair(columnJoinPredicateList.get(0), columnJoinPredicateList.get(1), ConditionType.EQ);// columnJoinPredicateList.stream().toArray(ColumnOperand[]::new);
 
         Collections.reverse(elementsToBeDeleted);
@@ -117,7 +123,7 @@ public class JoinOperator extends BaseOpW2Child {
         }
     }
 
-    @Override
+    /*@Override
     protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
         s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: ").append(this.getOutputSize()).append(" RealOutputSize: ").append(this.getRealOutputSize()).append("\n");
@@ -141,6 +147,11 @@ public class JoinOperator extends BaseOpW2Child {
     @Override
     public String toString() {
         return this.toString("");
+    }*/
+
+    @Override
+    protected void addHeaderStringToStringBuilder(StringBuilder builder) {
+        builder.append(joinOperand);
     }
 
     @Override

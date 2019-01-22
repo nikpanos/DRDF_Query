@@ -21,4 +21,14 @@ public class OperandFunction extends BaseOperand {
     public BaseOperand[] getArguments() {
         return arguments;
     }
+
+    @Override
+    protected void addContentsToStringBuilder(StringBuilder builder) {
+        builder.append("FUNCTION: ").append(functionName);
+        builder.append(" ARGUMENTS:[");
+        for (BaseOperand arg: arguments) {
+            builder.append(arg).append(", ");
+        }
+        builder.append("]");
+    }
 }

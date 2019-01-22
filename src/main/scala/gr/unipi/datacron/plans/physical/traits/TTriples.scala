@@ -8,6 +8,8 @@ import org.apache.spark.sql.DataFrame
 trait TTriples {
   def filterByColumn(params: filterByColumnParams): DataFrame
 
+  def filterByValue(params: filterByValueParams): DataFrame
+
   def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame
 
   def filterBySpatioTemporalRange(params: filterBySpatioTemporalRangeParams): DataFrame
@@ -22,6 +24,8 @@ trait TTriples {
 }
 
 case class filterByColumnParams(df: DataFrame, columnName: String, value: Any, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+
+case class filterByValueParams(df: DataFrame, value: String, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
 
 case class filterBySubSpatioTemporalInfoParams(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder,
                                                override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams

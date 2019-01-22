@@ -2,15 +2,15 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.columns;
 
 public class ColumnWithDirection {
 
-    private final SparqlColumn column;
+    private final Column column;
     private final SortDirection direction;
 
-    private ColumnWithDirection(SparqlColumn column, SortDirection direction) {
+    private ColumnWithDirection(Column column, SortDirection direction) {
         this.column = column;
         this.direction = direction;
     }
 
-    public SparqlColumn getColumn() {
+    public Column getColumn() {
         return column;
     }
 
@@ -18,7 +18,16 @@ public class ColumnWithDirection {
         return direction;
     }
 
-    public static ColumnWithDirection newColumnWithDirection(SparqlColumn column, SortDirection direction) {
+    public static ColumnWithDirection newColumnWithDirection(Column column, SortDirection direction) {
         return new ColumnWithDirection(column, direction);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(this.getClass().getSimpleName());
+        builder.append('(').append("COLUMN: ").append(column.getColumnName());
+        builder.append(' ').append("DIRECTION: ").append(direction);
+        builder.append(')');
+        return builder.toString();
     }
 }

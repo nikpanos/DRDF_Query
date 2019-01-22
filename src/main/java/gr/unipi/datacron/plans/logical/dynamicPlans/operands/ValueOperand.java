@@ -17,4 +17,9 @@ public class ValueOperand extends BaseOperand {
     public static ValueOperand newValueOperand(String value) {
         return new ValueOperand(value);
     }
+
+    @Override
+    protected void addContentsToStringBuilder(StringBuilder builder) {
+        builder.append("VALUE: ").append(value);
+    }
 }

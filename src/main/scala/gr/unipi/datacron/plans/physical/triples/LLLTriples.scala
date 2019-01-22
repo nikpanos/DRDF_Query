@@ -120,24 +120,24 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
       if (altitudeColumn.isDefined) {
         params.df
           //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-          .filter(filterBy3D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get)), col(sanitize(timeColumn))))
+          .filter(filterBy3D(col(pruneKey), col(wktColumn), col(altitudeColumn.get), col(timeColumn)))
       }
       else {
         params.df
           //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-          .filter(filterBy2D(col(sanitize(pruneKey)), col(sanitize(wktColumn)), col(sanitize(timeColumn))))
+          .filter(filterBy2D(col(pruneKey), col(wktColumn), col(timeColumn)))
       }
     }
     else {
       if (altitudeColumn.isDefined) {
         params.df
           //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-          .filter(filterBy3D_noKey(col(sanitize(wktColumn)), col(sanitize(altitudeColumn.get)), col(sanitize(timeColumn))))
+          .filter(filterBy3D_noKey(col(wktColumn), col(altitudeColumn.get), col(timeColumn)))
       }
       else {
         params.df
           //.filter(unix_timestamp(params.df(sanitize(params.temporalColumn)), dateFormat).between(lower, upper))
-          .filter(filterBy2D_noKey(col(sanitize(wktColumn)), col(sanitize(timeColumn))))
+          .filter(filterBy2D_noKey(col(wktColumn), col(timeColumn)))
       }
     }
   }
@@ -220,10 +220,12 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
 
   override def sortResults(params: sortResultsParams): DataFrame = {
     val sortExprs = params.cols.map(x => {
-      val colName = sanitize(x._1)
+      val colName = x._1
       if (x._2) asc(colName)
       else desc(colName)
     })
     params.df.orderBy(sortExprs: _*)
   }
+
+  override def filterByValue(params: filterByValueParams): DataFrame = params.df.filter(params.value)
 }

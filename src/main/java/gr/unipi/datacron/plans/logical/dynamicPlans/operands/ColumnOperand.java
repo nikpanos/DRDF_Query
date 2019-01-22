@@ -19,4 +19,9 @@ public class ColumnOperand extends BaseOperand {
         return this.column;
     }
 
+    @Override
+    protected void addContentsToStringBuilder(StringBuilder builder) {
+        builder.append(column);
+    }
+
 }

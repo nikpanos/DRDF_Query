@@ -1,7 +1,6 @@
 package gr.unipi.datacron.plans.physical.dictionary
 
 import gr.unipi.datacron.common.AppConfig
-import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.UserDefinedFunction
@@ -18,6 +17,6 @@ case class RdsDictionary() extends BaseRdsDictionary {
       }
       DataStore.dictionaryRedis.getDecodedValue(field)
     })
-    df.withColumn(newColumnName, translate(df(sanitize(columnName))))
+    df.withColumn(newColumnName, translate(df(columnName)))
   }
 }

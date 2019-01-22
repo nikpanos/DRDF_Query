@@ -43,4 +43,11 @@ public class OperandPair extends BaseOperand {
     public ConditionType getConditionType() {
         return conditionType;
     }
+
+    @Override
+    protected void addContentsToStringBuilder(StringBuilder builder) {
+        builder.append("LEFT: [").append(leftOperand).append("], ");
+        builder.append("RIGHT: [").append(rightOperand).append("], ");
+        builder.append(conditionType);
+    }
 }

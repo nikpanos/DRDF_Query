@@ -84,7 +84,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
             if (!dfA.contains(DataStore.nodeData)) {
               return dfA
             }*/
-            Datasources.findDatasourceBasedOnRdfType(objFilter.get)
+            return Datasources.findDatasourceBasedOnRdfType(objFilter.get)
           }
         }
         Datasources.getAllDatasourcesByIncludingAndExcludingPredicates(predicates.filter(!_.equals(rdfTypeEnc)))
@@ -166,7 +166,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     }
   }
 
-  override protected def processLowLevelSelectOperator(so: SelectOperator): BaseOperator = {
+  override protected def processLeafSelectOperator(so: SelectOperator): BaseOperator = {
     val dss = guessDatasource(None, so)
     if (dss.length > 1) {
       convertSelectToUnionOperator(so, dss)

@@ -4,6 +4,7 @@ import gr.unipi.datacron.common.DataFrameUtils._
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
 import gr.unipi.datacron.plans.physical.traits._
 import org.apache.spark.sql.DataFrame
+import gr.unipi.datacron.common.Utils._
 
 case class Projection() extends BasePhysicalPlan with TProjection {
   override def dropColumns(params: dropColumnsParams): DataFrame = params.df.drop(params.colNames: _*)

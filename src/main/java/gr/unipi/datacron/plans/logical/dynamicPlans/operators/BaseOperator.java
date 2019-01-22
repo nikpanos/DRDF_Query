@@ -102,8 +102,30 @@ public abstract class BaseOperator {
         return false;
     }
 
-    protected String toString(String margin) {
-        return margin;
+    protected void addHeaderStringToStringBuilder(StringBuilder builder) {
+    }
+
+    private void addNodeToStringBuilder(StringBuilder builder, BaseOperator node, String margin) {
+        builder.append(margin).append(node.getClass().getSimpleName()).append(" ");
+        node.addHeaderStringToStringBuilder(builder);
+        builder.append(" ").append("Columns: [");
+        for (SparqlColumn c : node.arrayColumns) {
+            builder.append(c);
+        }
+        builder.append("]\n");
+        if (node.bopChildren != null) {
+            String newMargin = margin + "|";
+            for (BaseOperator childNode : node.bopChildren) {
+                addNodeToStringBuilder(builder, childNode, newMargin);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        addNodeToStringBuilder(builder, this, "");
+        return builder.toString();
     }
 
 

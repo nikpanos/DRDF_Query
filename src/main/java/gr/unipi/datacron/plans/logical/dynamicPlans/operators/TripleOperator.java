@@ -44,18 +44,18 @@ public class TripleOperator extends BaseOpW0Child {
         return new TripleOperator(subject, predicate, object);
     }
 
-    @Override
+    /*@Override
     protected String toString(String margin) {
         return "";
-    }
+    }*/
 
     @Override
     protected long estimateOutputSize() {
         return -1;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         return "";
-    }
+    }*/
 }

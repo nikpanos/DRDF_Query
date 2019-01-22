@@ -55,4 +55,11 @@ public class SparqlColumn extends Column {
         return this;
     }
 
+    @Override
+    protected void addToStringContents(StringBuilder builder) {
+        super.addToStringContents(builder);
+        builder.append(", ").append("QUERY: ").append(queryString);
+        builder.append(", ").append("TYPE: ").append(columnTypes);
+    }
+
 }

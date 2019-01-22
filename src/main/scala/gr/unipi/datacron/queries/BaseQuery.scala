@@ -47,6 +47,9 @@ abstract class BaseQuery() {
       println("Starting query execution")
       val startLogicalTime = System.currentTimeMillis
       plan.get.preparePlan()
+      if (AppConfig.getOptionalBoolean(qfpPrintLogicalTreeEnabled).getOrElse(false)) {
+        plan.get.doAfterPrepare()
+      }
       val endLogicalTime = System.currentTimeMillis
       val result = plan.get.executePlan
       processOutput(result)
@@ -57,14 +60,6 @@ abstract class BaseQuery() {
         println("Logical plan build time (ms): " + logicalTime)
         //println("Query execution time (ms): " + physicalTime)
         //println("Total time (ms): " + totalTime)
-      }
-
-      if (AppConfig.getOptionalBoolean(qfpPrintLogicalTreeEnabled).getOrElse(false)) {
-        Benchmarks.isBenchmarkingEnabled = true
-        println("Calculating sizes...")
-        executeWarmUp(plan)
-        plan.get.doAfterPrepare()
-        Benchmarks.isBenchmarkingEnabled = false
       }
     }
     else {

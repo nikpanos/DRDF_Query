@@ -14,9 +14,16 @@ public class Column {
         return columnName;
     }
 
+    protected void addToStringContents(StringBuilder builder) {
+        builder.append("COLUMNNAME: ").append(columnName);
+    }
+
     @Override
     public String toString() {
-        return "COLUMNNAME: " + columnName;
+        StringBuilder builder = new StringBuilder(this.getClass().getSimpleName()).append('(');
+        addToStringContents(builder);
+        builder.append(')');
+        return builder.toString();
     }
 
     public static Column newColumn(String columnName) {

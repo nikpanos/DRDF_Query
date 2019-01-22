@@ -75,8 +75,8 @@ object DataStore {
     }
     //temporalGrid.getIntervalId(0)  //to initialize the temporal grid
 
-    if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
+    /*if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
       allData.foreach(df => println(df.count))
-    }
+    }*/
   }
 }

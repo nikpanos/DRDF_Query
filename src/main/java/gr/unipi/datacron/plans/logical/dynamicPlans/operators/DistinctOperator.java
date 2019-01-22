@@ -14,7 +14,7 @@ public class DistinctOperator extends BaseOpW1Child {
         return new DistinctOperator(bop);
     }
 
-    @Override
+    /*@Override
     protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
         s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
@@ -33,16 +33,16 @@ public class DistinctOperator extends BaseOpW1Child {
         }
 
         return s.toString();
-    }
+    }*/
 
     @Override
     protected long estimateOutputSize() {
         return getChild().getOutputSize();
     }
 
-    @Override
+    /*@Override
     public String toString() {
         return this.toString("");
-    }
+    }*/
 
 }

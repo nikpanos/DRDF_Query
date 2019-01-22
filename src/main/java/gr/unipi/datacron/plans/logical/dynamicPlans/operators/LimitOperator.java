@@ -24,7 +24,7 @@ public class LimitOperator extends BaseOpW1Child {
 
     }
 
-    @Override
+    /*@Override
     protected String toString(String margin) {
         StringBuilder s = new StringBuilder();
         s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
@@ -45,7 +45,7 @@ public class LimitOperator extends BaseOpW1Child {
         }
 
         return s.toString();
-    }
+    }*/
 
     @Override
     protected long estimateOutputSize() {
@@ -59,8 +59,13 @@ public class LimitOperator extends BaseOpW1Child {
         return i;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         return this.toString("");
+    }*/
+
+    @Override
+    protected void addHeaderStringToStringBuilder(StringBuilder builder) {
+        builder.append("LIMIT: ").append(limit);
     }
 }

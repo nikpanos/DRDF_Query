@@ -7,7 +7,9 @@ package gr.unipi.datacron.plans.logical.dynamicPlans.operators;
 
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author nicholaskoutroumanis
@@ -26,19 +28,33 @@ public class RenameOperator extends BaseOpW1Child {
         return new RenameOperator(bo, m);
     }
 
-    @Override
+    /*@Override
     protected String toString(String margin) {
         return "";
-    }
+    }*/
 
     @Override
     protected long estimateOutputSize() {
         return -1;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         return "";
+    }*/
+
+    @Override
+    protected void addHeaderStringToStringBuilder(StringBuilder builder) {
+        builder.append("MAPPING: [");
+        Iterator<Map.Entry<SparqlColumn, SparqlColumn>> iter = m.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry<SparqlColumn, SparqlColumn> e = iter.next();
+            builder.append("KEY(").append(e.getKey()).append("), VALUE(").append(e.getValue()).append(")");
+            if (iter.hasNext()) {
+                builder.append(", ");
+            }
+        }
+        builder.append(']');
     }
 
     public Map<SparqlColumn, SparqlColumn> getColumnMapping() {

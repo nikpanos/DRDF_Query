@@ -68,6 +68,9 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   override def decodeColumns(params: decodeColumnsParams): DataFrame =
     doBenchmark[DataFrame](() => pickDictionaryPlanBasedOnRules.decodeColumns(params), params)
 
+  override def decodeAllColumns(params: decodeAllColumnsParams): DataFrame =
+    doBenchmark[DataFrame](() => pickDictionaryPlanBasedOnRules.decodeAllColumns(params), params)
+
   override def joinDataframes(params: joinDataframesParams): DataFrame =
     doBenchmark[DataFrame](() => pickJoinTriplesPlanBasedOnRules.joinDataframes(params), params)
 
@@ -97,4 +100,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
 
   override def sortResults(params: sortResultsParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.sortResults(params), params)
+
+  override def filterByValue(params: filterByValueParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByValue(params), params)
 }

@@ -1,14 +1,15 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 
-import java.text.SimpleDateFormat
-
+import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
-import gr.unipi.datacron.plans.logical.dynamicPlans.columns.{SparqlColumn, ConditionType}
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.common.Utils._
+
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 
 
 class PlanAnalyzer extends LowLevelAnalyzer {
@@ -28,7 +29,7 @@ class PlanAnalyzer extends LowLevelAnalyzer {
 
   private def getColumnNameForOperation(oldTreeNode: BaseOperator, c: SparqlColumn, newTreeNode: BaseOperator): String = {
     val prefix = if (isPrefixed(newTreeNode)) {
-      prefixMappings(getPrefix(c.getColumnName)) + '.'
+      prefixMappings(getPrefix(c.getColumnName))
     }
     else { "" }
     val suffix = c.getColumnTypes match {
@@ -36,7 +37,7 @@ class PlanAnalyzer extends LowLevelAnalyzer {
       case PREDICATE => throw new Exception("Does not support operation on Predicate columns")
       case OBJECT =>
         val fil = c.getColumnName.substring(0, c.getColumnName.indexOf('.')) + ".Predicate"
-        val colName = oldTreeNode.getArrayColumns.find(c => c.getColumnName.equals(fil)).get.getColumnName
+        val colName = oldTreeNode.getArrayColumns.find(c => c.getColumnName.equals(fil)).get.getQueryString
         getEncodedStr(colName)
     }
     prefix + suffix
@@ -85,22 +86,37 @@ class PlanAnalyzer extends LowLevelAnalyzer {
   }
 
   override protected def processProjectOperator(po: ProjectOperator): BaseOperator = {
-    //val child = refineBySpatioTemporalInfo(processNode(po.getChild, dfO))
-    //analyzedOperators.columnOperators.ProjectOperator(child, po.getVariables, child.isPrefixed)
+    val child = processNode(po.getChild)
+    val columns = po.getVariables.map(v => {
+      val col = po.getArrayColumns.find(_.getQueryString == v).get
+      (getColumnNameForOperation(po, col, child), v)
+    })
+    val newPo = ProjectOperator.newProjectOperator(child, columns.map(_._1))
+    def convertToSparqlColumn(columnName: String): SparqlColumn = SparqlColumn.newSparqlColumn(columnName, "", ColumnTypes.OBJECT)
+    val newRo = RenameOperator.newRenameOperator(newPo, columns.map(c => {
+      (convertToSparqlColumn(c._1), convertToSparqlColumn(c._2))
+    }).toMap.asJava)
+    if (AppConfig.getBoolean(qfpEnableResultDecode)) DecodeOperator(newRo)
+    else newRo
   }
 
   override protected def processRenameOperator(ro: RenameOperator): BaseOperator = {
-    //val child = processNode(ro.getChild)
-    //analyzedOperators.columnOperators.RenameOperator(child, ro.getColumnMapping.asScala.toArray.map(x => (x._1.getColumnName, x._2.getColumnName)), child.isPrefixed)
+    println(ro.getChild.getClass.getName)
+    ro.getColumnMapping.asScala.foreach(x => {
+      println("(" + x._1.getColumnName + "," + x._2.getColumnName + ")")
+    })
+    throw new NotImplementedError("Rename operation is not yet implemented")
   }
 
   override protected def processSortOperator(so: SortOperator): BaseOperator = {
-    so.getColumnWithDirection.map(cwd => cwd.getColumn.getColumnName)
+    val child = processNode(so.getChild)
+    val d = so.getColumnWithDirection.map(cwd => ColumnWithDirection.newColumnWithDirection(Column.newColumn(cwd.getColumn.getColumnName), cwd.getDirection))
+    SortOperator.newSortOperator(child, d)
   }
 
   private def processOperand(operand: BaseOperand, oldTreeNode: BaseOperator, newTreeNode: BaseOperator): BaseOperand = operand match {
     case vo: ValueOperand => vo
-    case co: ColumnOperand => ColumnNameOperand(sanitize(getColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode)))
+    case co: ColumnOperand => ColumnNameOperand(getColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode))
     case op: OperandPair => OperandPair.newOperandPair(processOperand(op.getLeftOperand, oldTreeNode, newTreeNode), processOperand(op.getRightOperand, oldTreeNode, newTreeNode), op.getConditionType)
     case of: OperandFunction => throw new Exception("Functions are not yet supported")
   }

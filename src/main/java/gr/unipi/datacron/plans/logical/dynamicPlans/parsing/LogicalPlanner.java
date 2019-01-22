@@ -499,9 +499,13 @@ public class LogicalPlanner extends OpVisitorBase {
                 for (SparqlColumn c : root.getArrayColumns()) {
                     if (c instanceof ColumnWithVariable) {
                         if (c.getQueryString().equals(sc.expression.getExprVar().toString())) {
-                            int direction = sc.direction;
+                            int directionInt = sc.direction;
                             if (sc.direction == -2) {
-                                direction = 1;
+                                directionInt = 1;
+                            }
+                            SortDirection direction = SortDirection.ASC;
+                            if (directionInt < 0) {
+                                direction = SortDirection.DESC;
                             }
                             cwd.add(ColumnWithDirection.newColumnWithDirection(c, direction));
                             break;
