@@ -73,7 +73,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     val pair = jo.getJoinOperand.asInstanceOf[OperandPair]
 
     val leftOperand = pair.getLeftOperand.asInstanceOf[ColumnNameOperand].columnName
-    val rightOperand = pair.getLeftOperand.asInstanceOf[ColumnNameOperand].columnName
+    val rightOperand = pair.getRightOperand.asInstanceOf[ColumnNameOperand].columnName
 
     val leftDf = processNode(jo.getLeftChild).get
     val rightDf = processNode(jo.getRightChild).get

@@ -76,8 +76,8 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     val leftColumnOperand = operand.getLeftOperand.asInstanceOf[ColumnOperand]
     val rightColumnOperand = operand.getRightOperand.asInstanceOf[ColumnOperand]
 
-    val leftChild = prefixNode(jo, leftColumnOperand, processNode(jo.getLeftChild))
-    val rightChild = prefixNode(jo, rightColumnOperand, processNode(jo.getRightChild))
+    val leftChild = prefixNode(jo.getLeftChild, leftColumnOperand, processNode(jo.getLeftChild))
+    val rightChild = prefixNode(jo.getRightChild, rightColumnOperand, processNode(jo.getRightChild))
 
     val leftColName = getColumnNameForOperation(jo, leftColumnOperand.getColumn, leftChild)
     val rightColName = getColumnNameForOperation(jo, rightColumnOperand.getColumn, rightChild)

@@ -14,10 +14,10 @@ case class Projection() extends BasePhysicalPlan with TProjection {
     val renamedColumns = df.columns.map(c => {
       val valueO = params.oldAndNewColNames.get(c)
       if (valueO.isDefined) {
-        df(c).as(valueO.get)
+        df(sanitize(c)).as(valueO.get)
       }
       else {
-        df(c)
+        df(sanitize(c))
       }
     })
     df.select(renamedColumns: _*)
@@ -25,5 +25,8 @@ case class Projection() extends BasePhysicalPlan with TProjection {
 
   override def prefixColumns(params: prefixColumnsParams): DataFrame = params.df.prefixColumns(params.prefix)
 
-  override def selectColumns(params: selectColumnsParams): DataFrame = params.df.select(params.cols.head, params.cols.tail: _*)
+  override def selectColumns(params: selectColumnsParams): DataFrame = {
+    val sanitizedCols = params.cols.map(sanitize)
+    params.df.select(sanitizedCols.head, sanitizedCols.tail: _*)
+  }
 }
