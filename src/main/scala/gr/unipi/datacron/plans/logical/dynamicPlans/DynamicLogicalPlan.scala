@@ -66,7 +66,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   }
 
   private def processDistinctOperator(so: DistinctOperator): Option[DataFrame] = {
-    throw new NotImplementedError("Distinct operation is not yet implemented")
+    val childDf = processNode(so.getChild).get
+    Some(PhysicalPlanner.distinctData(distinctDataParams(childDf)))
   }
 
   private def processJoinOperator(jo: JoinOperator): Option[DataFrame] = {

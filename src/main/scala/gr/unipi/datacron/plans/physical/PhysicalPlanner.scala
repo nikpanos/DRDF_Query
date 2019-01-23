@@ -103,4 +103,7 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
 
   override def filterByValue(params: filterByValueParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByValue(params), params)
+
+  override def distinctData(params: distinctDataParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.distinctData(params), params)
 }

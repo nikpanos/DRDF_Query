@@ -21,6 +21,8 @@ trait TTriples {
   def limitResults(params: limitResultsParams): DataFrame
 
   def sortResults(params: sortResultsParams): DataFrame
+
+  def distinctData(params: distinctDataParams): DataFrame
 }
 
 case class filterByColumnParams(df: DataFrame, columnName: String, value: Any, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
@@ -41,3 +43,5 @@ case class unionDataframesParams(df1: DataFrame, df2: DataFrame, override val lo
 case class limitResultsParams(df: DataFrame, limitNo: Int, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
 
 case class sortResultsParams(df: DataFrame, cols: Array[(String, Boolean)], override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+
+case class distinctDataParams(df: DataFrame, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
