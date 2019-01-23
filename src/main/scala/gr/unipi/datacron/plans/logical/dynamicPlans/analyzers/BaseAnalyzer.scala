@@ -5,7 +5,12 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
 
+import scala.collection.mutable
+
 abstract class BaseAnalyzer {
+
+  private var decodedColumns = mutable.Set[String]()
+
   def analyzePlan(root: BaseOperator): BaseOperator = {
     processNode(root)
   }
@@ -25,6 +30,23 @@ abstract class BaseAnalyzer {
       case ro: RenameOperator => ro.getChild.isInstanceOf[TripleOperator]
       case _ => false
     }
+  }
+
+  protected def decodeColumns(child: BaseOperator, columnNames: Array[String]): BaseOperator = {
+    val notDecodedColumns = columnNames.filterNot(decodedColumns.contains)
+    if (notDecodedColumns.length > 0) {
+      notDecodedColumns.foreach(decodedColumns.add)
+      DecodeColumnsOperator(child, notDecodedColumns)
+    }
+    else {
+      child
+    }
+  }
+
+  protected def decodeAllColumns(child: BaseOperator): BaseOperator = DecodeAllOperator(child, decodedColumns.toArray)
+
+  protected def renameDecodedColumns(oldAndNewColumnNames: Map[String, String]): Unit = {
+    decodedColumns = decodedColumns.map(c => oldAndNewColumnNames.getOrElse(c, c))
   }
 
   protected def processNode(node: BaseOperator): BaseOperator = {

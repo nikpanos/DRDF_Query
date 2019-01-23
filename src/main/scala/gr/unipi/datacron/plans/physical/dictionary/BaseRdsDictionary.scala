@@ -30,4 +30,8 @@ abstract private[dictionary] class BaseRdsDictionary extends BasePhysicalPlan wi
 
   override def decodeAllColumns(params: decodeAllColumnsParams): DataFrame =
     decodeColumns(decodeColumnsParams(params.df, params.df.columns, preserveColumnNames = true))
+
+
+  override def decodeAllColumnsExceptFor(params: decodeAllColumnsExceptForParams): DataFrame =
+    decodeColumns(decodeColumnsParams(params.df, params.df.columns.filterNot(params.exceptForColumnNames.contains), preserveColumnNames = true))
 }

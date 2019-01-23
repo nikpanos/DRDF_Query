@@ -10,6 +10,7 @@ import gr.unipi.datacron.plans.physical.traits._
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame}
+import gr.unipi.datacron.common.Utils._
 
 case class LLLTriples() extends BasePhysicalPlan with TTriples {
 
@@ -221,8 +222,8 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
   override def sortResults(params: sortResultsParams): DataFrame = {
     val sortExprs = params.cols.map(x => {
       val colName = x._1
-      if (x._2) asc(colName)
-      else desc(colName)
+      if (x._2) asc(sanitize(colName))
+      else desc(sanitize(colName))
     })
     params.df.orderBy(sortExprs: _*)
   }

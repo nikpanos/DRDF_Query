@@ -81,10 +81,12 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     })
     val newPo = ProjectOperator.newProjectOperator(child, columns.map(_._1))
     def convertToSparqlColumn(columnName: String): SparqlColumn = SparqlColumn.newSparqlColumn(columnName, "", ColumnTypes.OBJECT)
-    val newRo = RenameOperator.newRenameOperator(newPo, columns.map(c => {
+    val oldAndNewColumns = columns.map(c => {
       (convertToSparqlColumn(c._1), convertToSparqlColumn(c._2))
-    }).toMap.asJava)
-    if (AppConfig.getBoolean(qfpEnableResultDecode)) DecodeOperator(newRo)
+    }).toMap
+    val newRo = RenameOperator.newRenameOperator(newPo, oldAndNewColumns.asJava)
+    renameDecodedColumns(oldAndNewColumns.map(x => (x._1.getColumnName, x._2.getColumnName)))
+    if (AppConfig.getBoolean(qfpEnableResultDecode)) decodeAllColumns(newRo)
     else newRo
   }
 
@@ -98,8 +100,11 @@ class PlanAnalyzer extends LowLevelAnalyzer {
 
   override protected def processSortOperator(so: SortOperator): BaseOperator = {
     val child = processNode(so.getChild)
-    val d = so.getColumnWithDirection.map(cwd => ColumnWithDirection.newColumnWithDirection(Column.newColumn(cwd.getColumn.getColumnName), cwd.getDirection))
-    SortOperator.newSortOperator(child, d)
+    val d = so.getColumnWithDirection.map(cwd => {
+      ColumnWithDirection.newColumnWithDirection(Column.newColumn(getPrefixedColumnNameForOperation(so, cwd.getColumn.asInstanceOf[SparqlColumn], child)), cwd.getDirection)
+    })
+    val columnNames = d.map(_.getColumn.getColumnName)
+    SortOperator.newSortOperator(decodeColumns(child, columnNames), d)
   }
 
   private def processOperand(operand: BaseOperand, oldTreeNode: BaseOperator, newTreeNode: BaseOperator): BaseOperand = operand match {

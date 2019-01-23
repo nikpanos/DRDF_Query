@@ -14,6 +14,8 @@ trait TDictionary {
   def decodeColumns(params: decodeColumnsParams): DataFrame
 
   def decodeAllColumns(params: decodeAllColumnsParams): DataFrame
+
+  def decodeAllColumnsExceptFor(params: decodeAllColumnsExceptForParams): DataFrame
 }
 
 case class decodeSingleKeyParams(key: Long, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
@@ -25,3 +27,5 @@ case class decodeColumnParams(df: DataFrame, columnName: String, preserveColumnN
 case class decodeColumnsParams(df: DataFrame, columnNames: Array[String], preserveColumnNames: Boolean = false, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
 
 case class decodeAllColumnsParams(df: DataFrame, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+
+case class decodeAllColumnsExceptForParams(df: DataFrame, exceptForColumnNames: Array[String], override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams

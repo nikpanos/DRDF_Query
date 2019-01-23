@@ -2,7 +2,7 @@ package gr.unipi.datacron.plans.physical.dictionary
 
 import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
-import gr.unipi.datacron.plans.physical.traits.decodeColumnsParams
+import gr.unipi.datacron.plans.physical.traits.{decodeAllColumnsExceptForParams, decodeColumnsParams}
 import gr.unipi.datacron.store.{DataStore, DictionaryRedis}
 import org.apache.spark.sql.catalyst.encoders.{ExpressionEncoder, RowEncoder}
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
@@ -103,6 +103,4 @@ case class RdsBatchDictionary() extends BaseRdsDictionary {
 
     df.mapPartitions(func)
   }
-
-
 }

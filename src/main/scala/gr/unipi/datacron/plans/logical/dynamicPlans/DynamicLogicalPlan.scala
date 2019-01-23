@@ -44,7 +44,8 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   private def processNode(node: BaseOperator): Option[DataFrame] = {
     node match {
       case so: DatasourceOperator => processDatasourceOperator(so)
-      case co: DecodeOperator => processDecodeOperator(co)
+      case co: DecodeAllOperator => processDecodeAllOperator(co)
+      case co: DecodeColumnsOperator => processDecodeColumnsOperator(co)
       case to: DistinctOperator => processDistinctOperator(to)
       case jo: JoinOperator => processJoinOperator(jo)
       case lo: LimitOperator => processLimitOperator(lo)
@@ -60,9 +61,14 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
 
   private def processDatasourceOperator(so: DatasourceOperator): Option[DataFrame] = Some(so.df)
 
-  private def processDecodeOperator(so: DecodeOperator): Option[DataFrame] = {
+  private def processDecodeAllOperator(so: DecodeAllOperator): Option[DataFrame] = {
     val childDf = processNode(so.getChild).get
-    Some(PhysicalPlanner.decodeAllColumns(decodeAllColumnsParams(childDf)))
+    Some(PhysicalPlanner.decodeAllColumnsExceptFor(decodeAllColumnsExceptForParams(childDf, so.exceptForColumns)))
+  }
+
+  private def processDecodeColumnsOperator(so: DecodeColumnsOperator): Option[DataFrame] = {
+    val childDf = processNode(so.getChild).get
+    Some(PhysicalPlanner.decodeColumns(decodeColumnsParams(childDf, so.columnNames, preserveColumnNames = true)))
   }
 
   private def processDistinctOperator(so: DistinctOperator): Option[DataFrame] = {
