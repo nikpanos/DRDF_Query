@@ -179,6 +179,13 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
 
   override protected def processJoinSubjectOperator(js: JoinSubjectOperator): BaseOperator = {
 
+    def getSubjectColForOperator(op: BaseOperator): SparqlColumn = op.getArrayColumns.find(_.getColumnTypes == SUBJECT).get
+
+    def getPrefixedSelectOperator(op: SelectOperator, ds: DatasourceOperator): BaseOperator = {
+      val subCol = getSubjectColForOperator(op)
+      prefixNode(op, subCol, processLowLevelSelectOperator(op, ds, ds.isPropertyTableSource))
+    }
+
     def processPropertyTable(selectOps: Array[SelectOperator], ds: DatasourceOperator): BaseOperator = {
       val firstSo = processLowLevelSelectOperator(selectOps.head, ds, ds.isPropertyTableSource)
       selectOps.tail.foldLeft(firstSo)((child, so) => {
@@ -187,10 +194,13 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     }
 
     def processTriplesTable(selectOps: Array[SelectOperator], ds: DatasourceOperator): BaseOperator = {
-      val firstSo = processLowLevelSelectOperator(selectOps.head, ds, ds.isPropertyTableSource)
+      val firstSo = getPrefixedSelectOperator(selectOps.head, ds)
+      val leftColName = getPrefixedColumnNameForOperation(selectOps.head, getSubjectColForOperator(selectOps.head), firstSo)
+
       selectOps.tail.foldLeft(firstSo)((left, so) => {
-        val right = processLowLevelSelectOperator(so, ds, ds.isPropertyTableSource)
-        val op = OperandPair.newOperandPair(ColumnNameOperand(tripleSubLongField), ColumnNameOperand(tripleSubLongField), ConditionType.EQ)
+        val right = getPrefixedSelectOperator(so, ds)
+        val rightColName = getPrefixedColumnNameForOperation(so, getSubjectColForOperator(so), right)
+        val op = OperandPair.newOperandPair(ColumnNameOperand(leftColName), ColumnNameOperand(rightColName), ConditionType.EQ)
         JoinOperator.newJoinOperator(left, right, op)
       })
     }
@@ -206,9 +216,13 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
         val encPred = getEncodedStr(so.getPredicate)
         propertyDs.hasColumn(encPred)
       })
-      val propertyTree = processPropertyTable(propertySo, propertyDs)
-      val triplesTree = processTriplesTable(triplesSo, triplesDs)
-      val op = OperandPair.newOperandPair(ColumnNameOperand(tripleSubLongField), ColumnNameOperand(tripleSubLongField), ConditionType.EQ)
+      val propertyTree = prefixNode(propertySo(0), getSubjectColForOperator(propertySo(0)), processPropertyTable(propertySo, propertyDs))
+      val triplesTree = prefixNode(triplesSo(0), getSubjectColForOperator(triplesSo(0)), processTriplesTable(triplesSo, triplesDs))
+
+      val propertyColName = getPrefixedColumnNameForOperation(propertySo(0), getSubjectColForOperator(propertySo(0)), propertyTree)
+      val triplesColName = getPrefixedColumnNameForOperation(triplesSo(0), getSubjectColForOperator(triplesSo(0)), triplesTree)
+
+      val op = OperandPair.newOperandPair(ColumnNameOperand(propertyColName), ColumnNameOperand(triplesColName), ConditionType.EQ)
       JoinOperator.newJoinOperator(propertyTree, triplesTree, op)
     }
     else {

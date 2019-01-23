@@ -6,7 +6,6 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
-import gr.unipi.datacron.common.Utils._
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
@@ -27,7 +26,7 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     }
   }
 
-  private def getColumnNameForOperation(oldTreeNode: BaseOperator, c: SparqlColumn, newTreeNode: BaseOperator): String = {
+  override protected def getPrefixedColumnNameForOperation(oldTreeNode: BaseOperator, c: SparqlColumn, newTreeNode: BaseOperator): String = {
     val prefix = if (isPrefixed(newTreeNode)) {
       prefixMappings(getPrefix(c.getColumnName))
     }
@@ -43,29 +42,18 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     prefix + suffix
   }
 
-  /*private def getPrefixForColumn(df: DataFrame, op: BaseOperator, col: SparqlColumn): (String, DataFrame) = {
-
-    if (!df.isPrefixed) {
-      op.getArrayColumns.foreach(c => prefixMappings.put(getPrefix(c.getColumnName), pref))
-      (pref, PhysicalPlanner.prefixColumns(prefixColumnsParams(df, pref)))
-    }
-    else {
-      (prefixMappings(pref), df)
-    }
-  }*/
-
   private def isPrefixed(node: BaseOperator): Boolean = node match {
     case _: PrefixOperator => true
     case _: DatasourceOperator => false
     case o: BaseOperator => o.getBopChildren.exists(isPrefixed)
   }
 
-  private def prefixNode(oldTreeNode: BaseOperator, colOp: ColumnOperand, newTreeNode: BaseOperator): BaseOperator = {
+  override protected def prefixNode(oldTreeNode: BaseOperator, col: SparqlColumn, newTreeNode: BaseOperator): BaseOperator = {
     if (isPrefixed(newTreeNode)) {
       newTreeNode
     }
     else {
-      val pref = getPrefix(colOp.getColumn.getColumnName)
+      val pref = getPrefix(col.getColumnName)
       oldTreeNode.getArrayColumns.foreach(c => { prefixMappings.put(getPrefix(c.getColumnName), pref) })
       PrefixOperator(newTreeNode, pref)
     }
@@ -76,11 +64,11 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     val leftColumnOperand = operand.getLeftOperand.asInstanceOf[ColumnOperand]
     val rightColumnOperand = operand.getRightOperand.asInstanceOf[ColumnOperand]
 
-    val leftChild = prefixNode(jo.getLeftChild, leftColumnOperand, processNode(jo.getLeftChild))
-    val rightChild = prefixNode(jo.getRightChild, rightColumnOperand, processNode(jo.getRightChild))
+    val leftChild = prefixNode(jo.getLeftChild, leftColumnOperand.getColumn, processNode(jo.getLeftChild))
+    val rightChild = prefixNode(jo.getRightChild, rightColumnOperand.getColumn, processNode(jo.getRightChild))
 
-    val leftColName = getColumnNameForOperation(jo, leftColumnOperand.getColumn, leftChild)
-    val rightColName = getColumnNameForOperation(jo, rightColumnOperand.getColumn, rightChild)
+    val leftColName = getPrefixedColumnNameForOperation(jo, leftColumnOperand.getColumn, leftChild)
+    val rightColName = getPrefixedColumnNameForOperation(jo, rightColumnOperand.getColumn, rightChild)
     val operandPair = OperandPair.newOperandPair(ColumnNameOperand(leftColName), ColumnNameOperand(rightColName), operand.getConditionType)
     JoinOperator.newJoinOperator(leftChild, rightChild, operandPair)
   }
@@ -89,7 +77,7 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     val child = processNode(po.getChild)
     val columns = po.getVariables.map(v => {
       val col = po.getArrayColumns.find(_.getQueryString == v).get
-      (getColumnNameForOperation(po, col, child), v)
+      (getPrefixedColumnNameForOperation(po, col, child), v)
     })
     val newPo = ProjectOperator.newProjectOperator(child, columns.map(_._1))
     def convertToSparqlColumn(columnName: String): SparqlColumn = SparqlColumn.newSparqlColumn(columnName, "", ColumnTypes.OBJECT)
@@ -116,7 +104,7 @@ class PlanAnalyzer extends LowLevelAnalyzer {
 
   private def processOperand(operand: BaseOperand, oldTreeNode: BaseOperator, newTreeNode: BaseOperator): BaseOperand = operand match {
     case vo: ValueOperand => vo
-    case co: ColumnOperand => ColumnNameOperand(getColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode))
+    case co: ColumnOperand => ColumnNameOperand(getPrefixedColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode))
     case op: OperandPair => OperandPair.newOperandPair(processOperand(op.getLeftOperand, oldTreeNode, newTreeNode), processOperand(op.getRightOperand, oldTreeNode, newTreeNode), op.getConditionType)
     case of: OperandFunction => throw new Exception("Functions are not yet supported")
   }

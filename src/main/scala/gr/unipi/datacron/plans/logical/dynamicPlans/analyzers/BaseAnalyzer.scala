@@ -1,5 +1,6 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits.encodeSingleValueParams
@@ -40,6 +41,9 @@ abstract class BaseAnalyzer {
       case _ => throw new Exception("Not supported operator in analyzer")
     }
   }
+
+  protected def prefixNode(oldTreeNode: BaseOperator, col: SparqlColumn, newTreeNode: BaseOperator): BaseOperator
+  protected def getPrefixedColumnNameForOperation(oldTreeNode: BaseOperator, c: SparqlColumn, newTreeNode: BaseOperator): String
 
   protected def processDistinctOperator(to: DistinctOperator): BaseOperator
   protected def processJoinOperator(jo: JoinOperator): BaseOperator
