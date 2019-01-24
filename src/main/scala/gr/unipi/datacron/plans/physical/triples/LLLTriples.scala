@@ -11,6 +11,8 @@ import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame}
 import gr.unipi.datacron.common.Utils._
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 
 case class LLLTriples() extends BasePhysicalPlan with TTriples {
 
@@ -199,8 +201,26 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
     }
   }*/
 
-  override def filterByColumn(params: filterByColumnParams): DataFrame = {
-    params.df.filter(col(params.columnName) === params.value)
+  override def filterByColumnValue(params: filterByColumnValueParams): DataFrame = params.df.filter(col(sanitize(params.columnName)) === params.value)
+
+  override def filterByLiteralOperandPair(params: filterByLiteralOperandPairParams): DataFrame = {
+
+    def resolveOperand(operand: BaseLiteralOperand): Column = operand match {
+      case vo: ValueOperand => lit(vo.getValue)
+      case cn: ColumnNameOperand => params.df(sanitize(cn.columnName))
+    }
+
+    val left = resolveOperand(params.operand.leftOperand)
+    val right = resolveOperand(params.operand.rightOperand)
+    val condition = (left: Column, right: Column) => params.operand.condition match {
+      case ConditionType.EQ => left === right
+      case ConditionType.GT => left > right
+      case ConditionType.GTE => left >= right
+      case ConditionType.LT => left < right
+      case ConditionType.LTE => left <= right
+      case ConditionType.NEQ => left =!= right
+    }
+    params.df.filter(condition(left, right))
   }
 
   private def getFilter(df: DataFrame, fil: (String, String)): Column = {
@@ -231,4 +251,6 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
   override def filterByValue(params: filterByValueParams): DataFrame = params.df.filter(params.value)
 
   override def distinctData(params: distinctDataParams): DataFrame = params.df.distinct()
+
+  override def filterByColumn(params: filterByColumnParams): DataFrame = params.df.filter(col(sanitize(params.columnName)))
 }

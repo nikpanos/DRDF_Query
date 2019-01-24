@@ -111,14 +111,29 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     case vo: ValueOperand => vo
     case co: ColumnOperand => ColumnNameOperand(getPrefixedColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode))
     case op: OperandPair => OperandPair.newOperandPair(processOperand(op.getLeftOperand, oldTreeNode, newTreeNode), processOperand(op.getRightOperand, oldTreeNode, newTreeNode), op.getConditionType)
-    case of: OperandFunction => throw new Exception("Functions are not yet supported")
+    case of: OperandFunction =>
+      val funcOperands = of.getArguments.map(op => processOperand(op, oldTreeNode, newTreeNode))
+      OperandFunction.newOperandFunction(of.getFunctionName, funcOperands :_*)
+  }
+
+  private def decodeColumnsByOperands(operand: BaseOperand, oldTreeNode: BaseOperator, newTreeNode: BaseOperator): BaseOperator = operand match {
+    case vo: ValueOperand => newTreeNode
+    case co: ColumnOperand => decodeColumns(newTreeNode, Array(getPrefixedColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode)))
+    case op: OperandPair => decodeColumnsByOperands(op.getLeftOperand, oldTreeNode, decodeColumnsByOperands(op.getRightOperand, oldTreeNode, newTreeNode))
+    case of: OperandFunction =>
+      val firstOp = decodeColumnsByOperands(of.getArguments.head, oldTreeNode, newTreeNode)
+      of.getArguments.tail.foldLeft(firstOp)((operator, operand) => {
+        decodeColumnsByOperands(operand, oldTreeNode, operator)
+      })
   }
 
   override protected def processSelectOperator(so: SelectOperator): BaseOperator = {
-    val child = processNode(so.getChild)
+    val childHead = decodeColumnsByOperands(so.getOperands.head, so, processNode(so.getChild))
 
-    val operands = so.getOperands.map(op => processOperand(op, so, child))
-    SelectOperator.newSelectOperator(child, so.getArrayColumns, operands, so.getOutputSize)
+    val newChild = so.getOperands.tail.foldLeft(childHead)((operator, operand) => decodeColumnsByOperands(operand, so, operator))
+
+    val operands = so.getOperands.map(op => processOperand(op, so, newChild))
+    SelectOperator.newSelectOperator(newChild, so.getArrayColumns, operands, so.getOutputSize)
   }
 
   override protected def processLimitOperator(lo: LimitOperator): BaseOperator = {

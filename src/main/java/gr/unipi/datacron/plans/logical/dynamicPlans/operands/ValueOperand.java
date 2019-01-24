@@ -1,12 +1,9 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.operands;
 
-public class ValueOperand extends BaseOperand {
-
-
+public class ValueOperand extends BaseLiteralOperand {
     private final String value;
 
-    public ValueOperand(String value) {
-
+    private ValueOperand(String value) {
         this.value = value;
     }
 

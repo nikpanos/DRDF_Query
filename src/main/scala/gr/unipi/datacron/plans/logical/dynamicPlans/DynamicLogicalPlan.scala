@@ -113,16 +113,30 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   }
 
   private def processSelectOperator(so: SelectOperator): Option[DataFrame] = {
+
+    def getStringFromOperand(operand: BaseOperand): BaseLiteralOperand = operand match {
+      case vo: ValueOperand => vo
+      case cn: ColumnNameOperand => cn
+    }
+
     val childDf = processNode(so.getChild).get
     val res = so.getOperands.foldLeft(childDf)((df, op) => op match {
       case vo: ValueOperand => PhysicalPlanner.filterByValue(filterByValueParams(df, vo.getValue))
+      case cn: ColumnNameOperand => PhysicalPlanner.filterByColumn(filterByColumnParams(df, cn.columnName))
       case op: OperandPair =>
-        val co = op.getLeftOperand.asInstanceOf[ColumnNameOperand]
-        val vo = op.getRightOperand.asInstanceOf[ValueOperand]
-        PhysicalPlanner.filterByColumn(filterByColumnParams(df, co.columnName, vo.getValue))
+        val left = getStringFromOperand(op.getLeftOperand)
+        val right = getStringFromOperand(op.getRightOperand)
+        val opPair = LiteralOperandPair(left, right, op.getConditionType)
+        PhysicalPlanner.filterByLiteralOperandPair(filterByLiteralOperandPairParams(df, opPair))
       case no: NotNullOperand =>
         PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(df, Array(no.columnName)))
+      case o => throw new NotImplementedError("Operand not supported in Select operator: " + o.getClass.getSimpleName)
     })
+
+    /*val childDf = processNode(so.getChild).get
+    val res = so.getOperands.foldLeft(childDf)((df, op) => {
+      PhysicalPlanner.filterByOperand(filterByOperandParams(df, op))
+    })*/
     Some(res)
   }
 

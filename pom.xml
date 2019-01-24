@@ -110,6 +110,12 @@
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>3.2.2</version>
+				<configuration>
+					<args>
+						<arg>-deprecation</arg>
+						<arg>-feature</arg>
+					</args>
+				</configuration>
 				<executions>
 					<execution>
 						<id>scala-compile-first</id>

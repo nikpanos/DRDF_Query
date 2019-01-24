@@ -1,8 +1,9 @@
 package gr.unipi.datacron.plans.logical.staticPlans.starSTRange
 
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType
 import gr.unipi.datacron.plans.logical.staticPlans.sptRefinement.PropertiesRefinement2
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
-import gr.unipi.datacron.plans.physical.traits.{filterByColumnParams, filterBySubSpatioTemporalInfoParams}
+import gr.unipi.datacron.plans.physical.traits.{filterByColumnValueParams, filterBySubSpatioTemporalInfoParams}
 import gr.unipi.datacron.store.DataStore
 import org.apache.spark.sql.DataFrame
 
@@ -15,7 +16,7 @@ case class StarProperties() extends BaseStar() {
 
     //val notNullDf = LogicalPlanner.filterNullProperties(filterNullPropertiesParams(DataStore.triplesData))
 
-    val filteredDF = PhysicalPlanner.filterByColumn(filterByColumnParams(DataStore.triplesData, qPredEncoded.get.toString, qObjEncoded.get))
+    val filteredDF = PhysicalPlanner.filterByColumnValue(filterByColumnValueParams(DataStore.triplesData, qPredEncoded.get.toString, qObjEncoded.get, ConditionType.EQ))
 
     val filteredByIdInfo = PhysicalPlanner.filterBySubSpatioTemporalInfo(filterBySubSpatioTemporalInfoParams(filteredDF, constraints, encoder))
 

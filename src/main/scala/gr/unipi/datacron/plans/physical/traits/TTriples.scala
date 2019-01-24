@@ -2,13 +2,19 @@ package gr.unipi.datacron.plans.physical.traits
 
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.encoding._
+import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.LiteralOperandPair
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator
 import org.apache.spark.sql.DataFrame
 
 trait TTriples {
+  def filterByColumnValue(params: filterByColumnValueParams): DataFrame
+
   def filterByColumn(params: filterByColumnParams): DataFrame
 
   def filterByValue(params: filterByValueParams): DataFrame
+
+  def filterByLiteralOperandPair(params: filterByLiteralOperandPairParams): DataFrame
 
   def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame
 
@@ -25,9 +31,13 @@ trait TTriples {
   def distinctData(params: distinctDataParams): DataFrame
 }
 
-case class filterByColumnParams(df: DataFrame, columnName: String, value: Any, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+case class filterByColumnValueParams(df: DataFrame, columnName: String, value: Any, conditionType: ConditionType, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+
+case class filterByColumnParams(df: DataFrame, columnName: String, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
 
 case class filterByValueParams(df: DataFrame, value: String, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+
+case class filterByLiteralOperandPairParams(df: DataFrame, operand: LiteralOperandPair, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
 
 case class filterBySubSpatioTemporalInfoParams(df: DataFrame, constraints: SpatioTemporalRange, encoder: SimpleEncoder,
                                                override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams

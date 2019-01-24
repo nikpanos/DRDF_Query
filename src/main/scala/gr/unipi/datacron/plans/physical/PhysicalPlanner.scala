@@ -43,8 +43,14 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
     case _ => throw new Exception("Dictionary trait not found")
   }
 
+  override def filterByColumnValue(params: filterByColumnValueParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByColumnValue(params), params)
+
   override def filterByColumn(params: filterByColumnParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByColumn(params), params)
+
+  override def filterByLiteralOperandPair(params: filterByLiteralOperandPairParams): DataFrame =
+    doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterByLiteralOperandPair(params), params)
 
   override def filterBySubSpatioTemporalInfo(params: filterBySubSpatioTemporalInfoParams): DataFrame =
     doBenchmark[DataFrame](() => pickTriplesPlanBasedOnRules.filterBySubSpatioTemporalInfo(params), params)
