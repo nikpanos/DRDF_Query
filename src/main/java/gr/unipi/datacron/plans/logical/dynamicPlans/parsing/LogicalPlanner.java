@@ -191,7 +191,7 @@ public class LogicalPlanner extends OpVisitorBase {
         if (root == null) {
             root = formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/));
         } else {
-            root = JoinOperator.newJoinOperator(root, formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/)));
+            root = UnionOperator.newUnionOperator(root, formBaseOperator(formStarQueriesAndRemainingTriplets(/*checkForShortcuts(*/listOfSelectOperators/*)*/)));
         }
     }
 
@@ -425,6 +425,12 @@ public class LogicalPlanner extends OpVisitorBase {
                 String s = expr.toString().substring(1, expr.toString().length() - 1);
 
                 String[] elements = s.split(" ");
+
+                if(elements.length==1){
+                    //if filter has single argument then pass it
+                    break;
+                }
+
                 switch (elements[0]) {
                     case "=":
                         ct = ConditionType.EQ;
@@ -473,10 +479,6 @@ public class LogicalPlanner extends OpVisitorBase {
                         e.printStackTrace();
                     }
                 }
-                System.out.println(expr.toString());
-
-                System.out.println(filters.get(0).getFunction().getArgs());
-                System.out.println("ddddddddddddddddd"+((ColumnOperand) bo2).getColumn().getQueryString() );
 
                 root = SelectOperator.newSelectOperator(root, root.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2, ct)}, root.getOutputSize());
 
