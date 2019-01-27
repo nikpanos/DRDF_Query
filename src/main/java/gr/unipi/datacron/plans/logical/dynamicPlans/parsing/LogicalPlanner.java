@@ -428,7 +428,7 @@ public class LogicalPlanner extends OpVisitorBase {
 
                 if(elements.length==1){
                     //if filter has single argument then pass it
-                    break;
+                    continue;
                 }
 
                 switch (elements[0]) {
