@@ -31,6 +31,5 @@ public class TestFilter1 {
 
         System.out.println("--------------------------");
         System.out.println(bop1.toString());
-
     }
 }

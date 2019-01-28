@@ -4,7 +4,7 @@ import gr.unipi.datacron.common.Benchmarks.doBenchmark
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.common._
 import gr.unipi.datacron.plans.physical.dictionary._
-import gr.unipi.datacron.plans.physical.joinTriples.{AJoinLLLTriples, _}
+import gr.unipi.datacron.plans.physical.joinTriples.{AutoJoin, _}
 import gr.unipi.datacron.plans.physical.projection.Projection
 import gr.unipi.datacron.plans.physical.properties.Properties
 import gr.unipi.datacron.plans.physical.traits._
@@ -15,12 +15,10 @@ import org.apache.spark.sql.DataFrame
 object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with TProperties with TProjection {
 
   private lazy val lllTriples = LLLTriples()
-  private lazy val mbJoinSTriples = MBJoinSTriples()
-  private lazy val mbJoinLLLTriples = MBJoinLLLTriples()
   private lazy val rdsDictionary = RdsDictionary()
   private lazy val rdsBatchDictionary = RdsBatchDictionary()
-  private lazy val aJoinLLLTriples = AJoinLLLTriples()
-  private lazy val abJoinLLLTriples = ABJoinLLLTriples()
+  private lazy val autoJoin = AutoJoin()
+  private lazy val broadcastJoin = BroadcastJoin()
   private lazy val properties = Properties()
   private lazy val projection = Projection()
 
@@ -30,10 +28,8 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
   }
 
   private def pickJoinTriplesPlanBasedOnRules: TJoinTriples = AppConfig.getString(qfpJoinTriples_trait) match {
-    case Consts.tMBJoinSTriples => mbJoinSTriples
-    case Consts.tMBJoinLLLTriples => mbJoinLLLTriples
-    case Consts.tAJoinLLLTriples => aJoinLLLTriples
-    case Consts.tABJoinLLLTriples => abJoinLLLTriples
+    case Consts.tAJoinLLLTriples => autoJoin
+    case Consts.tABJoinLLLTriples => broadcastJoin
     case _ => throw new Exception("JoinTriples trait not found")
   }
 
@@ -82,6 +78,9 @@ object PhysicalPlanner extends TTriples with TDictionary with TJoinTriples with 
 
   override def joinDataframes(params: joinDataframesParams): DataFrame =
     doBenchmark[DataFrame](() => pickJoinTriplesPlanBasedOnRules.joinDataframes(params), params)
+
+  override def joinAllDataframes(params: joinAllDataframesParams): DataFrame =
+    doBenchmark[DataFrame](() => pickJoinTriplesPlanBasedOnRules.joinAllDataframes(params), params)
 
   override def addTemporaryColumnForRefinement(params: addTemporaryColumnForRefinementParams): DataFrame =
     doBenchmark[DataFrame](() => properties.addTemporaryColumnForRefinement(params), params)
