@@ -84,7 +84,12 @@ public class JoinOperator extends BaseOpW2Child {
         //joinOperand is a COMPLETELY different variable than the arrayColumns, thus it should be initialized elsewhere!
         //IDEALLY joinOperand should be calculated in the parsing procedure, and not inside the Operators classes.
         //Take a look at the second constructor, to have an idea how it should be done.
-        joinOperand = OperandPair.newOperandPair(columnJoinPredicateList.get(0), columnJoinPredicateList.get(1), ConditionType.EQ);// columnJoinPredicateList.stream().toArray(ColumnOperand[]::new);
+        if (columnJoinPredicateList.size() == 0) {
+            joinOperand = ValueOperand.newValueOperand("true");
+        }
+        else {
+            joinOperand = OperandPair.newOperandPair(columnJoinPredicateList.get(0), columnJoinPredicateList.get(1), ConditionType.EQ);// columnJoinPredicateList.stream().toArray(ColumnOperand[]::new);
+        }
 
         Collections.reverse(elementsToBeDeleted);
         elementsToBeDeleted.forEach((Integer i) -> columnList.remove(i.intValue()));
