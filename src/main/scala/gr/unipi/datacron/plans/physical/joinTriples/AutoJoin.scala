@@ -1,11 +1,15 @@
 package gr.unipi.datacron.plans.physical.joinTriples
 
 import gr.unipi.datacron.plans.physical.BasePhysicalPlan
-import gr.unipi.datacron.plans.physical.traits.{TJoinTriples, joinDataframesParams}
+import gr.unipi.datacron.plans.physical.traits.{TJoinTriples, joinAllDataframesParams, joinDataframesParams}
 import gr.unipi.datacron.common.Utils._
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.functions.lit
 
-case class AJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
+case class AutoJoin() extends BasePhysicalPlan with TJoinTriples {
+
+  private def doJoinDataframes(leftDf: DataFrame, rightDf: DataFrame, col: Column): DataFrame =
+    leftDf.join(rightDf, col)
 
   override def joinDataframes(params: joinDataframesParams): DataFrame = {
     /*val alias1 = params.df1Alias.getOrElse("")
@@ -28,7 +32,11 @@ case class AJoinLLLTriples() extends BasePhysicalPlan with TJoinTriples {
       //println("No forced broadcast join")
       params.df1.join(params.df2, params.df1(sanitize(params.df1JoinColumn)) === params.df2(sanitize(params.df2JoinColumn)))
     }*/
-    params.df1.join(params.df2, params.df1(sanitize(params.df1JoinColumn)) === params.df2(sanitize(params.df2JoinColumn)))
+    //params.df1.join(params.df2, params.df1(sanitize(params.df1JoinColumn)) === params.df2(sanitize(params.df2JoinColumn)))
+    doJoinDataframes(params.df1, params.df2, params.df1(sanitize(params.df1JoinColumn)) === params.df2(sanitize(params.df2JoinColumn)))
     //df1
   }
+
+  override def joinAllDataframes(params: joinAllDataframesParams): DataFrame =
+    doJoinDataframes(params.df1, params.df2, lit(true))
 }

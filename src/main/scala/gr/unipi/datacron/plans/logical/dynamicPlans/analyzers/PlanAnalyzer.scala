@@ -60,17 +60,25 @@ class PlanAnalyzer extends LowLevelAnalyzer {
   }
 
   override protected def processJoinOperator(jo: JoinOperator): BaseOperator = {
-    val operand = jo.getJoinOperand.asInstanceOf[OperandPair]
-    val leftColumnOperand = operand.getLeftOperand.asInstanceOf[ColumnOperand]
-    val rightColumnOperand = operand.getRightOperand.asInstanceOf[ColumnOperand]
+    jo.getJoinOperand match {
+      case operand: OperandPair =>
+        val leftColumnOperand = operand.getLeftOperand.asInstanceOf[ColumnOperand]
+        val rightColumnOperand = operand.getRightOperand.asInstanceOf[ColumnOperand]
 
-    val leftChild = prefixNode(jo.getLeftChild, leftColumnOperand.getColumn, processNode(jo.getLeftChild))
-    val rightChild = prefixNode(jo.getRightChild, rightColumnOperand.getColumn, processNode(jo.getRightChild))
+        val leftChild = prefixNode(jo.getLeftChild, leftColumnOperand.getColumn, processNode(jo.getLeftChild))
+        val rightChild = prefixNode(jo.getRightChild, rightColumnOperand.getColumn, processNode(jo.getRightChild))
 
-    val leftColName = getPrefixedColumnNameForOperation(jo, leftColumnOperand.getColumn, leftChild)
-    val rightColName = getPrefixedColumnNameForOperation(jo, rightColumnOperand.getColumn, rightChild)
-    val operandPair = OperandPair.newOperandPair(ColumnNameOperand(leftColName), ColumnNameOperand(rightColName), operand.getConditionType)
-    JoinOperator.newJoinOperator(leftChild, rightChild, operandPair)
+        val leftColName = getPrefixedColumnNameForOperation(jo, leftColumnOperand.getColumn, leftChild)
+        val rightColName = getPrefixedColumnNameForOperation(jo, rightColumnOperand.getColumn, rightChild)
+        val operandPair = OperandPair.newOperandPair(ColumnNameOperand(leftColName), ColumnNameOperand(rightColName), operand.getConditionType)
+        JoinOperator.newJoinOperator(leftChild, rightChild, operandPair)
+      case operand: ValueOperand =>
+        val leftChild = prefixNode(jo.getLeftChild, jo.getLeftChild.getArrayColumns()(0), processNode(jo.getLeftChild))
+        val rightChild = prefixNode(jo.getRightChild, jo.getRightChild.getArrayColumns()(0), processNode(jo.getRightChild))
+        JoinOperator.newJoinOperator(leftChild, rightChild, operand)
+    }
+    //val operand = jo.getJoinOperand.asInstanceOf[OperandPair]
+
   }
 
   override protected def processProjectOperator(po: ProjectOperator): BaseOperator = {

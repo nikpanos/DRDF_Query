@@ -77,10 +77,6 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
   }
 
   private def processJoinOperator(jo: JoinOperator): Option[DataFrame] = {
-    val pair = jo.getJoinOperand.asInstanceOf[OperandPair]
-
-    val leftOperand = pair.getLeftOperand.asInstanceOf[ColumnNameOperand].columnName
-    val rightOperand = pair.getRightOperand.asInstanceOf[ColumnNameOperand].columnName
 
     val leftDf = processNode(jo.getLeftChild).get
     val rightDf = processNode(jo.getRightChild).get
@@ -88,7 +84,15 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     val leftSize = jo.getLeftChild.getOutputSize
     val rightSize = jo.getRightChild.getOutputSize
 
-    Some(PhysicalPlanner.joinDataframes(joinDataframesParams(leftDf, rightDf, leftOperand, rightOperand, leftSize, rightSize)))
+    jo.getJoinOperand match {
+      case pair: OperandPair =>
+        val leftOperand = pair.getLeftOperand.asInstanceOf[ColumnNameOperand].columnName
+        val rightOperand = pair.getRightOperand.asInstanceOf[ColumnNameOperand].columnName
+
+        Some(PhysicalPlanner.joinDataframes(joinDataframesParams(leftDf, rightDf, leftOperand, rightOperand, leftSize, rightSize)))
+      case valOp: ValueOperand =>
+        Some(PhysicalPlanner.joinAllDataframes(joinAllDataframesParams(leftDf, rightDf, leftSize, rightSize)))
+    }
   }
 
   private def processLimitOperator(lo: LimitOperator): Option[DataFrame] = {
