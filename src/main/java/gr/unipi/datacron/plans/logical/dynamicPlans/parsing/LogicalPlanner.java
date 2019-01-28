@@ -429,7 +429,6 @@ public class LogicalPlanner extends OpVisitorBase {
                 if(elements.length==1){
                     //if filter has single argument then pass it
                     if(expr.toString().startsWith("?")){
-
                         for (SparqlColumn c : root.getArrayColumns()) {
                             if (c.getQueryString().equals(elements[0])) {
                                 bo1 = ColumnOperand.newColumnOperand(c);
