@@ -13,7 +13,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
  */
 public class JoinSubjectOperatorTester {
 
-    public static void main(String args[]) {
+    public static void main(String[] args){
 
         BaseOperator bop = LogicalPlanner.setSparqlQuery("SELECT ?x"
                 + "WHERE"

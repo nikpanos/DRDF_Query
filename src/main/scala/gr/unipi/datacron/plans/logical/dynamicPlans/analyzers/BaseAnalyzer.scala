@@ -1,5 +1,6 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.analyzers
 
+import gr.unipi.datacron.common.SpatioTemporalRange
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
@@ -10,6 +11,8 @@ import scala.collection.mutable
 abstract class BaseAnalyzer {
 
   private var decodedColumns = mutable.Set[String]()
+
+  protected var spatioTemporalBoxFilter: Option[SpatioTemporalRange] = None
 
   def analyzePlan(root: BaseOperator): BaseOperator = {
     processNode(root)

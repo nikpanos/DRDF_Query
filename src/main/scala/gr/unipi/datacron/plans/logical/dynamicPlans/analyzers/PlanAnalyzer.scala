@@ -4,6 +4,7 @@ import gr.unipi.datacron.common.AppConfig
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnTypes._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns._
+import gr.unipi.datacron.plans.logical.dynamicPlans.functions.RegisteredFunctions
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 
@@ -129,10 +130,25 @@ class PlanAnalyzer extends LowLevelAnalyzer {
     case co: ColumnOperand => decodeColumns(newTreeNode, Array(getPrefixedColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode)))
     case op: OperandPair => decodeColumnsByOperands(op.getLeftOperand, oldTreeNode, decodeColumnsByOperands(op.getRightOperand, oldTreeNode, newTreeNode))
     case of: OperandFunction =>
-      val firstOp = decodeColumnsByOperands(of.getArguments.head, oldTreeNode, newTreeNode)
-      of.getArguments.tail.foldLeft(firstOp)((operator, operand) => {
-        decodeColumnsByOperands(operand, oldTreeNode, operator)
-      })
+      val rf = RegisteredFunctions.findFunctionByName(of.getFunctionName)
+      if (rf.isEmpty) {
+        throw new Exception("Function " + of.getFunctionName + " is not registered!")
+      }
+      if (rf.get.args.length!= of.getArguments.length) {
+        throw new Exception("Function " + of.getFunctionName + " is registered with " + rf.get.args.length + " arguments!")
+      }
+      val argsForDecode = of.getArguments.zipWithIndex.filter(a => {
+        rf.get.args(a._2).needsDecoding
+      }).map(_._1)
+      if (argsForDecode.length > 0) {
+        val firstOp = decodeColumnsByOperands(argsForDecode.head, oldTreeNode, newTreeNode)
+        argsForDecode.tail.foldLeft(firstOp)((operator, operand) => {
+          decodeColumnsByOperands(operand, oldTreeNode, operator)
+        })
+      }
+      else {
+        newTreeNode
+      }
   }
 
   override protected def processSelectOperator(so: SelectOperator): BaseOperator = {

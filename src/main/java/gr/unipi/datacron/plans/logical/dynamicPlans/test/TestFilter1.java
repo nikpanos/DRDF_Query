@@ -5,7 +5,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 public class TestFilter1 {
 
-    public static void main(String args[]) {
+    public static void main(String[] args){
         BaseOperator bop = LogicalPlanner.setSparqlQuery(
                 "Prefix : <http://www.datacron-project.eu/datAcron#>" +
                         "Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +

@@ -5,7 +5,7 @@ import gr.unipi.datacron.encoding._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.LiteralOperandPair
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.BaseOperator
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{Column, DataFrame}
 
 trait TTriples {
   def filterByColumnValue(params: filterByColumnValueParams): DataFrame
@@ -29,6 +29,8 @@ trait TTriples {
   def sortResults(params: sortResultsParams): DataFrame
 
   def distinctData(params: distinctDataParams): DataFrame
+
+  def filterByFunction(params: filterByFunctionParams): DataFrame
 }
 
 case class filterByColumnValueParams(df: DataFrame, columnName: String, value: Any, conditionType: ConditionType, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
@@ -55,3 +57,5 @@ case class limitResultsParams(df: DataFrame, limitNo: Int, override val logicalO
 case class sortResultsParams(df: DataFrame, cols: Array[(String, Boolean)], override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
 
 case class distinctDataParams(df: DataFrame, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams
+
+case class filterByFunctionParams(df: DataFrame, c: Column, override val logicalOperator: Option[BaseOperator] = None) extends BaseOperatorParams

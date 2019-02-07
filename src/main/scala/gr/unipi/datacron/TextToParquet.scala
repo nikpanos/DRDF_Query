@@ -12,7 +12,7 @@ object TextToParquet {
 
     val partitionsNum = AppConfig.getOptionalInt(partitionsNumberAfterShuffle).getOrElse(0)
 
-    val data = if ((sortingColumns.isDefined) && (sortingColumns.get.length > 0)) {
+    val data = if (sortingColumns.isDefined && (sortingColumns.get.length > 0)) {
       val cols = sortingColumns.get
       if (partitionsNum == 0) {
         throw new Exception("When sorting, you must specify the number of partitions")
@@ -67,6 +67,10 @@ object TextToParquet {
           processDataframe(DataStore.vesselData, "vessels", outputPath, sortCols)
         case `datasetAdsbNode` =>
           DataStore.nodeDatasetType = datasetAdsbNode
+          outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
+          processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
+        case `datasetFlightPlansNode` =>
+          DataStore.nodeDatasetType = datasetFlightPlansNode
           outputPath = DataStore.node.dataPath.replace("/text/", "/parquet/") //TODO: dirty, maybe clean it
           processDataframe(DataStore.nodeData, "node", outputPath, sortCols)
       })

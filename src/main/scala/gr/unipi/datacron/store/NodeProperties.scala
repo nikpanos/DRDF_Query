@@ -70,6 +70,28 @@ private[store] class NodeProperties() extends BaseHDFSStore {
               case Array(a, b, c, d, e, f, g, h, i, j) => (semObject.subj, a, b, c, d, e, f, g, h, i, j)
             }
           }).toDF(schema: _*)
+        case `datasetFlightPlansNode` =>
+          if (predicates.length != 4) {
+            throw new Exception("Expected 4 columns in dataset")
+          }
+          DataStore.sc.textFile(dataPath).map(s => {
+            SemanticObject.predicates = predicates
+            val tokenizer = TriplesTokenizer(s)
+
+            val sub = tokenizer.getNextToken.get
+            val semObject = new SemanticObject(sub)
+
+            var pred: Option[Long] = tokenizer.getNextToken
+            var obj: Option[Long] = tokenizer.getNextToken
+            while (pred.isDefined) {
+              semObject.setPropertyValue(pred.get, obj.get)
+              pred = tokenizer.getNextToken
+              obj = tokenizer.getNextToken
+            }
+            semObject.getValues match {
+              case Array(a, b, c, d) => (semObject.subj, a, b, c, d)
+            }
+          }).toDF(schema: _*)
         case "" =>
           throw new Exception("datasetType is not set")
       }

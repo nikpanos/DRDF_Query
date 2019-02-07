@@ -181,6 +181,7 @@ object Consts {
 
   final val datasetAisMedNode = "aisMedNode"
   final val datasetAdsbNode = "adsbNode"
+  final val datasetFlightPlansNode = "flightPlansNode"
   final val datasetVessel = "vessel"
 
   final val redisKeyEncodingLatLower = "settings.min_lat"
@@ -195,5 +196,7 @@ object Consts {
   final val redisKeyTimestamps = "settings.timestamps"
   final val redisKeyDimensions = "settings.dimensions"
   final val redisKeyCurveType = "settings.curveTypeRedisKey"
+
+  final val functionSpatioTemporalBox = datacronOntologyNamespace + "spatioTemporalBox2D"
 }
 

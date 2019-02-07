@@ -122,7 +122,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     }).get.asInstanceOf[OperandPair]).toOption
   }
 
-  private def processLowLevelSelectOperator(so: SelectOperator, ch: BaseOperator, isPropertyTableSource: Boolean): BaseOperator = {
+  protected def processLowLevelSelectOperator(so: SelectOperator, ch: BaseOperator, isPropertyTableSource: Boolean): BaseOperator = {
     val subOp = getOperandPairOfColumn(so, SUBJECT)
     val predOp = getOperandPairOfColumn(so, PREDICATE)
     val objOp = getOperandPairOfColumn(so, OBJECT)

@@ -7,11 +7,13 @@ import gr.unipi.datacron.plans.logical.BaseLogicalPlan
 import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner
 import gr.unipi.datacron.common.Consts._
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SortDirection
+import gr.unipi.datacron.plans.logical.dynamicPlans.functions.RegisteredFunctions
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands._
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators._
 import gr.unipi.datacron.plans.physical.PhysicalPlanner
 import gr.unipi.datacron.plans.physical.traits._
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions.{col, lit}
 
 import scala.collection.JavaConverters._
 import scala.io.Source
@@ -31,7 +33,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     val tree = LogicalPlanner.setSparqlQuery(sparqlQuery).build().getRoot
     println(tree)
     println("\n\n\n\n\n")
-    val analyzer = new analyzers.PlanAnalyzer()
+    val analyzer = new analyzers.SpatioTemporalAnalyzer()
     rootNode = analyzer.analyzePlan(tree)
   }
 
@@ -134,6 +136,14 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
         PhysicalPlanner.filterByLiteralOperandPair(filterByLiteralOperandPairParams(df, opPair))
       case no: NotNullOperand =>
         PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(df, Array(no.columnName)))
+      case fo: OperandFunction =>
+        val rf = RegisteredFunctions.findFunctionByName(fo.getFunctionName).get
+        val args = fo.getArguments.map({
+          case cno: ColumnNameOperand => col(cno.columnName)
+          case vo: ValueOperand => lit(vo.getValue)
+        })
+        val c = rf.implementation(args)
+        PhysicalPlanner.filterByFunction(filterByFunctionParams(df, c))
       case o => throw new NotImplementedError("Operand not supported in Select operator: " + o.getClass.getSimpleName)
     })
 

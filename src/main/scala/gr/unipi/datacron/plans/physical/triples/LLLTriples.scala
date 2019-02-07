@@ -253,4 +253,6 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
   override def distinctData(params: distinctDataParams): DataFrame = params.df.distinct()
 
   override def filterByColumn(params: filterByColumnParams): DataFrame = params.df.filter(col(sanitize(params.columnName)))
+
+  override def filterByFunction(params: filterByFunctionParams): DataFrame = params.df.filter(params.c)
 }

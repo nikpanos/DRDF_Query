@@ -14,7 +14,7 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 public class PanosTest {
 
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
 //        AppConfig.init("C:\\Users\\nikp\\Desktop\\params.hocon");
 
         //Long encodedValue = getRedisEncodedValue("a");
