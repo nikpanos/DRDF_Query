@@ -71,8 +71,8 @@ private[store] class NodeProperties() extends BaseHDFSStore {
             }
           }).toDF(schema: _*)
         case `datasetFlightPlansNode` =>
-          if (predicates.length != 4) {
-            throw new Exception("Expected 4 columns in dataset")
+          if (predicates.length != 5) {
+            throw new Exception("Expected 5 columns in dataset")
           }
           DataStore.sc.textFile(dataPath).map(s => {
             SemanticObject.predicates = predicates
@@ -89,7 +89,7 @@ private[store] class NodeProperties() extends BaseHDFSStore {
               obj = tokenizer.getNextToken
             }
             semObject.getValues match {
-              case Array(a, b, c, d) => (semObject.subj, a, b, c, d)
+              case Array(a, b, c, d, e) => (semObject.subj, a, b, c, d, e)
             }
           }).toDF(schema: _*)
         case "" =>
