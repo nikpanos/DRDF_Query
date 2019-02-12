@@ -10,7 +10,7 @@ import gr.unipi.datacron.common.Consts;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.*;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.BaseOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ColumnOperand;
-import gr.unipi.datacron.plans.logical.dynamicPlans.operands.OperandPair;
+import gr.unipi.datacron.plans.logical.dynamicPlans.operands.PairOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.ValueOperand;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operators.*;
 import gr.unipi.datacron.store.DataStore;
@@ -175,16 +175,16 @@ public class LogicalPlanner extends OpVisitorBase {
 
             RenameOperator p = RenameOperator.newRenameOperator(to, hm);
 
-            List<OperandPair> k = new ArrayList<>();
+            List<PairOperand> k = new ArrayList<>();
 
             for (SparqlColumn c : p.getArrayColumns()) {
                 if (!(c instanceof ColumnWithVariable)) {
-                    k.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString()), ConditionType.EQ));
+                    k.add(PairOperand.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString()), ConditionType.EQ));
                 }
 
             }
 
-            listOfSelectOperators.add(SelectOperator.newSelectOperator(p, p.getArrayColumns(), k.stream().toArray(OperandPair[]::new), outputSize));
+            listOfSelectOperators.add(SelectOperator.newSelectOperator(p, p.getArrayColumns(), k.stream().toArray(PairOperand[]::new), outputSize));
 
         });
 
@@ -358,14 +358,14 @@ public class LogicalPlanner extends OpVisitorBase {
 
                             RenameOperator pop = RenameOperator.newRenameOperator(to, hm);
 
-                            List<OperandPair> cwv = new ArrayList<>();
+                            List<PairOperand> cwv = new ArrayList<>();
                             for (SparqlColumn c : pop.getArrayColumns()) {
                                 if (!(c instanceof ColumnWithVariable)) {
-                                    cwv.add(OperandPair.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString()), ConditionType.EQ));
+                                    cwv.add(PairOperand.newOperandPair(ColumnOperand.newColumnOperand(c), ValueOperand.newValueOperand(c.getQueryString()), ConditionType.EQ));
                                 }
                             }
 
-                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(OperandPair[]::new), new java.util.Random().nextInt(2000) + 1));
+                            l.set(l.indexOf(l1), SelectOperator.newSelectOperator(pop, pop.getArrayColumns(), cwv.stream().toArray(PairOperand[]::new), new java.util.Random().nextInt(2000) + 1));
 
                             l.remove(list2.get(i));
 
@@ -493,7 +493,7 @@ public class LogicalPlanner extends OpVisitorBase {
                     }
                 }
 
-                root = SelectOperator.newSelectOperator(root, root.getArrayColumns(), new OperandPair[]{OperandPair.newOperandPair(bo1, bo2, ct)}, root.getOutputSize());
+                root = SelectOperator.newSelectOperator(root, root.getArrayColumns(), new PairOperand[]{PairOperand.newOperandPair(bo1, bo2, ct)}, root.getOutputSize());
 
             }
 

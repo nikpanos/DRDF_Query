@@ -10,20 +10,20 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType;
 /**
  * @author nicholaskoutroumanis
  */
-public class OperandPair extends BaseOperand {
+public class PairOperand extends BaseOperand {
 
     private final BaseOperand leftOperand;
     private final BaseOperand rightOperand;
     private final ConditionType conditionType;
 
-    private OperandPair(BaseOperand leftOperand, BaseOperand rightOperand, ConditionType conditionType) {
+    private PairOperand(BaseOperand leftOperand, BaseOperand rightOperand, ConditionType conditionType) {
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
         this.conditionType = conditionType;
     }
 
-    public static OperandPair newOperandPair(BaseOperand leftOperand, BaseOperand rightOperand, ConditionType conditionType) {
-        return new OperandPair(leftOperand, rightOperand, conditionType);
+    public static PairOperand newOperandPair(BaseOperand leftOperand, BaseOperand rightOperand, ConditionType conditionType) {
+        return new PairOperand(leftOperand, rightOperand, conditionType);
     }
 //
 //    @Override

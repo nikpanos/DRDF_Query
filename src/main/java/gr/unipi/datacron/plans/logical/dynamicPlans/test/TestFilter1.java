@@ -19,7 +19,7 @@ public class TestFilter1 {
         System.out.println("--------------------------");
         System.out.println(bop.toString());
 
-        BaseOperator bop1 = LogicalPlanner.setSparqlQuery(
+        /*BaseOperator bop1 = LogicalPlanner.setSparqlQuery(
                 "Prefix : <http://www.datacron-project.eu/datAcron#>" +
                         "Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                         "SELECT ?x " +
@@ -30,6 +30,6 @@ public class TestFilter1 {
                         "}").build().getRoot();
 
         System.out.println("--------------------------");
-        System.out.println(bop1.toString());
+        System.out.println(bop1.toString());*/
     }
 }

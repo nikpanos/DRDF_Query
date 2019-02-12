@@ -15,8 +15,8 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
 
   private val rdfTypeEnc = getEncodedStr(rdfType)
 
-  private def filterSelectOperators(so: SelectOperator, columnType: ColumnTypes): Array[OperandPair] = {
-    so.getOperands.flatMap({case op: OperandPair =>
+  private def filterSelectOperators(so: SelectOperator, columnType: ColumnTypes): Array[PairOperand] = {
+    so.getOperands.flatMap({case op: PairOperand =>
       op.getLeftOperand match {
         case _: ColumnOperand => Some(op)
       }
@@ -35,14 +35,14 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     }
   }
 
-  private def findSelectOperator(so: SelectOperator, columnType: ColumnTypes): Option[OperandPair] = {
-    so.getOperands.find({ case operandPair: OperandPair =>
+  private def findSelectOperator(so: SelectOperator, columnType: ColumnTypes): Option[PairOperand] = {
+    so.getOperands.find({ case operandPair: PairOperand =>
       operandPair.getLeftOperand match {
         case column: ColumnOperand =>
           column.getColumn.getColumnTypes == columnType
         case _ => throw new Exception("Should be ColumnOperand")
       }
-    }).asInstanceOf[Option[OperandPair]]
+    }).asInstanceOf[Option[PairOperand]]
   }
 
   private def findObjectOfRdfType(node: BaseOperator): Option[String] = {
@@ -112,14 +112,14 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     })
   }
 
-  private def getOperandPairOfColumn(so: SelectOperator, cType: ColumnTypes): Option[OperandPair] = {
+  private def getOperandPairOfColumn(so: SelectOperator, cType: ColumnTypes): Option[PairOperand] = {
     Try(so.getOperands.find({
-      case op: OperandPair =>
+      case op: PairOperand =>
         op.getLeftOperand match {
           case co: ColumnOperand =>
             co.getColumn.getColumnTypes == cType
         }
-    }).get.asInstanceOf[OperandPair]).toOption
+    }).get.asInstanceOf[PairOperand]).toOption
   }
 
   protected def processLowLevelSelectOperator(so: SelectOperator, ch: BaseOperator, isPropertyTableSource: Boolean): BaseOperator = {
@@ -130,7 +130,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     val operands = mutable.ListBuffer[BaseOperand]()
     if (subOp.isDefined) {
       val encodedValue = getEncodedStr(subOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-      val operandSub = OperandPair.newOperandPair(ColumnNameOperand(tripleSubLongField), ValueOperand.newValueOperand(encodedValue), ConditionType.EQ)
+      val operandSub = PairOperand.newOperandPair(ColumnNameOperand(tripleSubLongField), ValueOperand.newValueOperand(encodedValue), ConditionType.EQ)
       operands.append(operandSub)
     }
 
@@ -139,7 +139,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
     if (isPropertyTableSource) {
       if (objOp.isDefined) {
         val encodedFilterObj = getEncodedStr(objOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-        val operand = OperandPair.newOperandPair(ColumnNameOperand(encodedFilterPred), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
+        val operand = PairOperand.newOperandPair(ColumnNameOperand(encodedFilterPred), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
         operands.append(operand)
       }
       else {
@@ -148,12 +148,12 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
       SelectOperator.newSelectOperator(ch, so.getArrayColumns, operands.toArray, so.getOutputSize)
     }
     else {
-      val operandPred = OperandPair.newOperandPair(ColumnNameOperand(triplePredLongField), ValueOperand.newValueOperand(encodedFilterPred), ConditionType.EQ)
+      val operandPred = PairOperand.newOperandPair(ColumnNameOperand(triplePredLongField), ValueOperand.newValueOperand(encodedFilterPred), ConditionType.EQ)
       operands.append(operandPred)
       //df = PhysicalPlanner.filterByColumn(filterByColumnParams(df, triplePredLongField, encodedFilterPred, Option(filter)))
       if (objOp.isDefined) {
         val encodedFilterObj = getEncodedStr(objOp.get.getRightOperand.asInstanceOf[ValueOperand].getValue)
-        val operandObj = OperandPair.newOperandPair(ColumnNameOperand(tripleObjLongField), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
+        val operandObj = PairOperand.newOperandPair(ColumnNameOperand(tripleObjLongField), ValueOperand.newValueOperand(encodedFilterObj), ConditionType.EQ)
         operands.append(operandObj)
       }
       val newSo = SelectOperator.newSelectOperator(ch, so.getArrayColumns, operands.toArray, so.getOutputSize)
@@ -200,7 +200,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
       selectOps.tail.foldLeft(firstSo)((left, so) => {
         val right = getPrefixedSelectOperator(so, ds)
         val rightColName = getPrefixedColumnNameForOperation(so, getSubjectColForOperator(so), right)
-        val op = OperandPair.newOperandPair(ColumnNameOperand(leftColName), ColumnNameOperand(rightColName), ConditionType.EQ)
+        val op = PairOperand.newOperandPair(ColumnNameOperand(leftColName), ColumnNameOperand(rightColName), ConditionType.EQ)
         JoinOperator.newJoinOperator(left, right, op)
       })
     }
@@ -222,7 +222,7 @@ abstract class LowLevelAnalyzer extends BaseAnalyzer {
       val propertyColName = getPrefixedColumnNameForOperation(propertySo(0), getSubjectColForOperator(propertySo(0)), propertyTree)
       val triplesColName = getPrefixedColumnNameForOperation(triplesSo(0), getSubjectColForOperator(triplesSo(0)), triplesTree)
 
-      val op = OperandPair.newOperandPair(ColumnNameOperand(propertyColName), ColumnNameOperand(triplesColName), ConditionType.EQ)
+      val op = PairOperand.newOperandPair(ColumnNameOperand(propertyColName), ColumnNameOperand(triplesColName), ConditionType.EQ)
       JoinOperator.newJoinOperator(propertyTree, triplesTree, op)
     }
     else {

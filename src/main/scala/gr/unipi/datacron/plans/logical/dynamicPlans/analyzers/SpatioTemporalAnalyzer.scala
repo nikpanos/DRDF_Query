@@ -16,15 +16,15 @@ class SpatioTemporalAnalyzer extends PlanAnalyzer {
   private var constraints: Option[SpatioTemporalRange] = None
 
 
-  private def findFunctionOperand(so: SelectOperator, functionName: String): Option[OperandFunction] = {
+  private def findFunctionOperand(so: SelectOperator, functionName: String): Option[FunctionOperand] = {
 
     def checkOperand(op: BaseOperand): Boolean = op match {
-      case ofn: OperandFunction => ofn.getFunctionName == functionName
-      case opr: OperandPair => checkOperand(opr.getLeftOperand) || checkOperand(opr.getRightOperand)
+      case ofn: FunctionOperand => ofn.getFunctionName == functionName
+      case opr: PairOperand => checkOperand(opr.getLeftOperand) || checkOperand(opr.getRightOperand)
       case _ => false
     }
 
-    so.getOperands.find(checkOperand).asInstanceOf[Option[OperandFunction]]
+    so.getOperands.find(checkOperand).asInstanceOf[Option[FunctionOperand]]
   }
 
   override protected def processSelectOperator(so: SelectOperator): BaseOperator = {

@@ -1,16 +1,16 @@
 package gr.unipi.datacron.plans.logical.dynamicPlans.operands;
 
-public class OperandFunction extends BaseOperand {
+public class FunctionOperand extends BaseOperand {
 
     private final String functionName;
     private final BaseOperand[] arguments;
 
-    private OperandFunction(String functionName, BaseOperand[] arguments) {
+    private FunctionOperand(String functionName, BaseOperand[] arguments) {
         this.functionName = functionName;
         this.arguments = arguments;
     }
 
-    public static OperandFunction newOperandFunction(String functionName, BaseOperand... arguments){
+    public static FunctionOperand newOperandFunction(String functionName, BaseOperand... arguments){
         return newOperandFunction(functionName, arguments);
     }
 

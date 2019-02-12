@@ -9,7 +9,6 @@ import gr.unipi.datacron.plans.logical.dynamicPlans.columns.SparqlColumn;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ColumnWithVariable;
 import gr.unipi.datacron.plans.logical.dynamicPlans.columns.ConditionType;
 import gr.unipi.datacron.plans.logical.dynamicPlans.operands.*;
-import gr.unipi.datacron.plans.logical.dynamicPlans.parsing.LogicalPlanner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,7 +87,7 @@ public class JoinOperator extends BaseOpW2Child {
             joinOperand = ValueOperand.newValueOperand("true");
         }
         else {
-            joinOperand = OperandPair.newOperandPair(columnJoinPredicateList.get(0), columnJoinPredicateList.get(1), ConditionType.EQ);// columnJoinPredicateList.stream().toArray(ColumnOperand[]::new);
+            joinOperand = PairOperand.newOperandPair(columnJoinPredicateList.get(0), columnJoinPredicateList.get(1), ConditionType.EQ);// columnJoinPredicateList.stream().toArray(ColumnOperand[]::new);
         }
 
         Collections.reverse(elementsToBeDeleted);
@@ -106,8 +105,8 @@ public class JoinOperator extends BaseOpW2Child {
     }
 
     private void addOperandStringToStringBuilder(StringBuilder sb, BaseOperand op, String margin) {
-        if (op instanceof OperandPair) {
-            OperandPair pair = (OperandPair)op;
+        if (op instanceof PairOperand) {
+            PairOperand pair = (PairOperand)op;
             addOperandStringToStringBuilder(sb, pair.getLeftOperand(), margin);
             addOperandStringToStringBuilder(sb, pair.getRightOperand(), margin);
         }

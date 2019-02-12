@@ -87,7 +87,7 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     val rightSize = jo.getRightChild.getOutputSize
 
     jo.getJoinOperand match {
-      case pair: OperandPair =>
+      case pair: PairOperand =>
         val leftOperand = pair.getLeftOperand.asInstanceOf[ColumnNameOperand].columnName
         val rightOperand = pair.getRightOperand.asInstanceOf[ColumnNameOperand].columnName
 
@@ -129,14 +129,14 @@ case class DynamicLogicalPlan() extends BaseLogicalPlan() {
     val res = so.getOperands.foldLeft(childDf)((df, op) => op match {
       case vo: ValueOperand => PhysicalPlanner.filterByValue(filterByValueParams(df, vo.getValue))
       case cn: ColumnNameOperand => PhysicalPlanner.filterByColumn(filterByColumnParams(df, cn.columnName))
-      case op: OperandPair =>
+      case op: PairOperand =>
         val left = getStringFromOperand(op.getLeftOperand)
         val right = getStringFromOperand(op.getRightOperand)
         val opPair = LiteralOperandPair(left, right, op.getConditionType)
         PhysicalPlanner.filterByLiteralOperandPair(filterByLiteralOperandPairParams(df, opPair))
       case no: NotNullOperand =>
         PhysicalPlanner.filterNullProperties(filterNullPropertiesParams(df, Array(no.columnName)))
-      case fo: OperandFunction =>
+      case fo: FunctionOperand =>
         val rf = RegisteredFunctions.findFunctionByName(fo.getFunctionName).get
         val args = fo.getArguments.map({
           case cno: ColumnNameOperand => col(cno.columnName)

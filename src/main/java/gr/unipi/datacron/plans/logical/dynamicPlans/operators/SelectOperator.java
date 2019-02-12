@@ -78,8 +78,8 @@ public class SelectOperator extends BaseOpW1Child {
         StringBuilder s = new StringBuilder();
         s.append(margin).append("Operator: ").append(this.getClass().getSimpleName()).append(" OutputSize: " + this.getOutputSize()).append(" RealOutputSize: " + this.getRealOutputSize()).append("\n");
 
-//        for (OperandPair b : operandPairList) {
-//            s.append(margin).append("OperandPair: ").append(this.getClass().getSimpleName()).append(" Left Operand: " + b.getLeftOperand().getClass().getSimpleName() + " - ").append("Right Operand: " + b.getRightOperand().getClass().getSimpleName()).append(", ConditionType: " + b.getConditionType().toString()).append("\n");
+//        for (PairOperand b : operandPairList) {
+//            s.append(margin).append("PairOperand: ").append(this.getClass().getSimpleName()).append(" Left Operand: " + b.getLeftOperand().getClass().getSimpleName() + " - ").append("Right Operand: " + b.getRightOperand().getClass().getSimpleName()).append(", ConditionType: " + b.getConditionType().toString()).append("\n");
 //        }
 
         s.append(margin).append("Array Columns: \n");

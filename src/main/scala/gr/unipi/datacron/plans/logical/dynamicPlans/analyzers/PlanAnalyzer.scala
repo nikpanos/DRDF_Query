@@ -62,7 +62,7 @@ class PlanAnalyzer extends LowLevelAnalyzer {
 
   override protected def processJoinOperator(jo: JoinOperator): BaseOperator = {
     jo.getJoinOperand match {
-      case operand: OperandPair =>
+      case operand: PairOperand =>
         val leftColumnOperand = operand.getLeftOperand.asInstanceOf[ColumnOperand]
         val rightColumnOperand = operand.getRightOperand.asInstanceOf[ColumnOperand]
 
@@ -71,14 +71,14 @@ class PlanAnalyzer extends LowLevelAnalyzer {
 
         val leftColName = getPrefixedColumnNameForOperation(jo, leftColumnOperand.getColumn, leftChild)
         val rightColName = getPrefixedColumnNameForOperation(jo, rightColumnOperand.getColumn, rightChild)
-        val operandPair = OperandPair.newOperandPair(ColumnNameOperand(leftColName), ColumnNameOperand(rightColName), operand.getConditionType)
+        val operandPair = PairOperand.newOperandPair(ColumnNameOperand(leftColName), ColumnNameOperand(rightColName), operand.getConditionType)
         JoinOperator.newJoinOperator(leftChild, rightChild, operandPair)
       case operand: ValueOperand =>
         val leftChild = prefixNode(jo.getLeftChild, jo.getLeftChild.getArrayColumns()(0), processNode(jo.getLeftChild))
         val rightChild = prefixNode(jo.getRightChild, jo.getRightChild.getArrayColumns()(0), processNode(jo.getRightChild))
         JoinOperator.newJoinOperator(leftChild, rightChild, operand)
     }
-    //val operand = jo.getJoinOperand.asInstanceOf[OperandPair]
+    //val operand = jo.getJoinOperand.asInstanceOf[PairOperand]
 
   }
 
@@ -119,17 +119,17 @@ class PlanAnalyzer extends LowLevelAnalyzer {
   private def processOperand(operand: BaseOperand, oldTreeNode: BaseOperator, newTreeNode: BaseOperator): BaseOperand = operand match {
     case vo: ValueOperand => vo
     case co: ColumnOperand => ColumnNameOperand(getPrefixedColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode))
-    case op: OperandPair => OperandPair.newOperandPair(processOperand(op.getLeftOperand, oldTreeNode, newTreeNode), processOperand(op.getRightOperand, oldTreeNode, newTreeNode), op.getConditionType)
-    case of: OperandFunction =>
+    case op: PairOperand => PairOperand.newOperandPair(processOperand(op.getLeftOperand, oldTreeNode, newTreeNode), processOperand(op.getRightOperand, oldTreeNode, newTreeNode), op.getConditionType)
+    case of: FunctionOperand =>
       val funcOperands = of.getArguments.map(op => processOperand(op, oldTreeNode, newTreeNode))
-      OperandFunction.newOperandFunction(of.getFunctionName, funcOperands :_*)
+      FunctionOperand.newOperandFunction(of.getFunctionName, funcOperands :_*)
   }
 
   private def decodeColumnsByOperands(operand: BaseOperand, oldTreeNode: BaseOperator, newTreeNode: BaseOperator): BaseOperator = operand match {
     case vo: ValueOperand => newTreeNode
     case co: ColumnOperand => decodeColumns(newTreeNode, Array(getPrefixedColumnNameForOperation(oldTreeNode, co.getColumn, newTreeNode)))
-    case op: OperandPair => decodeColumnsByOperands(op.getLeftOperand, oldTreeNode, decodeColumnsByOperands(op.getRightOperand, oldTreeNode, newTreeNode))
-    case of: OperandFunction =>
+    case op: PairOperand => decodeColumnsByOperands(op.getLeftOperand, oldTreeNode, decodeColumnsByOperands(op.getRightOperand, oldTreeNode, newTreeNode))
+    case of: FunctionOperand =>
       val rf = RegisteredFunctions.findFunctionByName(of.getFunctionName)
       if (rf.isEmpty) {
         throw new Exception("Function " + of.getFunctionName + " is not registered!")
