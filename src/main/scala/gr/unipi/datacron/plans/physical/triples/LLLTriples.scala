@@ -71,32 +71,37 @@ case class LLLTriples() extends BasePhysicalPlan with TTriples {
     val formatter = new SimpleDateFormat(dateFormat)
 
     val filterBy = (pruneKey: Int, decodedSpatial: String, decodedAltitude: Option[String], decodedTemporal: String) => {
-      var tmpResult = ((pruneKey >> 0) & 1) != 1
-      var sptResult = ((pruneKey >> 1) & 1) != 1
+      try {
+        var tmpResult = ((pruneKey >> 0) & 1) != 1
+        var sptResult = ((pruneKey >> 1) & 1) != 1
 
-      if (!tmpResult) {
-        val d = formatter.parse(decodedTemporal).getTime
-        tmpResult = (d >= lowerCorner.time) && (d <= upperCorner.time)
-      }
-
-      if (tmpResult && !sptResult) {
-        //refine spatial
-        val pos = decodedSpatial.lastIndexOf(lonLatSeparator)
-        val lon = decodedSpatial.substring(7, pos).toDouble
-        val lat = decodedSpatial.substring(pos + 1, decodedSpatial.length - 1).toDouble
-        if (decodedAltitude.isDefined) {
-          val alt = decodedAltitude.get.toDouble
-          sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
-                      (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude) &&
-                      (alt >= lowerCorner.altitude.get) && (alt <= upperCorner.altitude.get)
+        if (!tmpResult) {
+          val d = formatter.parse(decodedTemporal).getTime
+          tmpResult = (d >= lowerCorner.time) && (d <= upperCorner.time)
         }
-        else {
-          sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
-                      (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude)
-        }
-      }
 
-      tmpResult && sptResult
+        if (tmpResult && !sptResult) {
+          //refine spatial
+          val pos = decodedSpatial.lastIndexOf(lonLatSeparator)
+          val lon = decodedSpatial.substring(7, pos).toDouble
+          val lat = decodedSpatial.substring(pos + 1, decodedSpatial.length - 1).toDouble
+          if (decodedAltitude.isDefined) {
+            val alt = decodedAltitude.get.toDouble
+            sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
+              (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude) &&
+              (alt >= lowerCorner.altitude.get) && (alt <= upperCorner.altitude.get)
+          }
+          else {
+            sptResult = (lon >= lowerCorner.longitude) && (lon <= upperCorner.longitude) &&
+              (lat >= lowerCorner.latitude) && (lat <= upperCorner.latitude)
+          }
+        }
+
+        tmpResult && sptResult
+      }
+      catch {
+        case _: NullPointerException => false
+      }
     }
 
     val filterBy3D = udf((pruneKey: Int, decodedSpatial: String, decodedAltitude: String, decodedTemporal: String) => {

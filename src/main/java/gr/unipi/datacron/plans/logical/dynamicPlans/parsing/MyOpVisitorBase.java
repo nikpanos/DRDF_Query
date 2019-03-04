@@ -78,7 +78,8 @@ public class MyOpVisitorBase extends OpVisitorBase {
 
 
     private Long getStatisticsValue(String key) {
-        return Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
+        //return Long.parseLong(DataStore.statisticsRedis().getValue(key).get());
+        return 10L;
     }
 
     private static String getRedisDecodedValue(Long key) {

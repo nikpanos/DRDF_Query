@@ -10,12 +10,15 @@ import gr.unipi.datacron.store.DataStore.spark
 abstract class BaseQuery() {
   DataStore.init()
 
-  private def executeWarmUp(plan: Option[BaseLogicalPlan]): (Long, Long) = {
+  private def executeWarmUp(plan: Option[BaseLogicalPlan], shouldExplain: Boolean): (Long, Long) = {
     val logicalStart = System.currentTimeMillis
     plan.get.preparePlan()
     val logicalEnd = System.currentTimeMillis
 
     val result = plan.get.executePlan
+    if (shouldExplain) {
+      result.explain(true)
+    }
     val startPhysical = System.currentTimeMillis
     val count = result.count
     val endPhysical = System.currentTimeMillis
@@ -41,7 +44,7 @@ abstract class BaseQuery() {
 
       if (AppConfig.getOptionalBoolean(qfpWarmUpEnabled).getOrElse(false)) {
         println("Warming up...")
-        (1 to 10).map(i => (i, executeWarmUp(plan))).foreach(x => println(x._1 + "th warm up time (ms): " + x._2._1 + " logical, " + x._2._2 + " physical."))
+        (1 to 10).map(i => (i, executeWarmUp(plan, AppConfig.getBoolean(qfpQueryOutputScreenExplain) && i == 1))).foreach(x => println(x._1 + "th warm up time (ms): " + x._2._1 + " logical, " + x._2._2 + " physical."))
         //plan.get.doAfterPrepare()
       }
 
@@ -63,7 +66,7 @@ abstract class BaseQuery() {
       if (AppConfig.getOptionalBoolean(qfpPrintLogicalTreeEnabled).getOrElse(false)) {
         Benchmarks.isBenchmarkingEnabled = true
         println("Calculating sizes...")
-        executeWarmUp(plan)
+        executeWarmUp(plan, false)
         plan.get.doAfterPrepare()
         Benchmarks.isBenchmarkingEnabled = false
       }
@@ -77,13 +80,13 @@ abstract class BaseQuery() {
     var result = res
     AppConfig.getStringList(qfpQueryOutputDevices).foreach {
       case `outputDeviceScreen` =>
+        if (AppConfig.getBoolean(qfpQueryOutputScreenExplain)) {
+          result.explain(true)
+        }
         val startTime = System.currentTimeMillis
         val count = result.count()
         val endTime = System.currentTimeMillis
         result.show(AppConfig.getInt(qfpQueryOutputScreenHowMany), truncate = false)
-        if (AppConfig.getBoolean(qfpQueryOutputScreenExplain)) {
-          result.explain(true)
-        }
         println("Result count: " + count)
         println("Query execution time (ms): " + (endTime - startTime))
       case `outputDeviceDir` =>
